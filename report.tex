@@ -1,0 +1,92 @@
+\documentclass{article}
+
+% Package necessari
+\usepackage[a4paper]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[table, dvipsnames]{xcolor}
+\usepackage{listings}
+\usepackage{cancel}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+% Impostazione delle lunghezze di alcuni elementi del documento
+\setlength{\parskip}{1em}
+\setlength{\parindent}{0em}
+\setlength{\arrayrulewidth}{0.1em}
+
+% Informazioni per la title page
+\title{\small{Corso di Performance Modeling of Computer Systems \& Networks} \\
+\huge{Studio delle prestazioni di un Ufficio Postale di \\
+\colorbox{yellow}{\color{blue} \textbf{Poste} Italiane}}}
+\date{A.A. 2020/2021}
+\author{A. Chillotti 
+\and 
+C. Cuffaro 
+\and 
+S. Tiberi}
+
+% Impostazione del package hyperref
+\hypersetup{
+    colorlinks=true,
+    linktocpage=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    pdftitle={Studio delle prestazioni di un Ufficio Postale di Poste Italiane},
+    pdfauthor={A. Chillotti, C. Cuffaro e S. Tiberi},
+}
+
+% Colori per i listing
+\definecolor{code_red}{rgb}{0.6,0,0} % strings
+\definecolor{code_green}{rgb}{0.25,0.5,0.35} % comments
+\definecolor{code_purple}{rgb}{0.5,0,0.35} % keywords
+\definecolor{code_background}{rgb}{0.95,0.95,0.92} % background
+ 
+% Stile del codice standard (C)
+\lstset{
+	language=C, 
+	backgroundcolor=\color{code_background},
+	frame=single,
+	basicstyle=\ttfamily,
+	keywordstyle=\color{code_purple}\bfseries,
+	stringstyle=\color{code_red},
+	commentstyle=\color{code_green},
+	numbers=left,
+	numberstyle=\small\color{gray},
+	numbersep=5pt,
+	tabsize=4,
+	showtabs=false,
+	showspaces=false,
+	showstringspaces=false,
+	escapechar=|, 
+	captionpos=b,
+	breaklines=true,
+}
+
+% Spaziatura tabelle
+\renewcommand{\arraystretch}{1.5}
+
+\graphicspath{ {./figs/} }
+% Definizione del colore delle tabelle
+\newcommand{\tablecolors}[1][2]{\rowcolors{#1}{gray!50}{gray!25}}
+
+% Definizione dello stile da usare per la P di probabilità (grassetto in math-mode)
+\newcommand{\pr}{\boldsymbol{P}}
+
+% Forzatura del displaystyle in math-mode
+\everymath\expandafter{\the\everymath\displaystyle}
+
+\newcommand{\scaption}[1]{\caption{\small{#1}}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\input{sections/01-presentazione}
+\input{sections/02-obiettivi}
+
+\end{document}
