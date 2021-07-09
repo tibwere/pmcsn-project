@@ -10,9 +10,9 @@
 \usepackage{graphicx}
 \usepackage[table, dvipsnames]{xcolor}
 \usepackage{listings}
-\usepackage{cancel}
 \usepackage{hyperref}
 \usepackage{enumitem}
+\usepackage{fancyhdr}
 
 % Impostazione delle lunghezze di alcuni elementi del documento
 \setlength{\parskip}{1em}
@@ -22,13 +22,16 @@
 % Informazioni per la title page
 \title{\small{Corso di Performance Modeling of Computer Systems \& Networks} \\
 \huge{Studio delle prestazioni di un Ufficio Postale di \\
-\colorbox{yellow}{\color{blue} \textbf{Poste} Italiane}}}
+\textbf{Poste Italiane}}}
+
 \date{A.A. 2020/2021}
-\author{A. Chillotti 
+
+\author{A. Chillotti\thanks{\texttt{alessandro.chillotti@outlook.it}}
 \and 
-C. Cuffaro 
+C. Cuffaro\thanks{\texttt{cristiano.cuffaro@outlook.com}} 
 \and 
-S. Tiberi}
+S. Tiberi\thanks{\texttt{simone.tiberi.98@gmail.com}}
+}
 
 % Impostazione del package hyperref
 \hypersetup{
@@ -67,6 +70,13 @@ S. Tiberi}
 	breaklines=true,
 }
 
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small A.Chillotti, C. Cuffaro, S. Tiberi}
+\rhead{\small Performance Modeling of Computer Systems \& Networks}
+\cfoot{\thepage}
+%\cfoot{Pagina \thepage}
+
 % Spaziatura tabelle
 \renewcommand{\arraystretch}{1.5}
 
@@ -75,12 +85,16 @@ S. Tiberi}
 \newcommand{\tablecolors}[1][2]{\rowcolors{#1}{gray!50}{gray!25}}
 
 % Definizione dello stile da usare per la P di probabilità (grassetto in math-mode)
-\newcommand{\pr}{\boldsymbol{P}}
+\newcommand{\pr}{\mathbf{P}}
 
 % Forzatura del displaystyle in math-mode
 \everymath\expandafter{\the\everymath\displaystyle}
 
 \newcommand{\scaption}[1]{\caption{\small{#1}}}
+
+\newcommand{\uo}{\textbf{Unica Operazione}}
+\newcommand{\pp}{\textbf{Pagamenti \& Prelievi}}
+\newcommand{\sr}{\textbf{Spedizioni \& Ritiri}}
 
 \begin{document}
 \maketitle
@@ -88,5 +102,6 @@ S. Tiberi}
 
 \input{sections/01-presentazione}
 \input{sections/02-obiettivi}
+\input{sections/03-modello-concettuale}
 
 \end{document}
