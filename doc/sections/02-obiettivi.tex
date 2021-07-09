@@ -1,2 +1,14 @@
-\section{Obiettivi dello studio}
-L'obiettivo dello studio è quello di individuare ed analizzare gli indici prestazionali del sistema \textbf{Poste Italiane} e di proporre una miglioria nel sistema di processamento delle richieste, al fine di ridurre il tempo medio d'attesa sperimentato dai clienti in coda.
+\section{Obiettivi dello studio}\label{sec:obiettivi}
+L'obiettivo dello studio è quello di minimizzare il numero degli sportelli attivi al fine di garantire il soddisfacimento di differenti requisiti di qualità per ciascuna tipologia di servizio illustrata nella presentazione (sez. \ref{sec:presentazione}):
+
+\begin{enumerate}[label=QoS-\arabic*), align=left, leftmargin=*]
+\item I titolari di conto \textsl{BancoPosta} devono sperimentare un tempo d'attesa non superiore a tre volte il tempo medio di servizio generale dei clienti.
+\item I clienti non titolari del conto \textsl{BancoPosta}:
+\begin{enumerate}
+\item Possessori di ticket di tipo \uo{} devono sperimentare un tempo d'attesa non superiore a sette volte il tempo medio di servizio dei clienti della medesima tipologia.
+\item Possessori di ticket di tipo \pp{} devono sperimentare un tempo d'attesa non superiore a dieci volte il tempo medio di servizio dei clienti della medesima tipologia.
+\item Possessori di ticket di tipo \sr{} devono sperimentare un tempo d'attesa non superiore a cinque volte il tempo medio di servizio dei clienti della medesima tipologia.
+\end{enumerate}
+\end{enumerate}
+
+È opportuno specificare che nel momento in cui non si soddisfi il QoS per un cliente, quest'ultimo può decidere di abbandonare l'ufficio postale.
