@@ -1,0 +1,51 @@
+\section{Modello Delle Specifiche}\label{sec:modello-specfiche}
+Di seguito sono riportate alcune assunzioni che saranno alla base di questa e delle successive fasi dello studio:
+\begin{itemize}
+\item I clienti arrivano all'ufficio postale ad istanti di tempo casuali, il che implica:
+\begin{itemize}
+\item Distribuzione poissoniana degli arrivi.
+\item Distribuzione esponenziale dei tempi di inter-arrivo.
+\end{itemize}
+\item I tempi di servizio sono distribuiti esponenzialmente.
+\item Il servizio di un cliente non può essere interrotto per favorire l'avanzamento di un altro a priorità superiore.
+\end{itemize}
+
+Per lo studio in questione sono stati utilizzati dati provenienti dalle seguenti fonti:
+\begin{itemize}
+\item Report ufficiale di Poste Italiane, relativo all'anno 2019\footnote{\url{https://www.posteitaliane.it/files/1476515475256/Annual-Report-2019.pdf}}.
+\item Principali dati economici e finanziari di Poste Italiane\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}}.
+\end{itemize}
+
+Per comodità in tabella \ref{table:modello-specifiche-1} è riportato un estratto delle misure di interesse provenienti da ambedue le fonti.
+
+\begin{table}[ht]
+\centering
+{\tablecolors
+\begin{tabular}{| l | r |}
+\hline
+Grandezza & Valore misurato nel 2019 \\
+\hline
+Clienti che vengono serviti in un tempo $t\leq 15\ min$ & 77.9 \% \\
+\hline
+N$^o$ di clienti al giorno & 1.4 mln \\
+\hline
+N$^o$ di uffici postali & 12 809 \\
+\hline
+\end{tabular}}
+\scaption{Estratto dei dati di interesse a partire dalle fonti citate}
+\label{table:modello-specifiche-1}
+\end{table}
+
+Sia $S$ la variabile aleatoria che modella il tempo di servizio generale, indipendentemente dal tipo di ticket selezionato dai clienti. A partire dalla prima riga della tabella è possibile ricavare il tasso di servizio medio $\mu$ come segue: 
+\begin{equation}
+\begin{split}
+\pr (S \leq 15\ min) = 0.779 &\Rightarrow 1 - e^{-\mu\cdot 15} = 0.779 \Rightarrow e^{-\mu\cdot 15} = 1 - 0.779 \\
+&\Rightarrow \mu \cdot 15 = -\ ln(1 - 0.779) \Rightarrow \mu = -\frac{ln(1 - 0.779)}{15} \\
+&\Rightarrow \mu \simeq 0.1006395\ req/min
+\end{split}
+\end{equation}
+
+Inoltre, a partire dalla seconda e dalla terza riga, è possibile ricavare la frequenza degli arrivi $\lambda$ come segue:
+\begin{equation}
+\lambda = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{24 \cdot 60} \simeq \frac{109.2981497}{24 \cdot 60} \simeq 0.0759015\ req/min
+\end{equation} 
