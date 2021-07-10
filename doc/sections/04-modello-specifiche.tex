@@ -1,22 +1,5 @@
 \section{Modello Delle Specifiche}\label{sec:modello-specfiche}
-Di seguito sono riportate alcune assunzioni che saranno alla base di questa e delle successive fasi dello studio:
-\begin{itemize}
-\item I clienti arrivano all'ufficio postale ad istanti di tempo casuali, il che implica:
-\begin{itemize}
-\item Distribuzione poissoniana degli arrivi.
-\item Distribuzione esponenziale dei tempi di inter-arrivo.
-\end{itemize}
-\item I tempi di servizio sono distribuiti esponenzialmente.
-\item Il servizio di un cliente non può essere interrotto per favorire l'avanzamento di un altro a priorità superiore.
-\end{itemize}
-
-Per lo studio in questione sono stati utilizzati dati provenienti dalle seguenti fonti:
-\begin{itemize}
-\item Report ufficiale di Poste Italiane, relativo all'anno 2019\footnote{\url{https://www.posteitaliane.it/files/1476515475256/Annual-Report-2019.pdf}}.
-\item Principali dati economici e finanziari di Poste Italiane\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}}.
-\end{itemize}
-
-Per comodità in tabella \ref{table:modello-specifiche-1} è riportato un estratto delle misure di interesse provenienti da ambedue le fonti.
+Per lo studio in questione sono stati utilizzati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}}, per comodità riportati in tabella \ref{table:modello-specifiche-1}.
 
 \begin{table}[ht]
 \centering
@@ -25,27 +8,87 @@ Per comodità in tabella \ref{table:modello-specifiche-1} è riportato un estrat
 \hline
 Grandezza & Valore misurato nel 2019 \\
 \hline
-Clienti che vengono serviti in un tempo $t\leq 15\ min$ & 77.9 \% \\
-\hline
 N$^o$ di clienti al giorno & 1.4 mln \\
 \hline
 N$^o$ di uffici postali & 12 809 \\
 \hline
 \end{tabular}}
-\scaption{Estratto dei dati di interesse a partire dalle fonti citate}
+\scaption{Estratto dei dati di interesse a partire dalla fonte citata}
 \label{table:modello-specifiche-1}
 \end{table}
 
-Sia $S$ la variabile aleatoria che modella il tempo di servizio generale, indipendentemente dal tipo di ticket selezionato dai clienti. A partire dalla prima riga della tabella è possibile ricavare il tasso di servizio medio $\mu$ come segue: 
+Di seguito sono riportate alcune assunzioni che saranno alla base di questa e delle successive fasi dello studio:
+\begin{itemize}
+\item I clienti arrivano all'ufficio postale ad istanti di tempo casuali, il che implica:
+\begin{itemize}
+\item Distribuzione poissoniana degli arrivi.
+\item Distribuzione esponenziale dei tempi di inter-arrivo.
+\end{itemize}
+\item La probabilità che un cliente sia titolare di un conto \textsl{BancoPosta} è pari a $p_{BP} = 0.25$.
+\item Le probabilità con cui ciascuna tipologia di ticket viene acquisita sono le seguenti:
+\begin{equation*}
+\begin{array}{l c l}
+\uo{} & \rightarrow & p_{UO} = 0.5 \\
+\pp{} & \rightarrow & p_{PP} = 0.35 \\
+\sr{} & \rightarrow & p_{SR} = 0.15
+\end{array}
+\end{equation*} 
+\item I tempi di servizio sono distribuiti esponenzialmente.
+\item I clienti afferenti ad una stessa coda vengono serviti in accordo ad una disciplina FIFO (First-In, First-Out).
+\item Il servizio di un cliente non può essere interrotto per favorire l'avanzamento di un altro con priorità superiore.
+\end{itemize}
+
+La politica di scheduling del sistema assume caratteristiche tipiche sia dello scheduling size-based che di quello astratto. In particolare:
+\begin{itemize}
+\item Ha caratteristiche astratte perché la probabilità di ricadere in una delle classi di priorità è funzione della frequenza con cui l'utente prende quella tipologia di ticket e non del tempo necessario all'elaborazione della richiesta da parte del servente. Infatti, il tempo necessario ad elaborare un ticket della classe $i$ non è necessariamente compreso in un intervallo $(x_{i-1}, x_i]$ bensì può assumere valori su tutto il semiasse reale positivo. 
+\item Ha caratteristiche size-based perché classi di priorità diverse non condividono lo stesso tempo di servizio medio, ovvero $\exists\ i,j\ t.c.\ E[S_i] \neq E[S_j]$.
+\end{itemize}
+
+Assumendo che:
+\begin{itemize}
+\item Il tempo medio di servizio $E[S]$ sia pari a $10\ min$.
+\item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari ad una volta e mezzo quello di una \uo{}.
+\item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a due volte quello di una \uo{}.
+\end{itemize}
+è possibile ricavare gli $E[S_k]$ come segue:
 \begin{equation}
 \begin{split}
-\pr (S \leq 15\ min) = 0.779 &\Rightarrow 1 - e^{-\mu\cdot 15} = 0.779 \Rightarrow e^{-\mu\cdot 15} = 1 - 0.779 \\
-&\Rightarrow \mu \cdot 15 = -\ ln(1 - 0.779) \Rightarrow \mu = -\frac{ln(1 - 0.779)}{15} \\
-&\Rightarrow \mu \simeq 0.1006395\ req/min
+E[S] &= p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot E[S_{PP}] + p_{SR}\cdot E[S_{SR}] \\
+&= p_{UO}\cdot E[S_{UO}] + \frac{3}{2}\cdot p_{PP}\cdot E[S_{UO}] + 2\cdot p_{SR}\cdot E[S_{UO}] \\
+&= (p_{UO} + \frac{3}{2}\cdot p_{PP} + 2\cdot p_{SR}) \cdot E[S_{UO}]
 \end{split}
 \end{equation}
-
-Inoltre, a partire dalla seconda e dalla terza riga, è possibile ricavare la frequenza degli arrivi $\lambda$ come segue:
+da cui:
 \begin{equation}
-\lambda = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{24 \cdot 60} \simeq \frac{109.2981497}{24 \cdot 60} \simeq 0.0759015\ req/min
+\begin{cases}
+E[S_{UO}] = \frac{E[S]}{(p_{UO} + \frac{3}{2}\cdot p_{PP} + 2\cdot p_{SR})} = \frac{400}{53} \simeq 7.5471698\ min \\[1em]
+E[S_{PP}] = \frac{3}{2}\cdot E[S_{UO}] = \frac{600}{53} \simeq 11.3207547\ min \\[1em]
+E[S_{SR}] = 2 \cdot E[S_{UO}] = \frac{800}{53} \simeq 15.0943396\ min
+\end{cases}
+\end{equation}
+
+I risultati ottenuti possono essere verificati con il seguente consistency check:
+\begin{equation}
+p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot E[S_{PP}] + p_{SR}\cdot E[S_{SR}] = 10\ min = E[S]\qquad (\mathbf{OK})
+\end{equation}
+
+Infine, a partire dalla seconda e dalla terza riga, è possibile ricavare il throughput del sistema $X$ come segue:
+\begin{equation}
+X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{24 \cdot 60} \simeq \frac{109.2981497}{24 \cdot 60} \simeq 0.0759015\ req/min
 \end{equation} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
