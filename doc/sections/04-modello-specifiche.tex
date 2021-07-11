@@ -1,28 +1,10 @@
 \section{Modello Delle Specifiche}\label{sec:modello-specfiche}
-Per lo studio in questione sono stati utilizzati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}}, per comodità riportati in tabella \ref{table:modello-specifiche-1}.
-
-\begin{table}[ht]
-\centering
-{\tablecolors
-\begin{tabular}{| l | r |}
-\hline
-Grandezza & Valore misurato nel 2019 \\
-\hline
-N$^o$ di clienti al giorno & 1.4 mln \\
-\hline
-N$^o$ di uffici postali & 12 809 \\
-\hline
-\end{tabular}}
-\scaption{Estratto dei dati di interesse a partire dalla fonte citata}
-\label{table:modello-specifiche-1}
-\end{table}
-
 Di seguito sono riportate alcune assunzioni che saranno alla base di questa e delle successive fasi dello studio:
 \begin{itemize}
 \item I clienti arrivano all'ufficio postale ad istanti di tempo casuali, il che implica:
 \begin{itemize}
 \item Distribuzione poissoniana degli arrivi.
-\item Distribuzione esponenziale dei tempi di inter-arrivo.
+\item Distribuzione esponenziale dei tempi di interarrivo.
 \end{itemize}
 \item La probabilità che un cliente sia titolare di un conto \textsl{BancoPosta} è pari a $p_{BP} = 0.25$.
 \item Le probabilità con cui ciascuna tipologia di ticket viene acquisita sono le seguenti:
@@ -44,38 +26,120 @@ La politica di scheduling del sistema assume caratteristiche tipiche sia dello s
 \item Ha caratteristiche size-based perché classi di priorità diverse non condividono lo stesso tempo di servizio medio, ovvero $\exists\ i,j\ t.c.\ E[S_i] \neq E[S_j]$.
 \end{itemize}
 
+Al fine di agevolare la comprensione del funzionamento dello scheduler di sistema, di seguito sono riportati gli pseudocodici \ref{alg:modello-specifiche-1} e \ref{alg:modello-specifiche-2} che descrivono, rispettivamente, il comportamento del servente generico e di quello dedicato.
+
+\begin{algorithm}
+\scaption{Algoritmo di schedulazione del servente generico}
+\label{alg:modello-specifiche-1}
+\begin{algorithmic}[1]
+\Procedure{GeneralPurposeServer}{}
+\While{true}
+	\If{customer owns \textsl{BancoPosta}}
+		\If{\textsl{UnicaOperazioneBP} queue not empty}
+			\State \textit{processes the first ticket of that type}
+		\Else
+			\If{\textsl{PagamentiPrelieviBP} queue not empty}
+			\State \textit{processes the first ticket of that type}
+			\EndIf
+		\EndIf
+	\Else
+		\If{\textsl{UnicaOperazione} queue not empty}
+			\State \textit{processes the first ticket of that type}
+		\Else
+			\If{\textsl{PagamentiPrelievi} queue not empty}
+			\State \textit{processes the first ticket of that type}
+			\EndIf
+		\EndIf
+	\EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\scaption{Algoritmo di schedulazione del servente dedicato a ticket \sr{}}
+\label{alg:modello-specifiche-2}
+\begin{algorithmic}[1]
+\Procedure{DedicatedServer}{}
+\While{true}
+	\If{customer owns \textsl{BancoPosta}}
+		\If{\textsl{SpedizioneRitiriBP} queue not empty}
+			\State \textit{processes the first ticket of that type}
+		\Else
+			\If{\textsl{UnicaOperazioneBP} queue not empty}
+				\State \textit{processes the first ticket of that type}
+			\Else
+				\If{\textsl{PagamentiPrelieviBP} queue not empty}
+					\State \textit{processes the first ticket of that type}
+				\EndIf
+			\EndIf
+		\EndIf
+	\Else
+		\If{\textsl{SpedizioneRitiri} queue not empty}
+			\State \textit{processes the first ticket of that type}
+		\Else
+			\If{\textsl{UnicaOperazione} queue not empty}
+				\State \textit{processes the first ticket of that type}
+			\Else
+				\If{\textsl{PagamentiPrelievi} queue not empty}
+					\State \textit{processes the first ticket of that type}
+				\EndIf
+			\EndIf
+		\EndIf
+	\EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
 Assumendo che:
 \begin{itemize}
 \item Il tempo medio di servizio $E[S]$ sia pari a $10\ min$.
-\item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari ad una volta e mezzo quello di una \uo{}.
-\item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a due volte quello di una \uo{}.
+\item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari ad una volta e mezzo quello di una \uo{}, ovvero $E[S_{PP}] = 1.5 \cdot E[S_{UO}]$.
+\item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a due volte quello di una \uo{}, ovvero $E[S_{SR}] = 2 \cdot E[S_{UO}]$.
 \end{itemize}
-è possibile ricavare gli $E[S_k]$ come segue:
+è possibile ricavare gli $E[S_i]$, con $i \in \lbrace UO, PP, SR \rbrace$, come segue:
 \begin{equation}
 \begin{split}
 E[S] &= p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot E[S_{PP}] + p_{SR}\cdot E[S_{SR}] \\
-&= p_{UO}\cdot E[S_{UO}] + \frac{3}{2}\cdot p_{PP}\cdot E[S_{UO}] + 2\cdot p_{SR}\cdot E[S_{UO}] \\
-&= (p_{UO} + \frac{3}{2}\cdot p_{PP} + 2\cdot p_{SR}) \cdot E[S_{UO}]
+&= p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot 1.5\cdot E[S_{UO}] + p_{SR}\cdot 2\cdot E[S_{UO}] \\
+&= (p_{UO} + 1.5\cdot p_{PP} + 2\cdot p_{SR}) \cdot E[S_{UO}]
 \end{split}
 \end{equation}
 da cui:
 \begin{equation}
 \begin{cases}
-E[S_{UO}] = \frac{E[S]}{(p_{UO} + \frac{3}{2}\cdot p_{PP} + 2\cdot p_{SR})} = \frac{400}{53} \simeq 7.5471698\ min \\[1em]
-E[S_{PP}] = \frac{3}{2}\cdot E[S_{UO}] = \frac{600}{53} \simeq 11.3207547\ min \\[1em]
+E[S_{UO}] = \frac{E[S]}{(p_{UO} + 1.5\cdot p_{PP} + 2\cdot p_{SR})} = \frac{400}{53} \simeq 7.5471698\ min \\[1em]
+E[S_{PP}] = 1.5\cdot E[S_{UO}] = \frac{600}{53} \simeq 11.3207547\ min \\[1em]
 E[S_{SR}] = 2 \cdot E[S_{UO}] = \frac{800}{53} \simeq 15.0943396\ min
 \end{cases}
 \end{equation}
 
 I risultati ottenuti possono essere verificati con il seguente consistency check:
 \begin{equation}
-p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot E[S_{PP}] + p_{SR}\cdot E[S_{SR}] = 10\ min = E[S]\qquad (\mathbf{OK})
+p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot E[S_{PP}] + p_{SR}\cdot E[S_{SR}] = 10\ min = E[S]\qquad \text{\color{forestgreen}\textbf{OK} \checkmark}
 \end{equation}
 
-Infine, a partire dalla seconda e dalla terza riga, è possibile ricavare il throughput del sistema $X$ come segue:
+\begin{table}[ht]
+\centering
+{\tablecolors
+\begin{tabular}{| l | r |}
+\hline
+Grandezza & Valore misurato nel 2019 \\
+\hline
+N$^o$ di clienti al giorno & 1.4 mln \\
+\hline
+N$^o$ di uffici postali & 12 809 \\
+\hline
+\end{tabular}}
+\scaption{Estratto dei dati di interesse a partire dalla fonte citata}
+\label{table:modello-specifiche-1}
+\end{table}
+
+Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
 \begin{equation}
 X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{24 \cdot 60} \simeq \frac{109.2981497}{24 \cdot 60} \simeq 0.0759015\ req/min
 \end{equation} 
+
+
 
 
 
