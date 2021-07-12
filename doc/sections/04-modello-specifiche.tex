@@ -138,7 +138,7 @@ N$^o$ di uffici postali & 12 809 \\
 
 Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
 \begin{equation}
-X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{24 \cdot 60} \simeq \frac{109.2981497}{24 \cdot 60} \simeq 0.0759015\ req/min
+X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{24 \cdot 60} = \frac{8750}{115281} \simeq 0.0759015\ req/min
 \end{equation} 
 
 È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
