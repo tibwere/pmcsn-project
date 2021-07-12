@@ -33,6 +33,7 @@
 #define UNICA_OP_SERV_STREAM 6
 #define PAGAM_PREL_SERV_STREAM 7
 #define SPED_RIT_SERV_STREAM 8
+#define ARRIVAL_TYPE_STREAM 9
 
 #define M 4
 #define NUMBER_OF_QUEUE 6
@@ -51,12 +52,9 @@
 
 enum type_of_ticket
 {
-	UNICA_OP_BP,
-	UNICA_OP_STD,
-	PAGAM_PREL_BP,
-	PAGAM_PREL_STD,
-	SPED_RIT_BP,
-	SPED_RIT_STD
+	UNICA_OP,
+	PAGAM_PREL,
+	SPED_RIT
 };
 
 struct times {
@@ -87,36 +85,31 @@ struct populations {
 }
 
 
-double GetArrival(enum type_of_ticket type)
+double GetArrival(void)
 {
     static double arrival = START;
+    SelectStream(ARRIVAL_TYPE_STREAM);
+    double choose = Uniform(0, 1);
 
-    switch(type) {
-    case UNICA_OP_BP:
+	if (choose <= 0.125) {
         SelectStream(UNICA_OP_BP_ARR_STREAM);
         arrival += Exponential(P_BP * P_UO * LAMBDA);
-        break;
-    case UNICA_OP_STD:
+	} else if (choose <= 0.5) {
         SelectStream(UNICA_OP_STD_ARR_STREAM);
         arrival += Exponential((1 - P_BP) * P_UO * LAMBDA);
-        break;
-    case PAGAM_PREL_BP:
+	} else if (choose <= 0.5875) {
         SelectStream(PAGAM_PREL_BP_ARR_STREAM);
-        arrival += Exponential(P_BP * P_PP * LAMBDA);
-        break;
-    case PAGAM_PREL_STD:
+        arrival += Exponential(P_BP * P_PP * LAMBDA);	
+	} else if (choose <= 0.85) {
         SelectStream(PAGAM_PREL_STD_ARR_STREAM);
-        arrival += Exponential((1 - P_BP) * P_PP * LAMBDA);
-        break;
-    case SPED_RIT_BP:
+        arrival += Exponential((1 - P_BP) * P_PP * LAMBDA);	
+	} else if (choose <= 0.8875) {
         SelectStream(SPED_RIT_BP_ARR_STREAM);
         arrival += Exponential(P_BP * P_SR * LAMBDA);
-        break;
-    case SPED_RIT_STD:
+	} else {
         SelectStream(SPED_RIT_STD_ARR_STREAM);
-        arrival += Exponential((1 - P_BP) * P_SR * LAMBDA);
-        break;
-    }
+        arrival += Exponential((1 - P_BP) * P_SR * LAMBDA);	
+	}
 
     return (arrival);
 } 
@@ -125,16 +118,13 @@ double GetArrival(enum type_of_ticket type)
 double GetService(enum type_of_ticket type) 
 {
     switch(type) {
-    case UNICA_OP_BP:
-    case UNICA_OP_STD:
+    case UNICA_OP:
         SelectStream(UNICA_OP_SERV_STREAM);
         return (Exponential(MU_UO));
-    case PAGAM_PREL_BP:
-    case PAGAM_PREL_STD:
+    case PAGAM_PREL:
         SelectStream(PAGAM_PREL_SERV_STREAM);
         return (Exponential(MU_PP));
-    case SPED_RIT_BP:
-    case SPED_RIT_STD:
+    case SPED_RIT:
         SelectStream(SPED_RIT_SERV_STREAM);
         return (Exponential(MU_SR));
     }
@@ -165,7 +155,6 @@ struct times *init_times(void)
 
     return t;
 }
-
 
 int main(void) 
 {
@@ -220,3 +209,5 @@ int main(void)
 
   return (0);
 }
+
+

@@ -1,6 +1,6 @@
+## LATEX ##
 # File di output
 *.pdf
-poste_italiane
 
 # File generati dalla compilazione
 *.aux
@@ -13,4 +13,7 @@ poste_italiane
 *.lol
 *.fls
 *.fdb_latexmk
-*.o
+
+## C ##
+bin/
+obj/
