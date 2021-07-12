@@ -1,4 +1,36 @@
 \section{Modello Delle Specifiche}\label{sec:modello-specfiche}
+Le seguenti variabili, definite per ogni istante di tempo $t$, forniscono una base per il modello delle specifiche del sistema in questione:
+\begin{itemize}
+\item Il numero di clienti presenti all'interno del sistema è dato da:
+\begin{equation}
+Customers(t) \in \mathbb{N}
+\end{equation}
+\item Il numero di clienti in servizio allo sportello $i$-esimo (con $i \in \lbrace 1, 2, \cdots, M \rbrace$) è dato da:
+\begin{equation}
+Server_i(t) = 
+\begin{cases}
+0 & \text{se il server è idle} \\
+1 & \text{se il server è busy}
+\end{cases}
+\end{equation}
+\item Per ciascuna coda $(h, j)$ con:
+\begin{itemize}
+\item $h \in \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace$
+\item $j \in \lbrace \mathtt{UNICA\_OP},\ \mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace$
+\end{itemize}
+il numero di clienti in essa presenti è dato da:
+\begin{equation}
+Queue_{h,j}(t) \in \mathbb{N}
+\end{equation}
+\end{itemize}
+
+La relazione matematica che lega le variabili appena descritte è la seguente:
+\begin{equation}
+Customers(t) = \sum_{(h,j) \in R}
+ Queue_{h,j}(t) + \sum_{i=1}^{M} Server_i(t)
+\end{equation}
+dove $R = \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace \times \lbrace \mathtt{UNICA\_OP},\mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace$.
+
 Di seguito sono riportate alcune assunzioni che saranno alla base di questa e delle successive fasi dello studio:
 \begin{itemize}
 \item I clienti arrivano all'ufficio postale ad istanti di tempo casuali, il che implica:
