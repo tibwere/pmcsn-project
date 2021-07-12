@@ -39,7 +39,7 @@ Al fine di agevolare la comprensione del funzionamento dello scheduler di sistem
 			\State \textit{processes the first ticket of that type}
 		\Else
 			\If{\textsl{PagamentiPrelieviBP} queue not empty}
-			\State \textit{processes the first ticket of that type}
+				\State \textit{processes the first ticket of that type}
 			\EndIf
 		\EndIf
 	\Else
@@ -47,11 +47,12 @@ Al fine di agevolare la comprensione del funzionamento dello scheduler di sistem
 			\State \textit{processes the first ticket of that type}
 		\Else
 			\If{\textsl{PagamentiPrelievi} queue not empty}
-			\State \textit{processes the first ticket of that type}
+				\State \textit{processes the first ticket of that type}
 			\EndIf
 		\EndIf
 	\EndIf
 \EndWhile
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -87,6 +88,7 @@ Al fine di agevolare la comprensione del funzionamento dello scheduler di sistem
 		\EndIf
 	\EndIf
 \EndWhile
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -138,6 +140,8 @@ Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati proveni
 \begin{equation}
 X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{24 \cdot 60} \simeq \frac{109.2981497}{24 \cdot 60} \simeq 0.0759015\ req/min
 \end{equation} 
+
+È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
 
 
 
