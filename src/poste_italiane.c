@@ -31,11 +31,11 @@
 #define P_PP 0.35
 #define P_SR 0.15
 
-#define LAMBDA 8750 / 115281
+#define LAMBDA (8750.0 / 115281)
 
-#define MU_UO 53 / 400
-#define MU_PP 53 / 600
-#define MU_SR 53 / 800
+#define MU_UO (53.0 / 400)
+#define MU_PP (53.0 / 600)
+#define MU_SR (53.0 / 800)
 
 #define IDLE -1
 #define UO_BP 0
@@ -131,7 +131,7 @@ struct time_integrated_populations *init_tip(void)
         return NULL;
     memset(p, 0x0, sizeof(struct time_integrated_populations));
 
-    return p;
+    return (p);
 }
 
 
@@ -145,7 +145,7 @@ struct times *init_times(int *type_ptr)
     t->current = START;
     t->arrival = GetArrival(type_ptr);
 
-    return t;
+    return (t);
 }
 
 struct server_info **init_server_info(void)
@@ -153,11 +153,13 @@ struct server_info **init_server_info(void)
     struct server_info **info = calloc(M-1, sizeof(struct server_info *));
 
     for (int i = 0; i < M-1; ++i) {
+        if ((info[i] = malloc(sizeof(struct server_info))) == NULL)
+            abort();
         info[i]->status = IDLE;
         info[i]->next = INFTY;
     }
 
-    return info;
+    return (info);
 }
 
 long total_customers(long *customers)
@@ -166,7 +168,7 @@ long total_customers(long *customers)
     for(int i = 0; i < NUMBER_OF_QUEUE; ++i)
         total += customers[i];
 
-    return total;
+    return (total);
 }
 
 int *get_in_service_per_type(struct server_info **gp_servers)
@@ -174,12 +176,12 @@ int *get_in_service_per_type(struct server_info **gp_servers)
     int *in_service_per_type;
     in_service_per_type = calloc(NUMBER_OF_QUEUE, sizeof(int));
 
-    for (int i = 0; i < M; ++i) {
+    for (int i = 0; i < M-1; ++i) {
         if(gp_servers[i]->status != IDLE)
             in_service_per_type[gp_servers[i]->status]++;
     }
 
-    return in_service_per_type;
+    return (in_service_per_type);
 }
 
 void update_tip(struct time_integrated_populations *area, struct times *t, 
@@ -196,16 +198,19 @@ void update_tip(struct time_integrated_populations *area, struct times *t,
     }
 }
 
-double next_completion_gp(struct server_info **gp_servers)
+int next_completion_gp(struct server_info **gp_servers)
 {
-    double min = gp_servers[0]->next;
+    struct server_info *min_server = gp_servers[0];
+    int min = 0;
 
     for(int i = 1; i < M-1; ++i) {
-        if(gp_servers[i]->next < min)
-            min = gp_servers[i]->next;
+        if(gp_servers[i]->next < min_server->next) {
+            min_server = gp_servers[i];
+            min = i;
+        }
     }
 
-    return min;
+    return (min);
 }
 
 int get_max_prio_queue_not_empty(struct server_info **gp_servers, long *customers)
@@ -219,17 +224,30 @@ int get_max_prio_queue_not_empty(struct server_info **gp_servers, long *customer
         ++prio_queue;
     }
 
-    return prio_queue;
+    return ((prio_queue == NUMBER_OF_QUEUE) ? -1 : prio_queue);
 }
 
 int get_idle_server_gp(struct server_info **gp_servers)
 {
     for (int i = 0; i < M-1; ++i) {
         if (gp_servers[i]->status == IDLE)
-            return i;
+            return (i);
     }
 
-    return -1;
+    return (-1);
+}
+
+void toggle_server_status(struct server_info **gp_servers, long *customers, int index, double current)
+{
+    int max_prio_queue_not_empty = get_max_prio_queue_not_empty(gp_servers, customers);
+    if (max_prio_queue_not_empty != -1) {
+        gp_servers[index]->status = max_prio_queue_not_empty;
+        double expo = GetService(max_prio_queue_not_empty);
+        gp_servers[index]->next = current + expo;
+    } else {
+        gp_servers[index]->status = IDLE;
+        gp_servers[index]->next = INFTY;
+    }
 }
 
 
@@ -242,8 +260,7 @@ int main(void)
     struct time_integrated_populations *area;
     int last_arrival_type;
     int idle_server_index;
-    int max_prio_queue_not_empty;
-
+    
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUE * sizeof(long));
     memset(customers, 0x0, NUMBER_OF_QUEUE * sizeof(long));
 
@@ -254,10 +271,10 @@ int main(void)
     area = init_tip();
     
     while ((t->arrival < STOP) || (total_customers(customers) > 0)) {
-        t->next = MIN(t->arrival, next_completion_gp(gp_servers));
+        int next_server_index = next_completion_gp(gp_servers);
+        t->next = MIN(t->arrival, gp_servers[next_server_index]->next);
         update_tip(area, t, customers, gp_servers);
-        t->current = t->next;                    
-        
+        t->current = t->next;
         if (t->current == t->arrival)  { /* ARRIVO */
             customers[last_arrival_type]++;
             t->arrival = GetArrival(&last_arrival_type);
@@ -267,23 +284,15 @@ int main(void)
                 t->arrival = INFTY;
             }
 
-            if ((idle_server_index = get_idle_server_gp(gp_servers)) != -1) {
-                max_prio_queue_not_empty = get_max_prio_queue_not_empty(gp_servers, customers);
-                gp_servers[idle_server_index]->status = max_prio_queue_not_empty;
-                gp_servers[idle_server_index]->next = t->current + GetService(max_prio_queue_not_empty);
-            }
+            if ((idle_server_index = get_idle_server_gp(gp_servers)) != -1)
+                toggle_server_status(gp_servers, customers, idle_server_index, t->current);
 
-        } 
-        
-        // else {    /* COMPLETAMENTO */
-        //     index++;
-        //     number--;
-        //     if (number > 0)
-        //         t.completion = t.current + GetService();
-        //     else
-        //         t.completion = INFTY;
-        // }
-  } 
+        } else {    /* COMPLETAMENTO */
+            number_of_completions[gp_servers[next_server_index]->status]++;
+            customers[gp_servers[next_server_index]->status]--;
+            toggle_server_status(gp_servers, customers, next_server_index, t->current);
+        }
+  }
 
 //   printf("\nfor %ld jobs\n", index);
 //   printf("   average interarrival time = %6.2f\n", t.last / index);
