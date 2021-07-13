@@ -12,15 +12,19 @@ BIN 	    = poste_italiane
 
 # N.B.	$@ è la variabile contenente il nome del target da generare, 
 #	$< è la prima dipendenza (in questo caso il file sorgente).
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS) create-directories
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 # N.B: $^ è la lista di dipendenze
 poste_italiane: $(BIN_OBJ) $(DEPS_OBJ)
 	$(CC) -o $(BIN_DIR)/$(BIN) $^ $(CFLAGS) $(LIBS)
 
-.PHONY: clean clean-all
+.PHONY: create-directories clean clean-all
 
+create-directories:
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(BIN_DIR)
+	
 clean:
 	rm -f $(OBJ_DIR)/*.o
 	
