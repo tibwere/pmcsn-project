@@ -69,6 +69,11 @@ struct time_integrated_populations {
     double service[NUMBER_OF_QUEUE];    /* time integrated number in service   */
 };
 
+/* Global variables (system status) */
+long customers[NUMBER_OF_QUEUE];
+struct server_info **gp_servers;
+struct server_info *dedicated_server;
+
 
 double GetArrival(int *type_ptr)
 {
@@ -146,9 +151,9 @@ struct times *init_times(int *type_ptr)
     return (t);
 }
 
-struct server_info **init_gp_servers(void)
+void init_gp_servers(void)
 {
-    struct server_info **gp_servers = calloc(M-1, sizeof(struct server_info *));
+    gp_servers = calloc(M-1, sizeof(struct server_info *));
 
     for (int i = 0; i < M-1; ++i) {
         if ((gp_servers[i] = malloc(sizeof(struct server_info))) == NULL)
@@ -156,21 +161,17 @@ struct server_info **init_gp_servers(void)
         gp_servers[i]->status = IDLE;
         gp_servers[i]->next = INFTY;
     }
-    
-    return (gp_servers);
 }
 
-struct server_info *init_ded_server(void)
+void init_ded_server(void)
 {
-    struct server_info *dedicated_server = malloc(sizeof(struct server_info));
+    dedicated_server = malloc(sizeof(struct server_info));
 
     dedicated_server->status = IDLE;
     dedicated_server->next = INFTY;
-    
-    return (dedicated_server);
 }
 
-long total_customers(long *customers)
+long total_customers(void)
 {
     long total = 0L;
     for(int i = 0; i < NUMBER_OF_QUEUE; ++i)
@@ -179,7 +180,7 @@ long total_customers(long *customers)
     return (total);
 }
 
-int *get_in_service_per_type(struct server_info **gp_servers, struct server_info *dedicated_server)
+int *get_in_service_per_type(void)
 {
     int *in_service_per_type;
     in_service_per_type = calloc(NUMBER_OF_QUEUE, sizeof(int));
@@ -194,10 +195,9 @@ int *get_in_service_per_type(struct server_info **gp_servers, struct server_info
     return (in_service_per_type);
 }
 
-void update_tip(struct time_integrated_populations *area, struct times *t, 
-    long *customers, struct server_info **gp_servers, struct server_info *dedicated_server)
+void update_tip(struct time_integrated_populations *area, struct times *t)
 {
-    int *in_service_per_type = get_in_service_per_type(gp_servers, dedicated_server);
+    int *in_service_per_type = get_in_service_per_type();
 
     for(int i = 0; i < NUMBER_OF_QUEUE; ++i) {
         if (customers[i] > 0) {
@@ -208,7 +208,7 @@ void update_tip(struct time_integrated_populations *area, struct times *t,
     }
 }
 
-int next_completion_gp(struct server_info **gp_servers)
+int next_completion_gp(void)
 {
     struct server_info *min_server = gp_servers[0];
     int min = 0;
@@ -223,10 +223,10 @@ int next_completion_gp(struct server_info **gp_servers)
     return (min);
 }
 
-int get_max_prio_queue_not_empty(struct server_info **gp_servers, struct server_info *dedicated_server, long *customers)
+int get_max_prio_queue_not_empty(void)
 {
     int prio_queue = 0;
-    int *in_service_per_type = get_in_service_per_type(gp_servers, dedicated_server);
+    int *in_service_per_type = get_in_service_per_type();
 
     while (prio_queue < NUMBER_OF_GP_QUEUE) {
         if (customers[prio_queue] > in_service_per_type[prio_queue])
@@ -237,7 +237,7 @@ int get_max_prio_queue_not_empty(struct server_info **gp_servers, struct server_
     return ((prio_queue == NUMBER_OF_GP_QUEUE) ? -1 : prio_queue);
 }
 
-int get_idle_server_gp(struct server_info **gp_servers)
+int get_idle_server_gp(void)
 {
     for (int i = 0; i < M-1; ++i) {
         if (gp_servers[i]->status == IDLE)
@@ -247,10 +247,9 @@ int get_idle_server_gp(struct server_info **gp_servers)
     return (-1);
 }
 
-void toggle_server_status(struct server_info **gp_servers, struct server_info *dedicated_server, 
-    long *customers, int index, double current)
+void toggle_server_status(int index, double current)
 {
-    int max_prio_queue_not_empty = get_max_prio_queue_not_empty(gp_servers, dedicated_server, customers);
+    int max_prio_queue_not_empty = get_max_prio_queue_not_empty();
     if (max_prio_queue_not_empty != -1) {
         if (index != -1) {
             gp_servers[index]->status = max_prio_queue_not_empty;
@@ -270,8 +269,7 @@ void toggle_server_status(struct server_info **gp_servers, struct server_info *d
     }
 }
 
-void next_assignment_ded_server(struct server_info **gp_servers, struct server_info *dedicated_server, 
-    long *customers, double current)
+void next_assignment_ded_server(double current)
 {
     if (customers[SR_BP] > 0) {
         dedicated_server->status = SR_BP;
@@ -280,16 +278,13 @@ void next_assignment_ded_server(struct server_info **gp_servers, struct server_i
         dedicated_server->status = SR_STD;
         dedicated_server->next = current + GetService(SR_STD);
     } else {
-        toggle_server_status(gp_servers, dedicated_server, customers, -1, current);
+        toggle_server_status(-1, current);
     }
 }
 
 int main(void) 
 {
     long number_of_completions[NUMBER_OF_QUEUE];
-    long customers[NUMBER_OF_QUEUE];
-    struct server_info **gp_servers;
-    struct server_info *dedicated_server;
     struct times *t;
     struct time_integrated_populations *area;
     int previous_arrival_type;
@@ -302,14 +297,14 @@ int main(void)
     PlantSeeds(0);
   
     t = init_times(&current_arrival_type);
-    gp_servers = init_gp_servers();
-    dedicated_server = init_ded_server();
+    init_gp_servers();
+    init_ded_server();
     area = init_tip();
    
-    while ((t->arrival < STOP) || (total_customers(customers) > 0)) {
-        int next_server_index = next_completion_gp(gp_servers);
+    while ((t->arrival < STOP) || (total_customers() > 0)) {
+        int next_server_index = next_completion_gp();
         t->next = MIN(MIN(t->arrival, gp_servers[next_server_index]->next), dedicated_server->next);
-        update_tip(area, t, customers, gp_servers, dedicated_server);
+        update_tip(area, t);
         t->current = t->next;
 #ifdef DEBUG 
         printf("Current time: %lf\nNext arrival time: %lf\nNext gp_completion: %lf\nNext ded_completion: %lf\n", t->current, 
@@ -333,8 +328,8 @@ int main(void)
                 t->arrival = INFTY;
             }
             if (previous_arrival_type != SR_BP && previous_arrival_type != SR_STD) {
-                if ((idle_server_index = get_idle_server_gp(gp_servers)) != -1 || dedicated_server->status == IDLE)
-                    toggle_server_status(gp_servers, dedicated_server, customers, idle_server_index, t->current);
+                if ((idle_server_index = get_idle_server_gp()) != -1 || dedicated_server->status == IDLE)
+                    toggle_server_status(idle_server_index, t->current);
             } else {
                 if (dedicated_server->status == IDLE) {
                     dedicated_server->status = previous_arrival_type;
@@ -344,11 +339,11 @@ int main(void)
         } else if (t->current == gp_servers[next_server_index]->next) {    /* COMPLETAMENTO SERVER GP */
             number_of_completions[gp_servers[next_server_index]->status]++;
             customers[gp_servers[next_server_index]->status]--;
-            toggle_server_status(gp_servers, dedicated_server, customers, next_server_index, t->current);
+            toggle_server_status(next_server_index, t->current);
         } else {    /* COMPLETAMENTO SERVER DEDICATO */
             number_of_completions[dedicated_server->status]++;
             customers[dedicated_server->status]--;
-            next_assignment_ded_server(gp_servers, dedicated_server, customers, t->current);
+            next_assignment_ded_server(t->current);
         }
   }
 
