@@ -51,7 +51,7 @@ in accordo alla tabella \ref{table:modello-specifiche-1} (e.g. se il servente $r
 \begin{equation}
 Server_k(t) \in \lbrace -1, 0, \dots, 5 \rbrace
 \end{equation}
-in accordo alla tabella \ref{table:modello-specifiche-1}\footnote{La variabile del server $k$-esimo può assumere un insieme più vasto di valori perché è l'unico che può elaborare ticket di tipo \sr{}}.
+in accordo alla tabella \ref{table:modello-specifiche-1}\footnote{La variabile del server $k$-esimo può assumere un insieme più vasto di valori perché è l'unico che può elaborare ticket di tipo \sr{}.}.
 \end{itemize}
 
 Dalle variabili appena descritte, è immediato ricavare il numero di richieste in coda per ciascuna tipologia di ticket:
@@ -158,32 +158,33 @@ Al fine di agevolare la comprensione del funzionamento dello scheduler di sistem
 \end{algorithmic}
 \end{algorithm}
 
-Assumendo che:
+\newpage
+Assumendo\footnote{$E[S_{i,j}]$ rappresenta il tempo medio di servizio del server $i$-esimo per la $j$-esima tipologia di ticket. Nel caso in cui sia presente solo il pedice $i$, si fa riferimento alla media pesata su tutte le tipologie di ticket.} che:
 \begin{itemize}
-\item Il tempo medio di servizio $E[S]$ sia pari a $10\ min$.
-\item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari ad una volta e mezzo quello di una \uo{}, ovvero $E[S_{PP}] = 1.5 \cdot E[S_{UO}]$.
-\item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a due volte quello di una \uo{}, ovvero $E[S_{SR}] = 2 \cdot E[S_{UO}]$.
+\item Il tempo medio di servizio $E[S_i]$, con $i \in \lbrace 1, 2, \dots, M \rbrace$, sia pari a $10\ min$.
+\item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari ad una volta e mezzo quello di una \uo{}, ovvero $E[S_{i, PP}] = 1.5 \cdot E[S_{i, UO}]$.
+\item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a due volte quello di una \uo{}, ovvero $E[S_{i, SR}] = 2 \cdot E[S_{i, UO}]$.
 \end{itemize}
-è possibile ricavare gli $E[S_i]$, con $i \in \lbrace UO, PP, SR \rbrace$, come segue:
+è possibile ricavare gli $E[S_{i,j}]$, con $i \in \lbrace 1, 2, \dots, M \rbrace$ e $j \in \lbrace UO, PP, SR \rbrace$, come segue:
 \begin{equation}
 \begin{split}
-E[S] &= p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot E[S_{PP}] + p_{SR}\cdot E[S_{SR}] \\
-&= p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot 1.5\cdot E[S_{UO}] + p_{SR}\cdot 2\cdot E[S_{UO}] \\
-&= (p_{UO} + 1.5\cdot p_{PP} + 2\cdot p_{SR}) \cdot E[S_{UO}]
+E[S_i] &= p_{UO}\cdot E[S_{i,UO}] + p_{PP}\cdot E[S_{i,PP}] + p_{SR}\cdot E[S_{i,SR}] \\
+&= p_{UO}\cdot E[S_{i,UO}] + p_{PP}\cdot 1.5\cdot E[S_{i,UO}] + p_{SR}\cdot 2\cdot E[S_{i,UO}] \\
+&= (p_{UO} + 1.5\cdot p_{PP} + 2\cdot p_{SR}) \cdot E[S_{i,UO}]
 \end{split}
 \end{equation}
 da cui:
 \begin{equation}
 \begin{cases}
-E[S_{UO}] = \frac{E[S]}{(p_{UO} + 1.5\cdot p_{PP} + 2\cdot p_{SR})} = \frac{400}{53} \simeq 7.5471698\ min \\[1em]
-E[S_{PP}] = 1.5\cdot E[S_{UO}] = \frac{600}{53} \simeq 11.3207547\ min \\[1em]
-E[S_{SR}] = 2 \cdot E[S_{UO}] = \frac{800}{53} \simeq 15.0943396\ min
+E[S_{i,UO}] = \frac{E[S_i]}{(p_{UO} + 1.5\cdot p_{PP} + 2\cdot p_{SR})} = \frac{400}{53} \simeq 7.5471698\ min \\[1em]
+E[S_{i,PP}] = 1.5\cdot E[S_{i,UO}] = \frac{600}{53} \simeq 11.3207547\ min \\[1em]
+E[S_{i,SR}] = 2 \cdot E[S_{i,UO}] = \frac{800}{53} \simeq 15.0943396\ min
 \end{cases}
 \end{equation}
 
 I risultati ottenuti possono essere verificati con il seguente consistency check:
 \begin{equation}
-p_{UO}\cdot E[S_{UO}] + p_{PP}\cdot E[S_{PP}] + p_{SR}\cdot E[S_{SR}] = 10\ min = E[S]\qquad \text{\color{forestgreen}\textbf{OK} \checkmark}
+p_{UO}\cdot E[S_{i,UO}] + p_{PP}\cdot E[S_{i,PP}] + p_{SR}\cdot E[S_{i,SR}] = 10\ min = E[S_i]\qquad \text{\color{forestgreen}\textbf{OK} \checkmark}
 \end{equation}
 
 \begin{table}[ht]
@@ -202,10 +203,19 @@ N$^o$ di uffici postali & 12 809 \\
 \label{table:modello-specifiche-2}
 \end{table}
 
-Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
+Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da:
+\begin{itemize}
+\item \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}}
+\item Orari di apertura di un ufficio postale di Fiumicino\footnote{\url{https://www.centroaperture.it/orari-apertura/fiumicino-poste-italiane-112743521}}
+\end{itemize}
+nel modo seguente:
 \begin{equation}
-X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{24 \cdot 60} = \frac{8750}{115281} \simeq 0.0759015\ req/min
+X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace} \cdot \frac{1}{\frac{60}{7} \cdot 60} = \frac{24500}{115281} \simeq 0.21252418\ req/min
 \end{equation} 
+dove le ore di lavoro giornaliere sono state calcolate come segue:
+\begin{equation}
+\frac{11h \cdot 5gg + 5h \cdot 1gg + 0h \cdot 1gg}{7gg} = \frac{60}{7} \simeq 8.57142856\ h/gg  
+\end{equation}
 
 È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
 
