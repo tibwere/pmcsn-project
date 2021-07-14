@@ -7,9 +7,9 @@
 
 #define DEBUG
 
-#define START         0.0               /* initial time                     */
-#define STOP      20000.0               /* terminal (close the door) time   */
-#define INFTY   (100.0 * STOP)          /* must be much larger than STOP    */
+#define START 0.0               /* initial time                     */
+#define STOP (60.0 * (60 / 7))  /* terminal (close the door) time   */
+#define INFTY (100.0 * STOP)    /* must be much larger than STOP    */
 
 #define UNICA_OP_BP_ARR_STREAM 0
 #define PAGAM_PREL_BP_ARR_STREAM 1
@@ -24,7 +24,7 @@
 
 #define ARRIVAL_TYPE_STREAM 9
 
-#define M 4
+#define M 3
 #define NUMBER_OF_QUEUE 6
 #define NUMBER_OF_GP_QUEUE 4
 
@@ -34,11 +34,11 @@
 #define P_PP 0.35
 #define P_SR 0.15
 
-#define LAMBDA (8750.0 / 115281)
+#define LAMBDA (24500.0 / 115281)
 
-#define MU_UO (53.0 / 400)
-#define MU_PP (53.0 / 600)
-#define MU_SR (53.0 / 800)
+#define MU_UO (53.0 / 620)
+#define MU_PP (53.0 / 930)
+#define MU_SR (53.0 / 1240)
 
 #define IDLE -1
 #define UO_BP 0
@@ -69,11 +69,29 @@ struct time_integrated_populations {
     double service[NUMBER_OF_QUEUE];    /* time integrated number in service   */
 };
 
+
 /* Global variables (system status) */
-long customers[NUMBER_OF_QUEUE];
+int customers[NUMBER_OF_QUEUE];
 struct server_info **gp_servers;
 struct server_info *dedicated_server;
 
+int integers_sum(int *items, int len) {
+    int sum = 0;
+
+    for (int i = 0; i < len; ++i)
+        sum += items[i];
+    
+    return sum;
+}
+
+double doubles_sum(double *items, int len) {
+    double sum = 0;
+
+    for (int i = 0; i < len; ++i)
+        sum += items[i];
+    
+    return sum;
+}
 
 double GetArrival(int *type_ptr)
 {
@@ -105,7 +123,6 @@ double GetArrival(int *type_ptr)
     return (arrival);
 } 
 
-
 double GetService(int type) 
 {
     switch(type) {
@@ -126,7 +143,6 @@ double GetService(int type)
     }
 }  
 
-
 struct time_integrated_populations *init_tip(void)
 {
     struct time_integrated_populations *p = malloc(sizeof(struct time_integrated_populations));
@@ -136,7 +152,6 @@ struct time_integrated_populations *init_tip(void)
 
     return (p);
 }
-
 
 struct times *init_times(int *type_ptr)
 {
@@ -171,9 +186,9 @@ void init_ded_server(void)
     dedicated_server->next = INFTY;
 }
 
-long total_customers(void)
+int total_customers(void)
 {
-    long total = 0L;
+    int total = 0;
     for(int i = 0; i < NUMBER_OF_QUEUE; ++i)
         total += customers[i];
 
@@ -282,17 +297,43 @@ void next_assignment_ded_server(double current)
     }
 }
 
+void print_report(int *number_of_completions, struct time_integrated_populations *area, struct times *t) 
+{
+    int tot_completions = integers_sum(number_of_completions, NUMBER_OF_QUEUE);
+    double area_customers = doubles_sum(area->customers, NUMBER_OF_QUEUE);
+    double area_queue = doubles_sum(area->queue, NUMBER_OF_QUEUE);
+    double area_service = doubles_sum(area->service, NUMBER_OF_QUEUE);
+    char *types_of_service[NUMBER_OF_QUEUE] = {"UNICA_OP_BP", "PAGAM_PREL_BP", "UNICA_OP_STD", "PAGAM_PREL_STD",
+        "SPED_RIT_BP", "SPED_RIT_STD"};
+        
+    printf("\n+--------------------+\n| SIMULATION RESULTS |\n+--------------------+\n");
+
+    for(int j = 0; j < NUMBER_OF_QUEUE; j++) {
+        printf("Completions of %-15s = %3d\n", types_of_service[j], number_of_completions[j]);
+    }
+    printf("\nTotal completions              = %3d\n\n", tot_completions);
+
+    printf("Average interarrival time      = %10.6f\n", t->last / tot_completions);
+    printf("Average wait                   = %10.6f\n", area_customers / tot_completions);
+    printf("Average delay                  = %10.6f\n", area_queue / tot_completions);
+    printf("Average service time           = %10.6f\n", area_service / tot_completions);
+    printf("Average # in the node          = %10.6f\n", area_customers / t->current);
+    printf("Average # in the queue         = %10.6f\n", area_queue / t->current);
+    printf("Average # in service           = %10.6f\n", area_service / t->current);
+    printf("Utilization                    = %10.6f\n", (area_service / M) / t->current);
+}
+
 int main(void) 
 {
-    long number_of_completions[NUMBER_OF_QUEUE];
+    int number_of_completions[NUMBER_OF_QUEUE];
     struct times *t;
     struct time_integrated_populations *area;
     int previous_arrival_type;
     int current_arrival_type;
     int idle_server_index;
     
-    memset(number_of_completions, 0x0, NUMBER_OF_QUEUE * sizeof(long));
-    memset(customers, 0x0, NUMBER_OF_QUEUE * sizeof(long));
+    memset(number_of_completions, 0x0, NUMBER_OF_QUEUE * sizeof(int));
+    memset(customers, 0x0, NUMBER_OF_QUEUE * sizeof(int));
 
     PlantSeeds(0);
   
@@ -307,16 +348,30 @@ int main(void)
         update_tip(area, t);
         t->current = t->next;
 #ifdef DEBUG 
-        printf("Current time: %lf\nNext arrival time: %lf\nNext gp_completion: %lf\nNext ded_completion: %lf\n", t->current, 
-            t->arrival, gp_servers[next_server_index]->next, dedicated_server->next);
+        char *types_of_service[NUMBER_OF_QUEUE] = {"UNICA_OP_BP", "PAGAM_PREL_BP", "UNICA_OP_STD", "PAGAM_PREL_STD",
+        "SPED_RIT_BP", "SPED_RIT_STD"};
+        printf("Current time                 = %12.6lf\n", t->current);
+        printf("Next arrival time            = %12.6lf\n", t->arrival);
+        printf("Next gp_completion           = %12.6lf\n", gp_servers[next_server_index]->next);
+        printf("Next ded_completion          = %12.6lf\n\n", dedicated_server->next);
         int j;
         for (j = 0; j < NUMBER_OF_QUEUE; j++)
-            printf("Customers[%d]: %ld\n", j, customers[j]);
-        for (j = 0; j < M-1; j++)
-            printf("Gp_Server[%d] Status: %d - Next: %lf\n", j, gp_servers[j]->status, gp_servers[j]->next);
+            printf("Customers of %-15s = %5d\n", types_of_service[j], customers[j]);
 
-        printf("Ded_Server Status: %d - Next: %lf\n", dedicated_server->status, dedicated_server->next);
-        printf("\n\n");
+        printf("\nTotal customers              = %5d\n\n", integers_sum(customers, NUMBER_OF_QUEUE));
+
+        char *tmp;
+        for (j = 0; j < M-1; j++) {
+            tmp = (gp_servers[j]->status == -1) ? "IDLE" : types_of_service[gp_servers[j]->status];
+            printf("Gp_Server[%d] Status = %s \n", j + 1, tmp);
+            printf("             Next   = %lf\n", gp_servers[j]->next);
+        }
+
+        tmp = (dedicated_server->status == -1) ? "IDLE" : types_of_service[dedicated_server->status];
+        printf("Ded_Server   Status = %s \n", tmp );
+        printf("             Next   = %lf\n", dedicated_server->next);
+
+        printf("===========================================\n");
 #endif
         if (t->current == t->arrival) { /* ARRIVO */
             customers[current_arrival_type]++;
@@ -345,16 +400,9 @@ int main(void)
             customers[dedicated_server->status]--;
             next_assignment_ded_server(t->current);
         }
-  }
+    }
 
-//   printf("\nfor %ld jobs\n", index);
-//   printf("   average interarrival time = %6.2f\n", t.last / index);
-//   printf("   average wait ............ = %6.2f\n", area.node / index);
-//   printf("   average delay ........... = %6.2f\n", area.queue / index);
-//   printf("   average service time .... = %6.2f\n", area.service / index);
-//   printf("   average # in the node ... = %6.2f\n", area.node / t.current);
-//   printf("   average # in the queue .. = %6.2f\n", area.queue / t.current);
-//   printf("   utilization ............. = %6.2f\n", area.service / t.current);
+    print_report(number_of_completions, area, t);
 
   return (0);
 }
