@@ -20,23 +20,30 @@ Ad ogni istante di tempo, lo stato del sistema è univocamente determinato dai v
 \begin{itemize}
 \item Per ciascuno sportello $i$ (con $i \in \lbrace 1, 2, \dots, k-1, k+1, \dots, M \rbrace$) si ha:
 \begin{equation}
-Server_i \in \lbrace \mathtt{IDLE},\ \mathtt{BUSY} \rbrace 
+Server_i \in
+\left\lbrace
+\begin{array}{l l l}
+\mathtt{IDLE}, & \mathtt{UNICA\_OP\_BP}, & \mathtt{PAGAM\_PREL\_BP},\\ 
+\mathtt{UNICA\_OP\_STD}, & \mathtt{PAGAM\_PREL\_STD}
+\end{array}
+\right\rbrace
 \end{equation}
 \item Per lo sportello dedicato, ovvero il $k$-esimo in figura \ref{fig:modello-concettuale-1}, si ha:
 \begin{equation}
-Server_k \in \lbrace \mathtt{IDLE},\ \mathtt{BUSY\_GENERAL},\ \mathtt{BUSY\_SPED\_RIT}\rbrace 
+Server_k \in 
+\left\lbrace
+\begin{array}{l l l}
+\mathtt{IDLE}, & \mathtt{UNICA\_OP\_BP}, & \mathtt{PAGAM\_PREL\_BP},\\ 
+\mathtt{UNICA\_OP\_STD}, & \mathtt{PAGAM\_PREL\_STD}, & \mathtt{SPED\_RIT\_BP},\\\mathtt{SPED\_RIT\_STD}
+\end{array}
+\right\rbrace
 \end{equation}
-dove:
-\begin{itemize}
-\item \texttt{BUSY\_GENERAL} rappresenta il caso in cui il servente stia elaborando un ticket \textbf{non} di tipo \sr{}.
-\item \texttt{BUSY\_SPED\_RIT} rappresenta il caso in cui il servente stia elaborando un ticket di tipo \sr{}.
-\end{itemize}
-\item Per ciascuna coda $(h, j)$ con:
+\item Per ciascuna tipologia di ticket $(h, j)$ con:
 \begin{itemize}
 \item $h \in \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace$
 \item $j \in \lbrace \mathtt{UNICA\_OP},\ \mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace$
 \end{itemize}
-il suo livello di occupazione è modellato dalla variabile $Queue_{h,j}$.
+il livello di occupazione dei clienti è modellato dalla variabile $Customers_{h,j}$.
 \end{itemize}
 
 Infine, si assume che:
@@ -47,7 +54,7 @@ Infine, si assume che:
 \begin{equation}
 \begin{cases}
 Server_i =\mathtt{IDLE} & \forall\ i \in \lbrace 1, 2, \dots, M \rbrace \\[1em]
-Queue_{h,j} = \mathtt{EMPTY} & \forall\ h \in \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace\ \wedge \\
+Customers_{h,j} = \mathtt{EMPTY} & \forall\ h \in \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace\ \wedge \\
 & \forall\ j \in \lbrace \mathtt{UNICA\_OP},\ \mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace
 \end{cases}
 \end{equation}

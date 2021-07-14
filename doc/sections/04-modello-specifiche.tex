@@ -1,35 +1,69 @@
-\section{Modello Delle Specifiche}\label{sec:modello-specfiche}
-Le seguenti variabili, definite per ogni istante di tempo $t$, forniscono una base per il modello delle specifiche del sistema in questione:
-\begin{itemize}
-\item Il numero di clienti presenti all'interno del sistema è dato da:
+\section{Modello Delle Specifiche}\label{sec:modello-specifiche}
+Le coppie di pedici $(h,j)$ appartenenti al prodotto cartesiano 
 \begin{equation}
-Customers(t) \in \mathbb{N}
+R = \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace \times \lbrace \mathtt{UNICA\_OP},\mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace
 \end{equation}
-\item Il numero di clienti in servizio allo sportello $i$-esimo (con $i \in \lbrace 1, 2, \cdots, M \rbrace$) è dato da:
-\begin{equation}
-Server_i(t) = 
-\begin{cases}
-0 & \text{se il server è idle} \\
-1 & \text{se il server è busy}
-\end{cases}
-\end{equation}
-\item Per ciascuna coda $(h, j)$ con:
+vengono mappate su valori numerici, in accordo alla tabella \ref{table:modello-specifiche-1}.
+\begin{table}[ht]
+\centering
+{\tablecolors
+\begin{tabular}{| l | l | r |}
+\hline
+$h$ & $j$ & Indice numerico\\
+\hline
+\rowcolor{airforceblue!50}
+\multicolumn{2}{| c |}{$\mathtt{IDLE}$} & $-1$\\
+\hline
+$\mathtt{BANCO\_POSTA}$ & $\mathtt{UNICA\_OP}$ & $0$\\
+\hline
+$\mathtt{BANCO\_POSTA}$ & $\mathtt{PAGAM\_PREL}$ & $1$\\
+\hline
+$\mathtt{STANDARD}$ & $\mathtt{UNICA\_OP}$ & $2$\\
+\hline
+$\mathtt{STANDARD}$ & $\mathtt{PAGAM\_PREL}$ & $3$\\
+\hline
+$\mathtt{BANCO\_POSTA}$ & $\mathtt{SPED\_RIT}$ & $4$\\
+\hline
+$\mathtt{STANDARD}$ & $\mathtt{SPED\_RIT}$ & $5$\\
+\hline
+\end{tabular}}
+\scaption{Mapping tra il modello concettuale e quello delle specifiche}
+\label{table:modello-specifiche-1}
+\end{table}
+\newpage
+Le seguenti variabili, definite:
 \begin{itemize}
-\item $h \in \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace$
-\item $j \in \lbrace \mathtt{UNICA\_OP},\ \mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace$
+\item Per ogni istante di tempo $t$
+\item Per ogni indice $i$ appartenente alla tabella \ref{table:modello-specifiche-1}
 \end{itemize}
-il numero di clienti in essa presenti è dato da:
+forniscono una base per il modello delle specifiche del sistema in questione:
+\begin{itemize}
+\item Per ogni $i \neq -1$, il numero di clienti presenti nel sistema è dato da:
 \begin{equation}
-Queue_{h,j}(t) \in \mathbb{N}
+Customers_i(t) \in \mathbb{N}
 \end{equation}
+\item Il numero di clienti in servizio allo sportello $r$-esimo (con $r \in \lbrace 1, 2, \dots, k-1, k+1, \dots, M \rbrace$) è dato da:
+\begin{equation}
+Server_r(t) \in \lbrace -1, 0, \dots, 3 \rbrace
+\end{equation}
+in accordo alla tabella \ref{table:modello-specifiche-1} (e.g. se il servente $r$-esimo sta elaborando un ticket di tipo \uo{} \textsl{BancoPosta} all'istante $t$, allora $Server_r(t)=0$).
+\item Il numero di clienti in servizio allo sportello dedicato è dato da:
+\begin{equation}
+Server_k(t) \in \lbrace -1, 0, \dots, 5 \rbrace
+\end{equation}
+in accordo alla tabella \ref{table:modello-specifiche-1}\footnote{La variabile del server $k$-esimo può assumere un insieme più vasto di valori perché è l'unico che può elaborare ticket di tipo \sr{}}.
 \end{itemize}
 
-La relazione matematica che lega le variabili appena descritte è la seguente:
+Dalle variabili appena descritte, è immediato ricavare il numero di richieste in coda per ciascuna tipologia di ticket:
 \begin{equation}
-Customers(t) = \sum_{(h,j) \in R}
- Queue_{h,j}(t) + \sum_{i=1}^{M} Server_i(t)
+Queue_i(t) = Customers_i(t) - \# \lbrace Server_r(t)\ \vert\ Server_r(t) = i \rbrace
 \end{equation}
-dove $R = \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace \times \lbrace \mathtt{UNICA\_OP},\mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace$.
+con $r \in \lbrace 1, 2, \dots, M \rbrace$ (ovvero compreso anche il server dedicato).
+
+Infine, per ricavare il numero di clienti totale nel sistema è possibile sfruttare la seguente relazione:
+\begin{equation}
+Customers(t) = \sum_{i=0}^{5} Customers_i(t)
+\end{equation}
 
 Di seguito sono riportate alcune assunzioni che saranno alla base di questa e delle successive fasi dello studio:
 \begin{itemize}
@@ -165,7 +199,7 @@ N$^o$ di uffici postali & 12 809 \\
 \hline
 \end{tabular}}
 \scaption{Estratto dei dati di interesse a partire dalla fonte citata}
-\label{table:modello-specifiche-1}
+\label{table:modello-specifiche-2}
 \end{table}
 
 Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
