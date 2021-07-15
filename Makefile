@@ -6,7 +6,7 @@ CC		= gcc
 CFLAGS		= -I$(INCLUDE_DIR) -Wall -Wextra
 LIBS 		= -lm
 DEPS 		= $(INCLUDE_DIR)/rngs.h $(INCLUDE_DIR)/rvgs.h
-BIN_OBJ 	= $(OBJ_DIR)/poste_italiane.o 
+BIN_OBJ 	= $(OBJ_DIR)/simul.o 
 DEPS_OBJ 	= $(OBJ_DIR)/rngs.o $(OBJ_DIR)/rvgs.o
 BIN		= simul
 
