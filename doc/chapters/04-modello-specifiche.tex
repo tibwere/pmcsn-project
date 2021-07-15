@@ -1,4 +1,4 @@
-\section{Modello Delle Specifiche}\label{sec:modello-specifiche}
+\chapter{Modello Delle Specifiche}\label{chp:modello-specifiche}
 Le coppie di pedici $(h,j)$ appartenenti al prodotto cartesiano 
 \begin{equation}
 R = \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace \times \lbrace \mathtt{UNICA\_OP},\mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace
@@ -27,16 +27,16 @@ $\mathtt{BANCO\_POSTA}$ & $\mathtt{SPED\_RIT}$ & $4$\\
 $\mathtt{STANDARD}$ & $\mathtt{SPED\_RIT}$ & $5$\\
 \hline
 \end{tabular}}
-\scaption{Mapping tra il modello concettuale e quello delle specifiche}
+\caption{Mapping tra il modello concettuale e quello delle specifiche}
 \label{table:modello-specifiche-1}
 \end{table}
-\newpage
+
 Le seguenti variabili, definite:
 \begin{itemize}
 \item Per ogni istante di tempo $t$
-\item Per ogni indice $i$ appartenente alla tabella \ref{table:modello-specifiche-1}
+\item Per ogni indice $i$ appartenente alla terza colonna della tabella \ref{table:modello-specifiche-1}
 \end{itemize}
-forniscono una base per il modello delle specifiche del sistema in questione:
+identificano univocamente una rappresentazione a livello delle specifiche dello stato del sistema.
 \begin{itemize}
 \item Per ogni $i \neq -1$, il numero di clienti presenti nel sistema è dato da:
 \begin{equation}
@@ -46,11 +46,13 @@ Customers_i(t) \in \mathbb{N}
 \begin{equation}
 Server_r(t) \in \lbrace -1, 0, \dots, 3 \rbrace
 \end{equation}
+
 in accordo alla tabella \ref{table:modello-specifiche-1} (e.g. se il servente $r$-esimo sta elaborando un ticket di tipo \uo{} \textsl{BancoPosta} all'istante $t$, allora $Server_r(t)=0$).
 \item Il numero di clienti in servizio allo sportello dedicato è dato da:
 \begin{equation}
 Server_\ded(t) \in \lbrace -1, 0, \dots, 5 \rbrace
 \end{equation}
+
 in accordo alla tabella \ref{table:modello-specifiche-1}\footnote{La variabile del server $k$-esimo può assumere un insieme più vasto di valori perché è l'unico che può elaborare ticket di tipo \sr{}.}.
 \end{itemize}
 
@@ -95,7 +97,7 @@ La politica di scheduling del sistema assume caratteristiche tipiche sia dello s
 Al fine di agevolare la comprensione del funzionamento dello scheduler di sistema, di seguito sono riportati gli pseudocodici \ref{alg:modello-specifiche-1} e \ref{alg:modello-specifiche-2} che descrivono, rispettivamente, il comportamento del servente generico e di quello dedicato.
 
 \begin{algorithm}
-\scaption{Algoritmo di schedulazione del servente generico}
+\caption{Algoritmo di schedulazione del servente generico}
 \label{alg:modello-specifiche-1}
 \begin{algorithmic}[1]
 \Procedure{GeneralPurposeServer}{}
@@ -123,7 +125,7 @@ Al fine di agevolare la comprensione del funzionamento dello scheduler di sistem
 \end{algorithm}
 
 \begin{algorithm}
-\scaption{Algoritmo di schedulazione del servente dedicato a ticket \sr{}}
+\caption{Algoritmo di schedulazione del servente dedicato a ticket \sr{}}
 \label{alg:modello-specifiche-2}
 \begin{algorithmic}[1]
 \Procedure{DedicatedServer}{}
@@ -158,11 +160,9 @@ Al fine di agevolare la comprensione del funzionamento dello scheduler di sistem
 \end{algorithmic}
 \end{algorithm}
 
-\newpage
-
 Per ciascun servente generale, ovvero $\forall\ i \neq \ded$, il tempo medio di servizio è pari a:
 \begin{equation}
-\label{eqn:modello-specifiche-10}
+\label{eqn:modello-specifiche-7}
 E[S_i] = \frac{p_{UO}}{p_{UO} + p_{PP}} \cdot E[S_{i, UO}] +  \frac{p_{PP}}{p_{UO} + p_{PP}} \cdot E[S_{i, PP}]
 \end{equation}
 
@@ -172,6 +172,7 @@ E[S_\ded] = \pi \cdot E[S_{\ded, SR}] + (1-\pi) \cdot E[S_i]
 \end{equation}
 Tuttavia, è complesso individuare un'espressione in forma chiusa di $\pi$ perché pari alla probabilità che vi siano clienti in possesso di ticket \sr{} da servire, ma che non vi siano richieste \uo{} o \pp{} in servizio su tale sportello.
 
+\newpage
 
 Assumendo che:
 \begin{itemize}
@@ -191,7 +192,7 @@ E[S_{\ded, SR}] = 2 \cdot E[S_{i, UO}]
 \end{equation}
 con $i \in \lbrace 1, 2, \dots, M\rbrace$.
 \end{itemize}
-dalla \ref{eqn:modello-specifiche-10} è possibile ricavare:
+dalla \ref{eqn:modello-specifiche-7} è possibile ricavare:
 \begin{equation}
 \begin{cases}
 E[S_{i,UO}] = \frac{E[S_i]}{(\frac{p_{UO}}{p_{UO} + p_{PP}} + 1.5\cdot \frac{p_{PP}}{p_{UO} + p_{PP}})} = \frac{340}{41} \simeq 8.2926829\ min \\[2em]
@@ -217,7 +218,7 @@ N$^o$ di clienti al giorno & 1.4 mln \\
 N$^o$ di uffici postali & 12 809 \\
 \hline
 \end{tabular}}
-\scaption{Estratto dei dati di interesse a partire dalla fonte citata}
+\caption{Estratto dei dati di interesse a partire dalla fonte citata}
 \label{table:modello-specifiche-2}
 \end{table}
 

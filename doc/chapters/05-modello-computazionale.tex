@@ -1,0 +1,48 @@
+\chapter{Modello Computazionale}\label{chp:modello-computazionale}
+\section{Stato del sistema}\label{sec:modello-computazionale-stato}
+Nella progettazione del simulatore è stata definita la struttura dati riportata nello snippet \ref{code:modello-computazionale-1}. Essa presenta due campi di seguito descritti:
+\begin{itemize}
+\item \texttt{status}: rappresenta lo stato del servente e può assumere i valori numerici riportati nella terza colonna della tabella \ref{table:modello-specifiche-1}.  
+\item \texttt{next}: rappresenta l'istante temporale del prossimo completamento.
+\end{itemize}
+
+\lstinputlisting[caption={Struttura dati per la memorizzazione dello stato del servente}, label={code:modello-computazionale-1}, firstline=51, lastline=55]{../src/simul.c}
+
+Le variabili di programma utilizzate per descrivere univocamente lo stato del sistema ad ogni istante di tempo sono:
+\begin{itemize}
+\item \texttt{{\color{code_purple} int} $^*$customers}: vettore di sei interi per la memorizzazione dei clienti per ciascuna tipologia di ticket.
+\item \texttt{{\color{code_purple} struct} server\_info $^{**}$gen\_servers}: vettore di $M-1$ puntatori alla struttura in \ref{code:modello-computazionale-1} per la memorizzazione dello stato dei serventi generali.
+\item \texttt{{\color{code_purple} struct} server\_info $^*$dedicated\_server}: puntatore alla struttura in \ref{code:modello-computazionale-1} per la memorizzazione dello stato del servente dedicato.
+\end{itemize}
+
+Il mapping fra le variabili matematiche definite nel modello delle specifiche e quelle di programma a livello computazionale è riassunto nella tabella \ref{table:modello-computazionale-1}. 
+
+\begin{table}[ht]
+\centering
+{\tablecolors
+\begin{tabular}{| l | l |}
+\hline
+Variabile matematica & Variabile di programma \\
+\hline
+$Customers_i(t)$ & \texttt{{\color{code_purple}int} customers[i]} \\
+\hline
+$Server_r(t)$ & \texttt{{\color{code_purple}int} gen\_servers[r]->status} \\
+\hline
+$Server_\ded(t)$ & \texttt{{\color{code_purple}int} dedicated\_server->status} \\
+\hline
+\end{tabular}}
+\caption{Mapping tra il modello delle specifiche e quello computazionale}
+\label{table:modello-computazionale-1}
+\end{table}
+
+\section{Eventi}\label{sec:modello-computazionale-eventi}
+Lo stato del sistema può cambiare all'occorrenza delle seguenti tipologie di eventi propri:
+%\begin{itemize}
+%\item Sei tipologie d'arrivi, una per ciascun indice $i \neq -1$ della terza colonna della tabella \ref{table:modello-specifiche-1}, all'occorrenza del quale:
+%\begin{center}
+%\texttt{customers[i] = customers[i] + 1}
+%\end{center}
+%\item Due tipologie di completamenti per ciascuno degli $M-1$ server generali
+%\end{itemize} 
+
+
