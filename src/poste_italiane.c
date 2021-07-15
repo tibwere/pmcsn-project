@@ -36,9 +36,9 @@
 
 #define LAMBDA (24500.0 / 115281)
 
-#define MU_UO (53.0 / 620)
-#define MU_PP (53.0 / 930)
-#define MU_SR (53.0 / 1240)
+#define MU_UO (41.0 / 340)
+#define MU_PP (41.0 / 510)
+#define MU_SR (41.0 / 680)
 
 #define IDLE -1
 #define UO_BP 0
@@ -47,8 +47,6 @@
 #define PP_STD 3
 #define SR_BP 4
 #define SR_STD 5
-
-#define MIN(a,b) (((a)<(b))?(a):(b))
 
 struct server_info
 {
@@ -91,6 +89,23 @@ double doubles_sum(double *items, int len) {
         sum += items[i];
     
     return sum;
+}
+
+double min (double a, double b, double c)
+{
+    if (a < b) {
+        if (a < c) {
+            return a;
+        } else {
+            return c;
+        }
+    } else {
+        if (b < c) {
+            return b;
+        } else {
+            return c;
+        }
+    }
 }
 
 double GetArrival(int *type_ptr)
@@ -286,15 +301,44 @@ void toggle_server_status(int index, double current)
 
 void next_assignment_ded_server(double current)
 {
-    if (customers[SR_BP] > 0) {
+    int *in_service = get_in_service_per_type();
+    if (customers[SR_BP] > in_service[SR_BP]) {
         dedicated_server->status = SR_BP;
         dedicated_server->next = current + GetService(SR_BP);
-    } else if (customers[SR_STD] > 0) {
+    } else if (customers[SR_STD] > in_service[SR_STD]) {
         dedicated_server->status = SR_STD;
         dedicated_server->next = current + GetService(SR_STD);
     } else {
         toggle_server_status(-1, current);
     }
+}
+
+void print_update(struct times *t, int next_server_index)
+{
+    char *types_of_service[NUMBER_OF_QUEUE] = {"UNICA_OP_BP", "PAGAM_PREL_BP", "UNICA_OP_STD", "PAGAM_PREL_STD",
+        "SPED_RIT_BP", "SPED_RIT_STD"};
+    printf("Current time                 = %12.6lf\n", t->current);
+    printf("Next arrival time            = %12.6lf\n", t->arrival);
+    printf("Next gp_completion           = %12.6lf\n", gp_servers[next_server_index]->next);
+    printf("Next ded_completion          = %12.6lf\n\n", dedicated_server->next);
+    int j;
+    for (j = 0; j < NUMBER_OF_QUEUE; j++)
+        printf("Customers of %-15s = %5d\n", types_of_service[j], customers[j]);
+
+    printf("\nTotal customers              = %5d\n\n", integers_sum(customers, NUMBER_OF_QUEUE));
+
+    char *tmp;
+    for (j = 0; j < M-1; j++) {
+        tmp = (gp_servers[j]->status == -1) ? "IDLE" : types_of_service[gp_servers[j]->status];
+        printf("Gp_Server[%d] Status = %s \n", j + 1, tmp);
+        printf("             Next   = %lf\n", gp_servers[j]->next);
+    }
+
+    tmp = (dedicated_server->status == -1) ? "IDLE" : types_of_service[dedicated_server->status];
+    printf("Ded_Server   Status = %s \n", tmp );
+    printf("             Next   = %lf\n", dedicated_server->next);
+
+    printf("===========================================\n");
 }
 
 void print_report(int *number_of_completions, struct time_integrated_populations *area, struct times *t) 
@@ -344,34 +388,11 @@ int main(void)
    
     while ((t->arrival < STOP) || (total_customers() > 0)) {
         int next_server_index = next_completion_gp();
-        t->next = MIN(MIN(t->arrival, gp_servers[next_server_index]->next), dedicated_server->next);
+        t->next = min(t->arrival, gp_servers[next_server_index]->next, dedicated_server->next);
         update_tip(area, t);
         t->current = t->next;
 #ifdef DEBUG 
-        char *types_of_service[NUMBER_OF_QUEUE] = {"UNICA_OP_BP", "PAGAM_PREL_BP", "UNICA_OP_STD", "PAGAM_PREL_STD",
-        "SPED_RIT_BP", "SPED_RIT_STD"};
-        printf("Current time                 = %12.6lf\n", t->current);
-        printf("Next arrival time            = %12.6lf\n", t->arrival);
-        printf("Next gp_completion           = %12.6lf\n", gp_servers[next_server_index]->next);
-        printf("Next ded_completion          = %12.6lf\n\n", dedicated_server->next);
-        int j;
-        for (j = 0; j < NUMBER_OF_QUEUE; j++)
-            printf("Customers of %-15s = %5d\n", types_of_service[j], customers[j]);
-
-        printf("\nTotal customers              = %5d\n\n", integers_sum(customers, NUMBER_OF_QUEUE));
-
-        char *tmp;
-        for (j = 0; j < M-1; j++) {
-            tmp = (gp_servers[j]->status == -1) ? "IDLE" : types_of_service[gp_servers[j]->status];
-            printf("Gp_Server[%d] Status = %s \n", j + 1, tmp);
-            printf("             Next   = %lf\n", gp_servers[j]->next);
-        }
-
-        tmp = (dedicated_server->status == -1) ? "IDLE" : types_of_service[dedicated_server->status];
-        printf("Ded_Server   Status = %s \n", tmp );
-        printf("             Next   = %lf\n", dedicated_server->next);
-
-        printf("===========================================\n");
+        print_update(t, next_server_index);
 #endif
         if (t->current == t->arrival) { /* ARRIVO */
             customers[current_arrival_type]++;
@@ -392,13 +413,15 @@ int main(void)
                 }
             }
         } else if (t->current == gp_servers[next_server_index]->next) {    /* COMPLETAMENTO SERVER GP */
-            number_of_completions[gp_servers[next_server_index]->status]++;
-            customers[gp_servers[next_server_index]->status]--;
+            int current_state = gp_servers[next_server_index]->status;
+            number_of_completions[current_state]++;
             toggle_server_status(next_server_index, t->current);
+            customers[current_state]--;
         } else {    /* COMPLETAMENTO SERVER DEDICATO */
-            number_of_completions[dedicated_server->status]++;
-            customers[dedicated_server->status]--;
+            int current_state = dedicated_server->status;
+            number_of_completions[current_state]++;
             next_assignment_ded_server(t->current);
+            customers[current_state]--;
         }
     }
 
