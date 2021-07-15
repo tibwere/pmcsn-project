@@ -159,32 +159,50 @@ Al fine di agevolare la comprensione del funzionamento dello scheduler di sistem
 \end{algorithm}
 
 \newpage
-Assumendo\footnote{$E[S_{i,j}]$ rappresenta il tempo medio di servizio del server $i$-esimo per la $j$-esima tipologia di ticket. Nel caso in cui sia presente solo il pedice $i$, si fa riferimento alla media pesata su tutte le tipologie di ticket.} che:
-\begin{itemize}
-\item Il tempo medio di servizio $E[S_i]$, con $i \in \lbrace 1, 2, \dots, M \rbrace$, sia pari a $10\ min$.
-\item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari ad una volta e mezzo quello di una \uo{}, ovvero $E[S_{i, PP}] = 1.5 \cdot E[S_{i, UO}]$.
-\item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a due volte quello di una \uo{}, ovvero $E[S_{i, SR}] = 2 \cdot E[S_{i, UO}]$.
-\end{itemize}
-è possibile ricavare gli $E[S_{i,j}]$, con $i \in \lbrace 1, 2, \dots, M \rbrace$ e $j \in \lbrace UO, PP, SR \rbrace$, come segue:
+
+Per ciascun servente generale, ovvero $\forall\ i \neq k$, il tempo medio di servizio è pari a:
 \begin{equation}
-\begin{split}
-E[S_i] &= p_{UO}\cdot E[S_{i,UO}] + p_{PP}\cdot E[S_{i,PP}] + p_{SR}\cdot E[S_{i,SR}] \\
-&= p_{UO}\cdot E[S_{i,UO}] + p_{PP}\cdot 1.5\cdot E[S_{i,UO}] + p_{SR}\cdot 2\cdot E[S_{i,UO}] \\
-&= (p_{UO} + 1.5\cdot p_{PP} + 2\cdot p_{SR}) \cdot E[S_{i,UO}]
-\end{split}
+\label{eqn:modello-specifiche-10}
+E[S_i] = \frac{p_{UO}}{p_{UO} + p_{PP}} \cdot E[S_{i, UO}] +  \frac{p_{PP}}{p_{UO} + p_{PP}} \cdot E[S_{i, PP}]
 \end{equation}
-da cui:
+
+Per il servente dedicato si ha:
+\begin{equation}
+E[S_k] = \pi \cdot E[S_{k, SR}] + (1-\pi) \cdot E[S_i]
+\end{equation}
+Tuttavia, è complesso individuare un'espressione in forma chiusa di $\pi$ perché pari alla probabilità che vi siano clienti in possesso di ticket \sr{} da servire, ma che non vi siano richieste \uo{} o \pp{} in servizio su tale sportello.
+
+
+Assumendo che:
+\begin{itemize}
+\item Per ogni servente generale:
+\begin{equation}
+E[S_i] = 10\ min
+\end{equation}
+con $i \in \lbrace 1, 2, \dots, k-1, k+1, \dots, M\rbrace$.
+\item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari a:
+\begin{equation}
+E[S_{i, PP}] = 1.5 \cdot E[S_{i, UO}]
+\end{equation}
+con $i \in \lbrace 1, 2, \dots, M\rbrace$.
+\item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a:
+\begin{equation}
+E[S_{k, SR}] = 2 \cdot E[S_{i, UO}]
+\end{equation}
+con $i \in \lbrace 1, 2, \dots, M\rbrace$.
+\end{itemize}
+dalla \ref{eqn:modello-specifiche-10} è possibile ricavare:
 \begin{equation}
 \begin{cases}
-E[S_{i,UO}] = \frac{E[S_i]}{(p_{UO} + 1.5\cdot p_{PP} + 2\cdot p_{SR})} = \frac{400}{53} \simeq 7.5471698\ min \\[1em]
-E[S_{i,PP}] = 1.5\cdot E[S_{i,UO}] = \frac{600}{53} \simeq 11.3207547\ min \\[1em]
-E[S_{i,SR}] = 2 \cdot E[S_{i,UO}] = \frac{800}{53} \simeq 15.0943396\ min
+E[S_{i,UO}] = \frac{E[S_i]}{(\frac{p_{UO}}{p_{UO} + p_{PP}} + 1.5\cdot \frac{p_{PP}}{p_{UO} + p_{PP}})} = \frac{340}{41} \simeq 8.2926829\ min \\[2em]
+E[S_{i,PP}] = 1.5\cdot E[S_{i,UO}] = \frac{510}{41} \simeq 12.4390244\ min \\[2em]
+E[S_{k,SR}] = 2 \cdot E[S_{i,UO}] = \frac{680}{41} \simeq 16.5853658\ min
 \end{cases}
 \end{equation}
 
 I risultati ottenuti possono essere verificati con il seguente consistency check:
 \begin{equation}
-p_{UO}\cdot E[S_{i,UO}] + p_{PP}\cdot E[S_{i,PP}] + p_{SR}\cdot E[S_{i,SR}] = 10\ min = E[S_i]\qquad \text{\color{forestgreen}\textbf{OK} \checkmark}
+\frac{p_{UO}}{p_{UO} + p_{PP}} \cdot E[S_{i, UO}] +  \frac{p_{PP}}{p_{UO} + p_{PP}} \cdot E[S_{i, PP}] = 10\ min = E[S_i]\qquad \text{\color{forestgreen}\textbf{OK} \checkmark}
 \end{equation}
 
 \begin{table}[ht]
