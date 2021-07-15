@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{report}
 
 % Package necessari
 \usepackage[a4paper]{geometry}
@@ -15,6 +15,7 @@
 \usepackage{fancyhdr}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
+\usepackage[font={small,sl}]{caption}
 
 % Impostazione delle lunghezze di alcuni elementi del documento
 \setlength{\parskip}{1em}
@@ -60,10 +61,10 @@ S. Tiberi\thanks{\texttt{\href{mailto:simone.tiberi.98@gmail.com}{simone.tiberi.
 	language=C, 
 	backgroundcolor=\color{code_background},
 	frame=single,
-	basicstyle=\ttfamily,
-	keywordstyle=\color{code_purple}\bfseries,
-	stringstyle=\color{code_red},
-	commentstyle=\color{code_green},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{code_purple}\bfseries\small,
+	stringstyle=\color{code_red}\small,
+	commentstyle=\color{code_green}\small,
 	numbers=left,
 	numberstyle=\small\color{gray},
 	numbersep=5pt,
@@ -96,19 +97,23 @@ S. Tiberi\thanks{\texttt{\href{mailto:simone.tiberi.98@gmail.com}{simone.tiberi.
 % Forzatura del displaystyle in math-mode
 \everymath\expandafter{\the\everymath\displaystyle}
 
-\newcommand{\scaption}[1]{\caption{\small{#1}}}
+%\newcommand{\scaption}[1]{\small{\caption{#1}}}
 \newcommand{\ded}{{\color{red}\hat{k}}}
 
 \newcommand{\uo}{\textsl{Unica Operazione}}
 \newcommand{\pp}{\textsl{Pagamenti \& Prelievi}}
 \newcommand{\sr}{\textsl{Spedizioni \& Ritiri}}
 
+\renewcommand{\lstlistingname}{Snippet}
+
 \begin{document}
 \maketitle
+\tableofcontents
 
-\input{sections/01-presentazione}
-\input{sections/02-obiettivi}
-\input{sections/03-modello-concettuale}
-\input{sections/04-modello-specifiche}
+\input{chapters/01-presentazione}
+\input{chapters/02-obiettivi}
+\input{chapters/03-modello-concettuale}
+\input{chapters/04-modello-specifiche}
+\input{chapters/05-modello-computazionale}
 
 \end{document}
