@@ -23,8 +23,8 @@
 #define SPED_RIT_SERV_STREAM 8
 
 #define M 3
-#define NUMBER_OF_QUEUE 6
-#define NUMBER_OF_GP_QUEUE 4
+#define NUMBER_OF_QUEUES 6
+#define NUMBER_OF_GP_QUEUES 4
 
 #define P_BP 0.25
 
@@ -52,7 +52,7 @@
 
 
 typedef struct event_list {
-    double arrivals[NUMBER_OF_QUEUE]; 
+    double arrivals[NUMBER_OF_QUEUES]; 
     double gen_completions[M-1]; 
     double ded_completion;
     double next;                      
@@ -61,13 +61,13 @@ typedef struct event_list {
 } event_list_t; 
 
 struct time_integrated_populations {
-    double customers[NUMBER_OF_QUEUE];  
-    double queue[NUMBER_OF_QUEUE];      
-    double service[NUMBER_OF_QUEUE];   
+    double customers[NUMBER_OF_QUEUES];  
+    double queue[NUMBER_OF_QUEUES];      
+    double service[NUMBER_OF_QUEUES];
 };
 
 /* System Status */
-int customers[NUMBER_OF_QUEUE] = {[0 ... NUMBER_OF_QUEUE - 1] = 0};
+int customers[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = 0};
 int gen_status[M-1] = {[0 ... M - 2] = IDLE};
 int ded_status = IDLE;
 
@@ -114,7 +114,7 @@ double next_event(int *min_event_type, int *min_index)
     int min_arrival_index, min_gen_compl_index;
     double min_arrival, min_gen_compl;
 
-    min_arrival = min_from_array(t->arrivals, NUMBER_OF_QUEUE, &min_arrival_index);
+    min_arrival = min_from_array(t->arrivals, NUMBER_OF_QUEUES, &min_arrival_index);
     min_gen_compl = min_from_array(t->gen_completions, M-1, &min_gen_compl_index);
 
     //printf("min_arr = %lf, min_compl = %lf")
@@ -144,7 +144,7 @@ double next_event(int *min_event_type, int *min_index)
 
 double GetArrival(int type)
 {
-    static double arrivals[NUMBER_OF_QUEUE] = {START};
+    static double arrivals[NUMBER_OF_QUEUES] = {START};
 
     switch (type)
     {
@@ -220,7 +220,7 @@ void init_event_list(void)
 
     t->current = START;
 
-    for (i = 0; i < NUMBER_OF_QUEUE; ++i) 
+    for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
         t->arrivals[i] = GetArrival(i);
 
     for (i = 0; i < M - 1; ++i) 
@@ -232,7 +232,7 @@ void init_event_list(void)
 int *get_in_service_per_type(void)
 {
     int *in_service_per_type;
-    in_service_per_type = calloc(NUMBER_OF_QUEUE, sizeof(int));
+    in_service_per_type = calloc(NUMBER_OF_QUEUES, sizeof(int));
 
     for (int i = 0; i < M-1; ++i) {
         if(gen_status[i] != IDLE)
@@ -248,7 +248,7 @@ void update_tip(struct time_integrated_populations *area)
 {
     int *in_service_per_type = get_in_service_per_type();
 
-    for(int i = 0; i < NUMBER_OF_QUEUE; ++i) {
+    for(int i = 0; i < NUMBER_OF_QUEUES; ++i) {
         if (customers[i] > 0) {
             area->customers[i] += (t->next - t->current) * customers[i];
             area->queue[i]   += (t->next - t->current) * (customers[i] - in_service_per_type[i]);
@@ -262,13 +262,13 @@ int get_max_prio_queue_not_empty(void)
     int prio_queue = 0;
     int *in_service_per_type = get_in_service_per_type();
 
-    while (prio_queue < NUMBER_OF_GP_QUEUE) {
+    while (prio_queue < NUMBER_OF_GP_QUEUES) {
         if (customers[prio_queue] > in_service_per_type[prio_queue])
             break;
         ++prio_queue;
     }
 
-    return ((prio_queue == NUMBER_OF_GP_QUEUE) ? -1 : prio_queue);
+    return ((prio_queue == NUMBER_OF_GP_QUEUES) ? -1 : prio_queue);
 }
 
 int get_idle_server_gp(void)
@@ -321,20 +321,20 @@ void print_update(void)
     int dummy;
     int j;
     char *tmp;
-    char *types_of_service[NUMBER_OF_QUEUE] = {
+    char *types_of_service[NUMBER_OF_QUEUES] = {
         "UNICA_OP_BP", "PAGAM_PREL_BP", "UNICA_OP_STD", 
         "PAGAM_PREL_STD", "SPED_RIT_BP", "SPED_RIT_STD"
     };
 
     printf("Current time                 = %12.6lf\n", t->current);
-    printf("Next arrival time            = %12.6lf\n", min_from_array(t->arrivals, NUMBER_OF_QUEUE, &dummy));
+    printf("Next arrival time            = %12.6lf\n", min_from_array(t->arrivals, NUMBER_OF_QUEUES, &dummy));
     printf("Next gp_completion           = %12.6lf\n", min_from_array(t->gen_completions, M-1, &dummy));
     printf("Next ded_completion          = %12.6lf\n\n", t->ded_completion);
     
-    for (j = 0; j < NUMBER_OF_QUEUE; j++)
+    for (j = 0; j < NUMBER_OF_QUEUES; j++)
         printf("Customers of %-15s = %5d\n", types_of_service[j], customers[j]);
 
-    printf("\nTotal customers              = %5d\n\n", integers_sum(customers, NUMBER_OF_QUEUE));
+    printf("\nTotal customers              = %5d\n\n", integers_sum(customers, NUMBER_OF_QUEUES));
 
     for (j = 0; j < M-1; j++) {
         tmp = (gen_status[j] == -1) ? "IDLE" : types_of_service[gen_status[j]];
@@ -352,18 +352,18 @@ void print_update(void)
 
 void print_report(int *number_of_completions, struct time_integrated_populations *area) 
 {
-    int tot_completions = integers_sum(number_of_completions, NUMBER_OF_QUEUE);
-    double area_customers = doubles_sum(area->customers, NUMBER_OF_QUEUE);
-    double area_queue = doubles_sum(area->queue, NUMBER_OF_QUEUE);
-    double area_service = doubles_sum(area->service, NUMBER_OF_QUEUE);
-    char *types_of_service[NUMBER_OF_QUEUE] = {
+    int tot_completions = integers_sum(number_of_completions, NUMBER_OF_QUEUES);
+    double area_customers = doubles_sum(area->customers, NUMBER_OF_QUEUES);
+    double area_queue = doubles_sum(area->queue, NUMBER_OF_QUEUES);
+    double area_service = doubles_sum(area->service, NUMBER_OF_QUEUES);
+    char *types_of_service[NUMBER_OF_QUEUES] = {
         "UNICA_OP_BP", "PAGAM_PREL_BP", "UNICA_OP_STD", 
         "PAGAM_PREL_STD", "SPED_RIT_BP", "SPED_RIT_STD"
     };
         
     printf("\n+--------------------+\n| SIMULATION RESULTS |\n+--------------------+\n");
 
-    for(int j = 0; j < NUMBER_OF_QUEUE; j++) 
+    for(int j = 0; j < NUMBER_OF_QUEUES; j++) 
         printf("Completions of %-15s = %3d\n", types_of_service[j], number_of_completions[j]);
     
     printf("\nTotal completions              = %3d\n\n", tot_completions);
@@ -376,12 +376,18 @@ void print_report(int *number_of_completions, struct time_integrated_populations
     printf("Average # in the queue         = %10.6f\n", area_queue / t->current);
     printf("Average # in service           = %10.6f\n", area_service / t->current);
     printf("Utilization                    = %10.6f\n", (area_service / M) / t->current);
+
+    printf("\n");
+    for (int j = 0; j < NUMBER_OF_QUEUES; j++) {
+        printf("Average interarrival time %s = %lf\n", types_of_service[j], t->last / number_of_completions[j]);
+        printf("Average delay %s = %lf\n\n", types_of_service[j], area->queue[j] / number_of_completions[j]);
+    }
 }
 
 int has_to_continue(int *flags)
 {
     int result = flags[0];
-    for (int i = 1; i < NUMBER_OF_QUEUE; ++i) 
+    for (int i = 1; i < NUMBER_OF_QUEUES; ++i) 
         result = result || flags[i];
     
     return result;
@@ -389,17 +395,17 @@ int has_to_continue(int *flags)
 
 int main(void) 
 {
-    int number_of_completions[NUMBER_OF_QUEUE];
+    int number_of_completions[NUMBER_OF_QUEUES];
     struct time_integrated_populations *area;
     int idle_server_index;
-    int continue_simul[NUMBER_OF_QUEUE] = {1};
+    int continue_simul[NUMBER_OF_QUEUES] = {1};
     int next_event_type;
     int next_event_index;
     int current_state;
 
     PlantSeeds(0);
 
-    memset(number_of_completions, 0x0, NUMBER_OF_QUEUE * sizeof(int));
+    memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_event_list();
     area = init_tip();
 
@@ -407,7 +413,7 @@ int main(void)
         printf("Gen_Status[%d] = %d\n", i, gen_status[i]);
     } 
    
-    while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUE) > 0)) {
+    while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
         t->next = next_event(&next_event_type, &next_event_index);
         update_tip(area);
         t->current = t->next;
@@ -435,7 +441,7 @@ int main(void)
             } else {
                 if (ded_status == IDLE) {
                     ded_status = next_event_index;
-                    ded_status = t->current + GetService(next_event_index);
+                    t->ded_completion = t->current + GetService(next_event_index);
                 }
             }            
 
