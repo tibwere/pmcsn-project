@@ -42,23 +42,23 @@ forniscono una base per il modello delle specifiche del sistema in questione:
 \begin{equation}
 Customers_i(t) \in \mathbb{N}
 \end{equation}
-\item Il numero di clienti in servizio allo sportello $r$-esimo (con $r \in \lbrace 1, 2, \dots, k-1, k+1, \dots, M \rbrace$) è dato da:
+\item Il numero di clienti in servizio allo sportello $r$-esimo (con $r \in \lbrace 1, 2, \dots, \ded-1, \ded+1, \dots, M \rbrace$) è dato da:
 \begin{equation}
 Server_r(t) \in \lbrace -1, 0, \dots, 3 \rbrace
 \end{equation}
 in accordo alla tabella \ref{table:modello-specifiche-1} (e.g. se il servente $r$-esimo sta elaborando un ticket di tipo \uo{} \textsl{BancoPosta} all'istante $t$, allora $Server_r(t)=0$).
 \item Il numero di clienti in servizio allo sportello dedicato è dato da:
 \begin{equation}
-Server_k(t) \in \lbrace -1, 0, \dots, 5 \rbrace
+Server_\ded(t) \in \lbrace -1, 0, \dots, 5 \rbrace
 \end{equation}
 in accordo alla tabella \ref{table:modello-specifiche-1}\footnote{La variabile del server $k$-esimo può assumere un insieme più vasto di valori perché è l'unico che può elaborare ticket di tipo \sr{}.}.
 \end{itemize}
 
 Dalle variabili appena descritte, è immediato ricavare il numero di richieste in coda per ciascuna tipologia di ticket:
 \begin{equation}
-Queue_i(t) = Customers_i(t) - \# \lbrace Server_r(t)\ \vert\ Server_r(t) = i \rbrace
+Queue_i(t) = Customers_i(t) - \# \lbrace Server_v(t)\ \vert\ Server_v(t) = i \rbrace
 \end{equation}
-con $r \in \lbrace 1, 2, \dots, M \rbrace$ (ovvero compreso anche il server dedicato).
+con $v \in \lbrace 1, 2, \dots, M \rbrace$ (ovvero compreso anche il server dedicato).
 
 Infine, per ricavare il numero di clienti totale nel sistema è possibile sfruttare la seguente relazione:
 \begin{equation}
@@ -160,7 +160,7 @@ Al fine di agevolare la comprensione del funzionamento dello scheduler di sistem
 
 \newpage
 
-Per ciascun servente generale, ovvero $\forall\ i \neq k$, il tempo medio di servizio è pari a:
+Per ciascun servente generale, ovvero $\forall\ i \neq \ded$, il tempo medio di servizio è pari a:
 \begin{equation}
 \label{eqn:modello-specifiche-10}
 E[S_i] = \frac{p_{UO}}{p_{UO} + p_{PP}} \cdot E[S_{i, UO}] +  \frac{p_{PP}}{p_{UO} + p_{PP}} \cdot E[S_{i, PP}]
@@ -168,7 +168,7 @@ E[S_i] = \frac{p_{UO}}{p_{UO} + p_{PP}} \cdot E[S_{i, UO}] +  \frac{p_{PP}}{p_{U
 
 Per il servente dedicato si ha:
 \begin{equation}
-E[S_k] = \pi \cdot E[S_{k, SR}] + (1-\pi) \cdot E[S_i]
+E[S_\ded] = \pi \cdot E[S_{\ded, SR}] + (1-\pi) \cdot E[S_i]
 \end{equation}
 Tuttavia, è complesso individuare un'espressione in forma chiusa di $\pi$ perché pari alla probabilità che vi siano clienti in possesso di ticket \sr{} da servire, ma che non vi siano richieste \uo{} o \pp{} in servizio su tale sportello.
 
@@ -179,7 +179,7 @@ Assumendo che:
 \begin{equation}
 E[S_i] = 10\ min
 \end{equation}
-con $i \in \lbrace 1, 2, \dots, k-1, k+1, \dots, M\rbrace$.
+con $i \in \lbrace 1, 2, \dots, \ded-1, \ded+1, \dots, M\rbrace$.
 \item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari a:
 \begin{equation}
 E[S_{i, PP}] = 1.5 \cdot E[S_{i, UO}]
@@ -187,7 +187,7 @@ E[S_{i, PP}] = 1.5 \cdot E[S_{i, UO}]
 con $i \in \lbrace 1, 2, \dots, M\rbrace$.
 \item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a:
 \begin{equation}
-E[S_{k, SR}] = 2 \cdot E[S_{i, UO}]
+E[S_{\ded, SR}] = 2 \cdot E[S_{i, UO}]
 \end{equation}
 con $i \in \lbrace 1, 2, \dots, M\rbrace$.
 \end{itemize}
@@ -196,7 +196,7 @@ dalla \ref{eqn:modello-specifiche-10} è possibile ricavare:
 \begin{cases}
 E[S_{i,UO}] = \frac{E[S_i]}{(\frac{p_{UO}}{p_{UO} + p_{PP}} + 1.5\cdot \frac{p_{PP}}{p_{UO} + p_{PP}})} = \frac{340}{41} \simeq 8.2926829\ min \\[2em]
 E[S_{i,PP}] = 1.5\cdot E[S_{i,UO}] = \frac{510}{41} \simeq 12.4390244\ min \\[2em]
-E[S_{k,SR}] = 2 \cdot E[S_{i,UO}] = \frac{680}{41} \simeq 16.5853658\ min
+E[S_{\ded,SR}] = 2 \cdot E[S_{i,UO}] = \frac{680}{41} \simeq 16.5853658\ min
 \end{cases}
 \end{equation}
 

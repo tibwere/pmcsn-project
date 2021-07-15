@@ -12,13 +12,13 @@ Il funzionamento del sistema è illustrato dal diagramma in figura \ref{fig:mode
 \item Ciascuna coda modella una fila di clienti possessori dello stesso tipo di ticket.
 \item Ciascun servente rappresenta uno sportello dell'ufficio postale
 \begin{itemize}
-\item Il $k$-esimo servente (evidenziato in {\color{red} rosso}) rappresenta lo sportello dedicato per la gestione dei ticket di tipo \sr{}, il cui comportamento è stato già illustrato nel flow chart in figura \ref{fig:presentazione-1}.
+\item Il $\ded$-esimo servente (evidenziato in {\color{red} rosso}) rappresenta lo sportello dedicato per la gestione dei ticket di tipo \sr{}, il cui comportamento è stato già illustrato nel flow chart in figura \ref{fig:presentazione-1}.
 \end{itemize}
 \end{itemize}
 
 Ad ogni istante di tempo, lo stato del sistema è univocamente determinato dai valori assunti dalle seguenti variabili di stato:
 \begin{itemize}
-\item Per ciascuno sportello $i$ (con $i \in \lbrace 1, 2, \dots, k-1, k+1, \dots, M \rbrace$) si ha:
+\item Per ciascuno sportello $i$ (con $i \in \lbrace 1, 2, \dots, \ded-1, \ded+1, \dots, M \rbrace$) si ha:
 \begin{equation}
 Server_i \in
 \left\lbrace
@@ -28,9 +28,9 @@ Server_i \in
 \end{array}
 \right\rbrace
 \end{equation}
-\item Per lo sportello dedicato, ovvero il $k$-esimo in figura \ref{fig:modello-concettuale-1}, si ha:
+\item Per lo sportello dedicato, ovvero il $\ded$-esimo in figura \ref{fig:modello-concettuale-1}, si ha:
 \begin{equation}
-Server_k \in 
+Server_\ded \in 
 \left\lbrace
 \begin{array}{l l l}
 \mathtt{IDLE}, & \mathtt{UNICA\_OP\_BP}, & \mathtt{PAGAM\_PREL\_BP},\\ 
