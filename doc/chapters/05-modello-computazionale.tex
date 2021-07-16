@@ -1,18 +1,11 @@
 \chapter{Modello Computazionale}\label{chp:modello-computazionale}
+L'approccio utilizzato per la realizzazione del modello computazionale è quello della next-event simulation. Di seguito è riportata un'analisi delle sue fasi.
 \section{Stato del sistema}\label{sec:modello-computazionale-stato}
-Nella progettazione del simulatore è stata definita la struttura dati riportata nello snippet \ref{code:modello-computazionale-1}. Essa presenta due campi di seguito descritti:
-\begin{itemize}
-\item \texttt{status}: rappresenta lo stato del servente e può assumere i valori numerici riportati nella terza colonna della tabella \ref{table:modello-specifiche-1}.  
-\item \texttt{next}: rappresenta l'istante temporale del prossimo completamento.
-\end{itemize}
-
-\lstinputlisting[caption={Struttura dati per la memorizzazione dello stato del servente}, label={code:modello-computazionale-1}, firstline=51, lastline=55]{../src/simul.c}
-
 Le variabili di programma utilizzate per descrivere univocamente lo stato del sistema ad ogni istante di tempo sono:
 \begin{itemize}
-\item \texttt{{\color{code_purple} int} $^*$customers}: vettore di sei interi per la memorizzazione dei clienti per ciascuna tipologia di ticket.
-\item \texttt{{\color{code_purple} struct} server\_info $^{**}$gen\_servers}: vettore di $M-1$ puntatori alla struttura in \ref{code:modello-computazionale-1} per la memorizzazione dello stato dei serventi generali.
-\item \texttt{{\color{code_purple} struct} server\_info $^*$dedicated\_server}: puntatore alla struttura in \ref{code:modello-computazionale-1} per la memorizzazione dello stato del servente dedicato.
+\item \texttt{{\color{code_purple} int} customers[NUMBER\_OF\_QUEUES]}: vettore di sei interi per la memorizzazione del numero di clienti per ciascuna tipologia di arrivo.
+\item \texttt{{\color{code_purple} int} gen\_status[M-1]}: vettore di $M-1$ interi, che assumono valori in accordo alla definizione \ref{eqn:modello-specifiche-3}, per la memorizzazione dello stato dei serventi generali.
+\item \texttt{{\color{code_purple} int} ded\_status}: valore intero, che assume valori in accordo alla definizione \ref{eqn:modello-specifiche-4}, per la memorizzazione dello stato del servente dedicato.
 \end{itemize}
 
 Il mapping fra le variabili matematiche definite nel modello delle specifiche e quelle di programma a livello computazionale è riassunto nella tabella \ref{table:modello-computazionale-1}. 
@@ -26,23 +19,92 @@ Variabile matematica & Variabile di programma \\
 \hline
 $Customers_i(t)$ & \texttt{{\color{code_purple}int} customers[i]} \\
 \hline
-$Server_r(t)$ & \texttt{{\color{code_purple}int} gen\_servers[r]->status} \\
+$Server_r(t)$ & \texttt{{\color{code_purple}int} gen\_status[r]} \\
 \hline
-$Server_\ded(t)$ & \texttt{{\color{code_purple}int} dedicated\_server->status} \\
+$Server_\ded(t)$ & \texttt{{\color{code_purple}int} ded\_status} \\
 \hline
 \end{tabular}}
 \caption{Mapping tra il modello delle specifiche e quello computazionale}
 \label{table:modello-computazionale-1}
 \end{table}
-
+\newpage
+Ad inizio simulazione lo stato del sistema viene impostato come mostrato nello snippet \ref{lst:modello-computazionale-1}.
+\lstinputlisting[label={lst:modello-computazionale-1}, caption={Inizializzazione dello stato del sistema}, firstline=69, lastline=72]{../src/simul.c}
 \section{Eventi}\label{sec:modello-computazionale-eventi}
+Siano:
+\begin{itemize}
+\item \texttt{i} l'indice che assume valori appartenenti alla terza colonna della tabella \ref{table:modello-specifiche-1} ($\mathtt{i} \neq -1$).
+\item \texttt{r} l'indice che assume valori appartenenti all'insieme $\mathtt{\lbrace 0, 1, \dots, M - 2 \rbrace}$, utilizzato per accedere ai record dell'array \texttt{gen\_status}.
+\end{itemize}
 Lo stato del sistema può cambiare all'occorrenza delle seguenti tipologie di eventi propri:
-%\begin{itemize}
-%\item Sei tipologie d'arrivi, una per ciascun indice $i \neq -1$ della terza colonna della tabella \ref{table:modello-specifiche-1}, all'occorrenza del quale:
-%\begin{center}
-%\texttt{customers[i] = customers[i] + 1}
-%\end{center}
-%\item Due tipologie di completamenti per ciascuno degli $M-1$ server generali
-%\end{itemize} 
+\begin{itemize}
+\item Sei tipologie d'arrivi, all'occorrenza dei quali:
+\begin{center}
+\texttt{customers[i] = customers[i] + 1}
+\end{center}
+\item Due tipologie di completamenti per ciascun server generale, a seguito dei quali:
+\begin{itemize}
+\item \texttt{gen\_status[r]} passa da un certo valore \texttt{i} ad \texttt{IDLE}
+\item \texttt{customers[i] = customers[i] - 1}
+\end{itemize}
+\item Tre tipologie di completamenti per il server dedicato che comportano:
+\begin{itemize}
+\item \texttt{ded\_status} passa da un certo valore \texttt{i} ad \texttt{IDLE}
+\item \texttt{customers[i] = customers[i] - 1}
+\end{itemize}
+\end{itemize} 
+\section{Clock di simulazione}\label{sec:modello-computazionale-clock}
+L'orologio di sistema adottato nel simulatore è contenuto all'interno di una struttura dati, riportata nello snippet \ref{lst:modello-computazionale-2}, che memorizza informazioni relative al tempo di simulazione. In particolare:
+\begin{itemize}
+\item \texttt{{\color{code_purple}double} next}: istante di occorenza del successivo evento nel sistema.
+\item \texttt{{\color{code_purple}double} last}: istante di fine simulazione.
+\item \texttt{{\color{code_purple}double} current}: orologio di sistema.
+\end{itemize}
 
+\lstinputlisting[label={lst:modello-computazionale-2}, caption={Struttura dati per la gestione del tempo}, firstline=60, lastline=64]{../src/simul.c}
+Di seguito sono riportate alcune osservazioni relative al tempo di simulazione:
+\begin{itemize}
+\item L'unità di misura di riferimento è il minuto.
+\item L'orologio di sistema (\texttt{t->current}) viene inizializzato a \texttt{START}.
+\item Il tempo di simulazione $\tau$ è pari a \texttt{STOP}.
+\item Nel caso in cui un'istante di arrivo $t^*$ sia postumo al termine della simulazione ($t^* > \tau$), il suo tempo di occorrenza viene impostato pari a \texttt{INFTY} per denotare il blocco di quel flusso di arrivi (\textit{"close the door"}).
+\end{itemize}
+Per il caso di studio in analisi, i valori di \texttt{START}, \texttt{STOP} ed \texttt{INFTY} sono rispettivamente \texttt{0}, \texttt{???} e \texttt{100 $\cdot$ STOP}.
+\section{Scheduler}\label{sec:modello-computazionale-scheduler}
+Il meccanismo di avanzamento del tempo, che garantisce l'occorrenza ordinata degli eventi temporali, ad ogni iterazione del loop di simulazione:
+\begin{enumerate}
+\item Computa l'occorrenza del next-event (\texttt{t->next = next\_event(\dots)})
+\item Aggiorna l'orologio di sistema (\texttt{t->current = t->next})
+\end{enumerate}
+fintantoché è verificata almeno una delle seguenti due condizioni:
+\begin{itemize}
+\item Il tempo di occorrenza degli eventi è non superiore a $\tau$.
+\item Sono presenti clienti nel sistema non ancora serviti.
+\end{itemize}
 
+\section{Lista degli eventi}\label{sec:modello-computazionale-lista-eventi}
+La lista degli eventi, a livello implementativo, è gestita mediante la struttura dati riportata nello snippet \ref{lst:modello-computazionale-3}.
+Ciascun campo della struttura mantiene gli istanti di tempo di occorrenza di una categoria di eventi. In particolare:
+\begin{itemize}
+\item \texttt{{\color{code_purple}double} arrivals[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{i} rappresenta l'istante del successivo arrivo di tipo \texttt{i}.
+\item \texttt{{\color{code_purple}double} gen\_completions[M-1]}: ciascuna entry \texttt{r} rappresenta l'istante del successivo completamento del server \texttt{r}.
+\item \texttt{{\color{code_purple}double} ded\_completion}: rappresenta l'istante del successivo completamento del server dedicato.
+\end{itemize}
+
+\lstinputlisting[label={lst:modello-computazionale-3}, caption={Struttura dati per la lista degli eventi}, firstline=54, lastline=58]{../src/simul.c}
+\section{Algoritmo next-event}\label{sec:modello-computazionale-algoritmo}
+L'algoritmo di simulazione implementato consiste nei seguenti quattro passi:
+\begin{enumerate}[label=Step \arabic*), align=left, leftmargin=*]
+\item \textbf{Inizializzazione}
+\begin{itemize}
+\item L'orologio di simulazione è inizializzato come descritto nella sezione \ref{sec:modello-computazionale-clock}.
+\item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare:
+\begin{center}
+\begin{tabular}{l l l}
+\texttt{events->arrivals[i]} & \texttt{=} & \texttt{GetArrival(i)} \\
+\texttt{events->gen\_completions[i]} & \texttt{=} & \texttt{INFTY} \\
+\texttt{events->ded\_completion} & \texttt{=} & \texttt{INFTY}
+\end{tabular}
+\end{center}
+\end{itemize} 
+\end{enumerate}

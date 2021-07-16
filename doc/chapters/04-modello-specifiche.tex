@@ -44,12 +44,14 @@ Customers_i(t) \in \mathbb{N}
 \end{equation}
 \item Il numero di clienti in servizio allo sportello $r$-esimo (con $r \in \lbrace 1, 2, \dots, \ded-1, \ded+1, \dots, M \rbrace$) è dato da:
 \begin{equation}
+\label{eqn:modello-specifiche-3}
 Server_r(t) \in \lbrace -1, 0, \dots, 3 \rbrace
 \end{equation}
 
 in accordo alla tabella \ref{table:modello-specifiche-1} (e.g. se il servente $r$-esimo sta elaborando un ticket di tipo \uo{} \textsl{BancoPosta} all'istante $t$, allora $Server_r(t)=0$).
 \item Il numero di clienti in servizio allo sportello dedicato è dato da:
 \begin{equation}
+\label{eqn:modello-specifiche-4}
 Server_\ded(t) \in \lbrace -1, 0, \dots, 5 \rbrace
 \end{equation}
 
