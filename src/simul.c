@@ -18,11 +18,13 @@
 #include "rvgs.h"                       /* Random variate generators */
 
 
-//#define VERIFY                          /* Macro used to trigger verbose debug prints */
+#define VERIFY                          /* Macro used to trigger verbose debug prints */
 
 #define START 0.0                       /* Initial time */
-#define STOP (60.0 * (44.0 / 7))          /* Terminal ("close the door") time */
+#define STOP (60.0 * (44.0 / 7))        /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
+
+#define REPLIES 1                       /* Simulation replies */
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
 #define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
@@ -82,6 +84,15 @@ typedef struct time_integrated_populations {
     double service[NUMBER_OF_QUEUES];   /* "Area" of service [unita' di misura: (customers in service) * time] */
 } time_integrated_populations_t;
 
+typedef struct statistics {
+    double r[NUMBER_OF_QUEUES];         /* Interarrival times */
+    double w[NUMBER_OF_QUEUES];         /* Waits */
+    double d[NUMBER_OF_QUEUES];         /* Delays */
+    double s[NUMBER_OF_QUEUES];         /* Services */
+    double l[NUMBER_OF_QUEUES];         /* Requests in the node */
+    double q[NUMBER_OF_QUEUES];         /* Requests in the queues */ 
+    double n[NUMBER_OF_QUEUES];         /* Requests in service */
+} statistics_t;
 
 /* System Status */
 int customers[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = 0};
@@ -474,9 +485,9 @@ void print_update(int event_type, int event_index, int service_completed)
     double min_completion = min_from_array(events->gen_completions, M-1, &dummy);
 
     if (event_type == ARR_EVENT_TYPE) {
-        printf("Current event: ARRIVAL %s\n\n", types_of_tickets[event_index]);
+        printf("Current event: ARRIVAL %s\n\n\n", types_of_tickets[event_index]);
     } else if (event_type == GEN_COMPL_EVENT_TYPE) {
-        printf("Current event: COMPLETION OF A GEN. SERVER\n\tid                = %d\n\tservice completed = %s\n\n", 
+        printf("Current event: COMPLETION OF A GEN. SERVER (id: %d)\n\tservice completed = %s\n\n", 
             event_index, types_of_tickets[service_completed]);
     } else {
         printf("Current event: COMPLETION OF A DED. SERVER\n\tservice completed = %s\n\n", 
@@ -503,7 +514,7 @@ void print_update(int event_type, int event_index, int service_completed)
 
     for (j = 0; j < M-1; j++) {
         tmp = (gen_status[j] == -1) ? "IDLE" : types_of_tickets[gen_status[j]];
-        printf("General server %d:\n\tStatus          = %s \n", j + 1, tmp);
+        printf("General server %d:\n\tStatus          = %s \n", j, tmp);
         printf("\tNext completion = %lf\n\n", events->gen_completions[j]);
     }
 
@@ -557,6 +568,35 @@ void print_report(int *number_of_completions, time_integrated_populations_t *are
 }
 
 /*
+ * Print a report at the end of the simulation run
+ *
+ * @param *number_of_completions:
+ *      Array of completions
+ * @param *area:
+ *      Pointer to time_integrated_populations structure
+ */
+statistics_t *load_statistics(time_integrated_populations_t *area, int *number_of_completions) 
+{
+    statistics_t *stat;
+    
+    stat = malloc(sizeof(statistics_t));
+    if (stat == NULL)
+        abort();
+
+    for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
+        stat->r[i] = t->last / number_of_completions[i];
+        stat->w[i] = area->customers[i] / number_of_completions[i];
+        stat->d[i] = area->queue[i] / number_of_completions[i];
+        stat->s[i] = area->service[i] / number_of_completions[i];
+        stat->l[i] = area->customers[i] / t->current;
+        stat->q[i] = area->queue[i] / t->current;
+        stat->n[i] = area->service[i] / t->current;
+    }
+
+    return stat;
+}
+
+/*
  * Check if there is a flow that has not yet passed stop
  * 
  * @param flags:
@@ -574,7 +614,7 @@ int has_to_continue(int *flags)
     return result;
 }
 
-double simulation_run(void) 
+statistics_t *simulation_run(void) 
 {
     int number_of_completions[NUMBER_OF_QUEUES];
     time_integrated_populations_t *area;
@@ -637,21 +677,27 @@ double simulation_run(void)
     }
 
     //print_report(number_of_completions, area);
-    return ((doubles_sum(area->service, NUMBER_OF_QUEUES) / M) / t->current);
+    return (load_statistics(area, number_of_completions));
 }
 
-int main() 
+int main(void) 
 {
+    statistics_t *stat;
+
     PlantSeeds(0);
-    double util = 0.0;
-    const int REPLIES = 50000;
-
-
-    for (int i = 0; i < REPLIES; ++i) {
-        util += simulation_run();
+    
+    stat = simulation_run();
+    for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
+        printf("Average interarrival time[%d]      = %10.6f\n", i, stat->r[i]);
+        printf("Average wait[%d]                   = %10.6f\n", i, stat->w[i]);
+        printf("Average delay[%d]                  = %10.6f\n", i, stat->d[i]);
+        printf("Average service time[%d]           = %10.6f\n", i, stat->s[i]);
+        printf("Average # in the node[%d]          = %10.6f\n", i, stat->l[i]);
+        printf("Average # in the queue[%d]         = %10.6f\n", i, stat->q[i]);
+        printf("Average # in service[%d]           = %10.6f\n\n", i, stat->n[i]);
     }
 
-    printf("AVG customers = %lf\n", ((double)util / REPLIES));    
+    return (0);
 }
 
 
