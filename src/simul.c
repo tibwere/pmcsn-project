@@ -1,73 +1,87 @@
+/*
+ * Simulator of "Poste Italiane" system
+ * 
+ * authors: A. Chillotti    (M. 0299824)
+ *          C. Cuffaro      (M. 0299838)      
+ *          S. Tiberi       (M. 0299908)
+ * 
+ * A.Y. 2020/2021
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "rngs.h"                       /* the multi-stream generator       */
-#include "rvgs.h"                       /* random variate generators        */
 
-#define DEBUG
+/* Simulation libraries */
+#include "rngs.h"                       /* Multi-stream generator */
+#include "rvgs.h"                       /* Random variate generators */
 
-#define START 0.0               /* initial time                     */
-#define STOP (60.0 * (60 / 7))  /* terminal (close the door) time   */
-#define INFTY (100.0 * STOP)    /* must be much larger than STOP    */
 
-#define UNICA_OP_BP_ARR_STREAM 0
-#define PAGAM_PREL_BP_ARR_STREAM 1
-#define UNICA_OP_STD_ARR_STREAM 2
-#define PAGAM_PREL_STD_ARR_STREAM 3
-#define SPED_RIT_BP_ARR_STREAM 4
-#define SPED_RIT_STD_ARR_STREAM 5
+#define DEBUG                           /* Macro used to trigger verbose debug prints */
 
-#define UNICA_OP_SERV_STREAM 6
-#define PAGAM_PREL_SERV_STREAM 7
-#define SPED_RIT_SERV_STREAM 8
+#define START 0.0                       /* Initial time */
+#define STOP (60.0 * (60 / 7))          /* Terminal ("close the door") time */
+#define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
-#define M 3
-#define NUMBER_OF_QUEUES 6
-#define NUMBER_OF_GP_QUEUES 4
+#define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
+#define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
+#define UNICA_OP_STD_ARR_STREAM 2       /* Stream for "Unica Operazione Standard" [ARRIVALS] */
+#define PAGAM_PREL_STD_ARR_STREAM 3     /* Stream for "Pagamenti & Prelievi Standard" [ARRIVALS] */ 
+#define SPED_RIT_BP_ARR_STREAM 4        /* Stream for "Spedizioni & Ritiri Banco Posta" [ARRIVALS] */
+#define SPED_RIT_STD_ARR_STREAM 5       /* Stream for "Spedizioni & Ritiri Standard" [ARRIVALS] */
 
-#define P_BP 0.25
+#define UNICA_OP_SERV_STREAM 6          /* Stream for "Unica Operazione" [SERVICES] */
+#define PAGAM_PREL_SERV_STREAM 7        /* Stream for "Pagamenti & Prelievi" [SERVICES] */
+#define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
-#define P_UO 0.5
-#define P_PP 0.35
-#define P_SR 0.15
+#define M 3                             /* Number of servers */
+#define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
+#define NUMBER_OF_GP_QUEUES 4           /* Number of queues (only SPED_RIT) */
 
-#define LAMBDA (24500.0 / 115281)
+#define P_BP 0.25                       /* Probability of taking a ticket "BancoPosta" */
 
-#define MU_UO (41.0 / 340)
-#define MU_PP (41.0 / 510)
-#define MU_SR (41.0 / 680)
+#define P_UO 0.5                        /* Probability of taking a ticket "Unica Operazione" */
+#define P_PP 0.35                       /* Probability of taking a ticket "Pagamenti & Prelievi" */
+#define P_SR 0.15                       /* Probability of taking a ticket "Spedizioni & Ritiri" */
 
-#define IDLE -1
-#define UO_BP 0
-#define PP_BP 1
-#define UO_STD 2
-#define PP_STD 3
-#define SR_BP 4
-#define SR_STD 5
+#define LAMBDA (24500.0 / 115281)       /* Average arrival rate */
 
-#define ARR_EVENT_TYPE 0
-#define GEN_COMPL_EVENT_TYPE 1
-#define DED_COMPL_EVENT_TYPE 2
+#define MU_UO (41.0 / 340)              /* Average service rate for "Unica Operazione" */
+#define MU_PP (41.0 / 510)              /* Average service rate for "Pagamenti & Prelievi" */
+#define MU_SR (41.0 / 680)              /* Average service rate for "Spedizioni & Ritiri" */
+
+#define IDLE -1                         /* The server is idle */
+#define UO_BP 0                         /* The server is processing a ticket "Unica Operazione BancoPosta" */
+#define PP_BP 1                         /* The server is processing a ticket "Pagamenti & Prelievi BancoPosta" */
+#define UO_STD 2                        /* The server is processing a ticket "Unica Operazione Standard" */
+#define PP_STD 3                        /* The server is processing a ticket "Pagamenti & Prelievi Standard" */
+#define SR_BP 4                         /* The server is processing a ticket "Spedizioni & Ritiri BancoPosta" */
+#define SR_STD 5                        /* The server is processing a ticket "Spedizioni & Ritiri Standard" */
+
+#define ARR_EVENT_TYPE 0                /* Next event is an arrival */
+#define GEN_COMPL_EVENT_TYPE 1          /* Next event is a completion of a general server */
+#define DED_COMPL_EVENT_TYPE 2          /* Next event is a completion of a dedicated server */
 
 
 typedef struct event_list {
-    double arrivals[NUMBER_OF_QUEUES]; 
-    double gen_completions[M-1]; 
-    double ded_completion;                  
+    double arrivals[NUMBER_OF_QUEUES];  /* Next occurrence of an arrival for each flow */
+    double gen_completions[M-1];        /* Next occurrence of a completion for each server */       
+    double ded_completion;              /* Next occurrence of a completion for the dedicated server */            
 } event_list_t; 
 
 typedef struct times {
-    double next;                      
-    double current;
-    double last;  
+    double next;                        /* Occurrence of the next event */                                         
+    double current;                     /* System clock */
+    double last;                        /* Last simulation event */ 
 } times_t;
 
 typedef struct time_integrated_populations {
-    double customers[NUMBER_OF_QUEUES];  
-    double queue[NUMBER_OF_QUEUES];      
-    double service[NUMBER_OF_QUEUES];
+    double customers[NUMBER_OF_QUEUES]; /* "Area" of customers [unita' di misura: (total customers) * time] */ 
+    double queue[NUMBER_OF_QUEUES];     /* "Area" of queues [unita' di misura: (customers in queue) * time] */       
+    double service[NUMBER_OF_QUEUES];   /* "Area" of service [unita' di misura: (customers in service) * time] */
 } time_integrated_populations_t;
+
 
 /* System Status */
 int customers[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = 0};
@@ -80,6 +94,17 @@ event_list_t *events;
 /* Simulation Clock */
 times_t *t;
 
+
+/*
+ * Sum of the elements belonging to an array of integers
+ * 
+ * @param items:
+ *      Array of integers
+ * @param len: 
+ *      Array length
+ * @return:
+ *      The sum of the elements in the array
+ */
 int integers_sum(int *items, int len) {
     int sum = 0;
 
@@ -89,6 +114,16 @@ int integers_sum(int *items, int len) {
     return sum;
 }
 
+/*
+ * Sum of the elements belonging to an array of doubles
+ * 
+ * @param items:
+ *      Array of doubles
+ * @param len: 
+ *      Array length
+ * @return:
+ *      The sum of the elements in the array
+ */
 double doubles_sum(double *items, int len) {
     double sum = 0;
 
@@ -98,6 +133,18 @@ double doubles_sum(double *items, int len) {
     return sum;
 }
 
+/*
+ * Minimum element from an array of doubles
+ * 
+ * @param items:
+ *      Array of doubles
+ * @param len: 
+ *      Array length
+ * @param *index:
+ *      Pointer to save index of the minimum
+ * @return:
+ *      The minimum element of the array
+ */
 double min_from_array(double *items, int len, int *index)
 {
     int min_index = 0;
@@ -114,6 +161,16 @@ double min_from_array(double *items, int len, int *index)
     return min_val;
 }
 
+/*
+ * Occurrence of the next event
+ * 
+ * @param *min_event_type:
+ *      Pointer to save the type of the next event
+ * @param *min_index: 
+ *      Pointer to save the array index in the events list of the next event
+ * @return:
+ *      Time occurence of the next event
+ */
 double next_event(int *min_event_type, int *min_index)
 {
     int min_arrival_index, min_gen_compl_index;
@@ -122,31 +179,37 @@ double next_event(int *min_event_type, int *min_index)
     min_arrival = min_from_array(events->arrivals, NUMBER_OF_QUEUES, &min_arrival_index);
     min_gen_compl = min_from_array(events->gen_completions, M-1, &min_gen_compl_index);
 
-    //printf("min_arr = %lf, min_compl = %lf")
-
-    if (min_arrival < min_gen_compl) {
-        if (min_arrival < events->ded_completion) {
+    if (min_arrival < min_gen_compl) {                  
+        if (min_arrival < events->ded_completion) {     /* Next event is an arrival */
             *min_event_type = ARR_EVENT_TYPE;
             *min_index = min_arrival_index;
             return min_arrival;
-        } else {
+        } else {                                        /* Next event is an completion of the dedicated server */
             *min_event_type = DED_COMPL_EVENT_TYPE;
             *min_index = 0;
             return events->ded_completion;
         }
     } else {
-        if (min_gen_compl < events->ded_completion) {
+        if (min_gen_compl < events->ded_completion) {   /* Next event is an completion of a general server */
             *min_event_type = GEN_COMPL_EVENT_TYPE;
             *min_index = min_gen_compl_index;
             return min_gen_compl;
-        } else {
-            *min_event_type = DED_COMPL_EVENT_TYPE;
+        } else {                                        /* Next event is an completion of the dedicated server */
+            *min_event_type = DED_COMPL_EVENT_TYPE;     
             *min_index = 0;
             return events->ded_completion;
         }        
     }
 }
 
+/*
+ * Next arrival of flow i 
+ * 
+ * @param type:
+ *      i-th flow
+ * @return:
+ *      Occurrence of next arrival
+ */
 double GetArrival(int type)
 {
     static double arrivals[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = START};
@@ -184,6 +247,14 @@ double GetArrival(int type)
     return (arrivals[type]);
 } 
 
+/*
+ * Next service time of type i 
+ * 
+ * @param type:
+ *      i-th type
+ * @return:
+ *      Service time for a ticket of type i
+ */
 double GetService(int type) 
 {
     switch(type) {
@@ -204,16 +275,26 @@ double GetService(int type)
     }
 }
 
+/*
+ * Initialize time_integrated_populations structure
+ *
+ * @return:
+ *      Pointer to a structure
+ */
 time_integrated_populations_t *init_tip(void)
 {
     time_integrated_populations_t *p = malloc(sizeof(time_integrated_populations_t));
     if (p == NULL)
-        return NULL;
+        abort();
+
     memset(p, 0x0, sizeof(time_integrated_populations_t));
 
     return (p);
 }
 
+/*
+ * Initialize event list
+ */
 void init_event_list(void)
 {
 
@@ -221,6 +302,7 @@ void init_event_list(void)
     events = malloc(sizeof(event_list_t));
     if (events == NULL)
         abort();
+
     memset(events, 0x0, sizeof(event_list_t));
 
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
@@ -232,6 +314,9 @@ void init_event_list(void)
     events->ded_completion = INFTY;
 }
 
+/*
+ * Initialize times structure
+ */
 void init_times(void) 
 {
     t = malloc(sizeof(times_t));
@@ -242,10 +327,18 @@ void init_times(void)
     t->current = START;
 }
 
+/*
+ * Number of ticket in service for each flow
+ *
+ * @return:
+ *      Array of integer that contains those numbers
+ */
 int *get_in_service_per_type(void)
 {
     int *in_service_per_type;
     in_service_per_type = calloc(NUMBER_OF_QUEUES, sizeof(int));
+    if (in_service_per_type == NULL)
+        abort();
 
     for (int i = 0; i < M-1; ++i) {
         if(gen_status[i] != IDLE)
@@ -257,6 +350,12 @@ int *get_in_service_per_type(void)
     return (in_service_per_type);
 }
 
+/*
+ * Update time integrated populations
+ *
+ * @param *area:
+ *      Pointer to a structure time_integrated_populations
+ */
 void update_tip(time_integrated_populations_t *area)
 {
     int *in_service_per_type = get_in_service_per_type();
@@ -270,6 +369,12 @@ void update_tip(time_integrated_populations_t *area)
     }
 }
 
+/*
+ * Index of a priority queue not empty in the system
+ *
+ * @return:
+ *      Index of the queue (customers array) if exists, otherwise -1
+ */
 int get_max_prio_queue_not_empty(void)
 {
     int prio_queue = 0;
@@ -284,6 +389,12 @@ int get_max_prio_queue_not_empty(void)
     return ((prio_queue == NUMBER_OF_GP_QUEUES) ? -1 : prio_queue);
 }
 
+/*
+ * Index of first idle general server in the system
+ *
+ * @return:
+ *      Index of the server
+ */
 int get_idle_server_gp(void)
 {
     for (int i = 0; i < M-1; ++i) {
@@ -293,28 +404,37 @@ int get_idle_server_gp(void)
     return (-1);
 }
 
+/*
+ * Assign a job to a server
+ *
+ * @param index;
+ *      Server index to assign job to
+ */
 void toggle_server_status(int index)
 {
     int max_prio_queue_not_empty = get_max_prio_queue_not_empty();
-    if (max_prio_queue_not_empty != -1) {
-        if (index != -1) {
+    if (max_prio_queue_not_empty != -1) {                                                           /* There is a queue not empty */
+        if (index != -1) {                                                                          /* The server is general */
             gen_status[index] = max_prio_queue_not_empty;
             events->gen_completions[index] = t->current + GetService(max_prio_queue_not_empty);
-        } else {
+        } else {                                                                                    /* The server is dedicated */
             ded_status = max_prio_queue_not_empty;
             events->ded_completion = t->current + GetService(max_prio_queue_not_empty);
         }
-    } else {
-        if (index != -1) {
+    } else {                                                                                        /* There isn't a queue not empty */
+        if (index != -1) {                                                                          /* The server is general */
             gen_status[index] = IDLE;
             events->gen_completions[index] = INFTY;
-        } else {
+        } else {                                                                                    /* The server is dedicated */
             ded_status = IDLE;
             events->ded_completion = INFTY;
         }
     }
 }
 
+/*
+ * Assign a job (Spedizioni & Ritiri [BancoPosta/Standard]) to the dedicated server
+ */
 void next_assignment_ded_server(void)
 {
     int *in_service = get_in_service_per_type();
@@ -329,6 +449,9 @@ void next_assignment_ded_server(void)
     }
 }
 
+/*
+ * Print an update at each iteration of the simulation run (DEBUG MODE only)
+ */
 void print_update(void)
 {
     int dummy;
@@ -360,9 +483,16 @@ void print_update(void)
     printf("             Next   = %lf\n", events->ded_completion);
 
     printf("===========================================\n");
-    //getchar();
 }
 
+/*
+ * Print a report at the end of the simulation run (DEBUG MODE only)
+ *
+ * @param *number_of_completions:
+ *      Array of completions
+ * @param *area:
+ *      Pointer to time_integrated_populations structure
+ */
 void print_report(int *number_of_completions, time_integrated_populations_t *area) 
 {
     int tot_completions = integers_sum(number_of_completions, NUMBER_OF_QUEUES);
@@ -397,6 +527,15 @@ void print_report(int *number_of_completions, time_integrated_populations_t *are
     }
 }
 
+/*
+ * Check if there is a flow that has not yet passed stop
+ * 
+ * @param flags:
+ *      Boolean mask used to store the result of condition (!events->arrivals[next_event_index] > STOP)
+ * @return
+ *      * 1 if exists at least an entry of flags that is 1
+ *      * 0 otherwise
+ */
 int has_to_continue(int *flags)
 {
     int result = flags[0];
