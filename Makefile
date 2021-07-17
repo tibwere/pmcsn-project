@@ -37,7 +37,9 @@ validate: $(VAL_BIN_OBJ) $(VAL_DEPS_OBJ)
 	$(CC) -o $(BIN_DIR)/$(VAL) $^ $(CFLAGS) $(LIBS) $(VAL_FLAGS)
 
 verify: $(VER_BIN_OBJ) $(VER_DEPS_OBJ)
-	$(CC) -o $(BIN_DIR)/$(VER) $^ $(CFLAGS) $(LIBS) $(VER_FLAGS) 
+	$(CC) -o $(BIN_DIR)/$(VER) $^ $(CFLAGS) $(LIBS) $(VER_FLAGS)
+
+all: simulator validate verify 
 
 .PHONY: create-directories clean clean-all
 
