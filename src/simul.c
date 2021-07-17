@@ -104,6 +104,7 @@ event_list_t *events;
 times_t *t;
 
 
+/* Prototypes */
 int                             integers_sum(int *, int);
 double                          doubles_sum(double *, int);
 double                          min_from_array(double *, int, int *);
@@ -111,7 +112,20 @@ double                          next_event(int *, int *);
 void                            GetArrival(int);
 double                          GetService(int);
 time_integrated_populations_t * init_tip(void);
-/* TODO FINIRE DI RIPORTARE I PROTOTIPI */
+void                            init_event_list(void);
+void                            init_times(void);
+int *                           get_in_service_per_type(void);
+void                            update_tip(time_integrated_populations_t *);
+int                             get_max_prio_queue_not_empty(void);
+int                             get_idle_server_gp(void);
+void                            toggle_server_status(int);
+void                            next_assignment_ded_server(void);
+void                            print_update(int, int, int);
+void                            print_report(int *, time_integrated_populations_t *);
+statistics_t *                  load_statistics(time_integrated_populations_t *, int *);
+int                             has_to_continue(int *);
+statistics_t *                  simulation_run(void);
+
 
 /*
  * Sum of the elements belonging to an array of integers
