@@ -18,10 +18,10 @@
 #include "rvgs.h"                       /* Random variate generators */
 
 
-#define DEBUG                           /* Macro used to trigger verbose debug prints */
+//#define VERIFY                          /* Macro used to trigger verbose debug prints */
 
 #define START 0.0                       /* Initial time */
-#define STOP (60.0 * (60 / 7))          /* Terminal ("close the door") time */
+#define STOP (60.0 * (44.0 / 7))          /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
@@ -45,11 +45,11 @@
 #define P_PP 0.35                       /* Probability of taking a ticket "Pagamenti & Prelievi" */
 #define P_SR 0.15                       /* Probability of taking a ticket "Spedizioni & Ritiri" */
 
-#define LAMBDA (24500.0 / 115281)       /* Average arrival rate */
+#define LAMBDA (21875.0 / 70466)       /* Average arrival rate */
 
-#define MU_UO (41.0 / 340)              /* Average service rate for "Unica Operazione" */
-#define MU_PP (41.0 / 510)              /* Average service rate for "Pagamenti & Prelievi" */
-#define MU_SR (41.0 / 680)              /* Average service rate for "Spedizioni & Ritiri" */
+#define MU_UO (41.0 / 408)        /* Average service rate for "Unica Operazione" */
+#define MU_PP (41.0 / 612)        /* Average service rate for "Pagamenti & Prelievi" */
+#define MU_SR (41.0 / 816)        /* Average service rate for "Spedizioni & Ritiri" */
 
 #define IDLE -1                         /* The server is idle */
 #define UO_BP 0                         /* The server is processing a ticket "Unica Operazione BancoPosta" */
@@ -95,6 +95,15 @@ event_list_t *events;
 times_t *t;
 
 
+int                             integers_sum(int *, int);
+double                          doubles_sum(double *, int);
+double                          min_from_array(double *, int, int *);
+double                          next_event(int *, int *);
+void                            GetArrival(int);
+double                          GetService(int);
+time_integrated_populations_t * init_tip(void);
+/* TODO FINIRE DI RIPORTARE I PROTOTIPI */
+
 /*
  * Sum of the elements belonging to an array of integers
  * 
@@ -105,7 +114,8 @@ times_t *t;
  * @return:
  *      The sum of the elements in the array
  */
-int integers_sum(int *items, int len) {
+int integers_sum(int *items, int len) 
+{
     int sum = 0;
 
     for (int i = 0; i < len; ++i)
@@ -124,7 +134,8 @@ int integers_sum(int *items, int len) {
  * @return:
  *      The sum of the elements in the array
  */
-double doubles_sum(double *items, int len) {
+double doubles_sum(double *items, int len) 
+{
     double sum = 0;
 
     for (int i = 0; i < len; ++i)
@@ -203,48 +214,44 @@ double next_event(int *min_event_type, int *min_index)
 }
 
 /*
- * Next arrival of flow i 
+ * Generate next arrival of flow i 
  * 
  * @param type:
  *      i-th flow
- * @return:
- *      Occurrence of next arrival
  */
-double GetArrival(int type)
+void GetArrival(int type)
 {
-    static double arrivals[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = START};
+    //static double arrivals[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = START};
 
     switch (type)
     {
     case UO_BP:
         SelectStream(UNICA_OP_BP_ARR_STREAM);
-        arrivals[type] += Exponential(1 / (P_UO * P_BP * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_UO * P_BP * LAMBDA));
         break;
     case UO_STD:
         SelectStream(UNICA_OP_STD_ARR_STREAM);
-        arrivals[type] += Exponential(1 / (P_UO * (1 - P_BP) * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_UO * (1 - P_BP) * LAMBDA));
         break;
     case PP_BP:
         SelectStream(PAGAM_PREL_BP_ARR_STREAM);
-        arrivals[type] += Exponential(1 / (P_PP * P_BP * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_PP * P_BP * LAMBDA));
         break;
     case PP_STD:
         SelectStream(PAGAM_PREL_STD_ARR_STREAM);
-        arrivals[type] += Exponential(1 / (P_PP * (1 - P_BP) * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_PP * (1 - P_BP) * LAMBDA));
         break;
     case SR_BP:
         SelectStream(SPED_RIT_BP_ARR_STREAM);
-        arrivals[type] += Exponential(1 / (P_SR * P_BP * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_SR * P_BP * LAMBDA));
         break;
     case SR_STD:
         SelectStream(SPED_RIT_STD_ARR_STREAM);
-        arrivals[type] += Exponential(1 / (P_SR * (1 - P_BP) * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_SR * (1 - P_BP) * LAMBDA));
         break;
     default:
         abort();
     }
-
-    return (arrivals[type]);
 } 
 
 /*
@@ -306,7 +313,7 @@ void init_event_list(void)
     memset(events, 0x0, sizeof(event_list_t));
 
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
-        events->arrivals[i] = GetArrival(i);
+        GetArrival(i);
 
     for (i = 0; i < M - 1; ++i) 
         events->gen_completions[i] = INFTY;
@@ -450,43 +457,65 @@ void next_assignment_ded_server(void)
 }
 
 /*
- * Print an update at each iteration of the simulation run (DEBUG MODE only)
+ * Print an update at each iteration of the simulation run (VERIFY MODE only)
  */
-void print_update(void)
+void print_update(int event_type, int event_index, int service_completed)
 {
     int dummy;
     int j;
     char *tmp;
-    char *types_of_service[NUMBER_OF_QUEUES] = {
-        "UNICA_OP_BP", "PAGAM_PREL_BP", "UNICA_OP_STD", 
-        "PAGAM_PREL_STD", "SPED_RIT_BP", "SPED_RIT_STD"
+
+    char *types_of_tickets[NUMBER_OF_QUEUES] = {
+        "\'Unica Operazione BancoPosta\'", "\'Pagamenti & Prelievi BancoPosta\'", "\'Unica Operazione Standard\'", 
+        "\'Pagamenti & Prelievi Standard\'", "\'Spedizioni & Ritiri BancoPosta\'", "\'Spedizioni & Ritiri Standard\'"
     };
 
-    printf("Current time                 = %12.6lf\n", t->current);
-    printf("Next arrival time            = %12.6lf\n", min_from_array(events->arrivals, NUMBER_OF_QUEUES, &dummy));
-    printf("Next gp_completion           = %12.6lf\n", min_from_array(events->gen_completions, M-1, &dummy));
-    printf("Next ded_completion          = %12.6lf\n\n", events->ded_completion);
-    
-    for (j = 0; j < NUMBER_OF_QUEUES; j++)
-        printf("Customers of %-15s = %5d\n", types_of_service[j], customers[j]);
+    double min_arrival = min_from_array(events->arrivals, NUMBER_OF_QUEUES, &dummy);
+    double min_completion = min_from_array(events->gen_completions, M-1, &dummy);
 
-    printf("\nTotal customers              = %5d\n\n", integers_sum(customers, NUMBER_OF_QUEUES));
-
-    for (j = 0; j < M-1; j++) {
-        tmp = (gen_status[j] == -1) ? "IDLE" : types_of_service[gen_status[j]];
-        printf("Gp_Server[%d] Status = %s \n", j + 1, tmp);
-        printf("             Next   = %lf\n", events->gen_completions[j]);
+    if (event_type == ARR_EVENT_TYPE) {
+        printf("Current event: ARRIVAL %s\n\n", types_of_tickets[event_index]);
+    } else if (event_type == GEN_COMPL_EVENT_TYPE) {
+        printf("Current event: COMPLETION OF A GEN. SERVER\n\tid                = %d\n\tservice completed = %s\n\n", 
+            event_index, types_of_tickets[service_completed]);
+    } else {
+        printf("Current event: COMPLETION OF A DED. SERVER\n\tservice completed = %s\n\n", 
+            types_of_tickets[service_completed]);      
     }
 
-    tmp = (ded_status == -1) ? "IDLE" : types_of_service[ded_status];
-    printf("Ded_Server   Status = %s \n", tmp);
-    printf("             Next   = %lf\n", events->ded_completion);
+    printf("Current time                        = %12.6lf\n", t->current);
+    printf("Next arrival time                   = %12.6lf%s\n", 
+        min_arrival, 
+        (min_arrival == INFTY) ? " (INFTY)"  : "");
+    printf("Next completion of general server   = %12.6lf%s\n", 
+        min_completion, 
+        ((min_completion == INFTY) ? " (INFTY)"  : "")
+    );
+    printf("Next completion of dedicated server = %12.6lf%s\n\n",
+        events->ded_completion,
+        ((events->ded_completion == INFTY) ? " (INFTY)" : "")
+    );
 
-    printf("===========================================\n");
+    for (j = 0; j < NUMBER_OF_QUEUES; j++)
+        printf("Customers of %-33s = %3d\n", types_of_tickets[j], customers[j]);
+
+    printf("\nTotal customers                                = %3d\n\n", integers_sum(customers, NUMBER_OF_QUEUES));
+
+    for (j = 0; j < M-1; j++) {
+        tmp = (gen_status[j] == -1) ? "IDLE" : types_of_tickets[gen_status[j]];
+        printf("General server %d:\n\tStatus          = %s \n", j + 1, tmp);
+        printf("\tNext completion = %lf\n\n", events->gen_completions[j]);
+    }
+
+    tmp = (ded_status == -1) ? "IDLE" : types_of_tickets[ded_status];
+    printf("Dedicated server:\n\tStatus          = %s \n", tmp);
+    printf("\tNext completion = %lf\n\n", events->ded_completion);
+
+    printf("===========================================================\n");
 }
 
 /*
- * Print a report at the end of the simulation run (DEBUG MODE only)
+ * Print a report at the end of the simulation run
  *
  * @param *number_of_completions:
  *      Array of completions
@@ -545,7 +574,7 @@ int has_to_continue(int *flags)
     return result;
 }
 
-int main(void) 
+double simulation_run(void) 
 {
     int number_of_completions[NUMBER_OF_QUEUES];
     time_integrated_populations_t *area;
@@ -555,30 +584,20 @@ int main(void)
     int next_event_index;
     int current_state;
 
-    PlantSeeds(0);
-
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_event_list();
     init_times();
     area = init_tip();
-
-    for (int i = 0; i < M-1; ++i) {
-        printf("Gen_Status[%d] = %d\n", i, gen_status[i]);
-    } 
    
-    while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
+    while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {        
         t->next = next_event(&next_event_type, &next_event_index);
         update_tip(area);
         t->current = t->next;
 
-#ifdef DEBUG
-        print_update();
-#endif
-
         if (next_event_type == ARR_EVENT_TYPE) {                       /* ARRIVO */
             customers[next_event_index]++;
 
-            events->arrivals[next_event_index] = GetArrival(next_event_index);
+            GetArrival(next_event_index);
             
             if (events->arrivals[next_event_index] > STOP) {
                 continue_simul[next_event_index] = 0;
@@ -603,17 +622,36 @@ int main(void)
             number_of_completions[current_state]++;
             toggle_server_status(next_event_index);
             customers[current_state]--;
+
         } else {                                                    /* COMPLETAMENTO SERVER DEDICATO */
             current_state = ded_status;
             number_of_completions[current_state]++;
             next_assignment_ded_server();
             customers[current_state]--;
         }
+
+#ifdef VERIFY
+        print_update(next_event_type, next_event_index, current_state);
+#endif
+
     }
 
-    print_report(number_of_completions, area);
+    //print_report(number_of_completions, area);
+    return ((doubles_sum(area->service, NUMBER_OF_QUEUES) / M) / t->current);
+}
 
-  return (0);
+int main() 
+{
+    PlantSeeds(0);
+    double util = 0.0;
+    const int REPLIES = 50000;
+
+
+    for (int i = 0; i < REPLIES; ++i) {
+        util += simulation_run();
+    }
+
+    printf("AVG customers = %lf\n", ((double)util / REPLIES));    
 }
 
 
