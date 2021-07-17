@@ -18,8 +18,6 @@
 #include "rvgs.h"                       /* Random variate generators */
 
 
-#define VERIFY                          /* Macro used to trigger verbose debug prints */
-
 #define START 0.0                       /* Initial time */
 #define STOP (60.0 * (44.0 / 7))        /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
@@ -47,11 +45,11 @@
 #define P_PP 0.35                       /* Probability of taking a ticket "Pagamenti & Prelievi" */
 #define P_SR 0.15                       /* Probability of taking a ticket "Spedizioni & Ritiri" */
 
-#define LAMBDA (21875.0 / 70466)       /* Average arrival rate */
+#define LAMBDA (21875.0 / 70466)        /* Average arrival rate */
 
-#define MU_UO (41.0 / 408)        /* Average service rate for "Unica Operazione" */
-#define MU_PP (41.0 / 612)        /* Average service rate for "Pagamenti & Prelievi" */
-#define MU_SR (41.0 / 816)        /* Average service rate for "Spedizioni & Ritiri" */
+#define MU_UO (41.0 / 408)              /* Average service rate for "Unica Operazione" */
+#define MU_PP (41.0 / 612)              /* Average service rate for "Pagamenti & Prelievi" */
+#define MU_SR (41.0 / 816)              /* Average service rate for "Spedizioni & Ritiri" */
 
 #define IDLE -1                         /* The server is idle */
 #define UO_BP 0                         /* The server is processing a ticket "Unica Operazione BancoPosta" */
@@ -469,6 +467,13 @@ void next_assignment_ded_server(void)
 
 /*
  * Print an update at each iteration of the simulation run (VERIFY MODE only)
+ * 
+ * @param event_type:
+ *      Type of the generated event
+ * @param event_index:
+ *      Index of array dependant to specific event type
+ * @param service_completed:
+ *      Type of last completed service (event_type != ARRIVALS)
  */
 void print_update(int event_type, int event_index, int service_completed)
 {
@@ -568,12 +573,14 @@ void print_report(int *number_of_completions, time_integrated_populations_t *are
 }
 
 /*
- * Print a report at the end of the simulation run
+ * Evaluate statics from a single simulation run
  *
- * @param *number_of_completions:
- *      Array of completions
  * @param *area:
  *      Pointer to time_integrated_populations structure
+ * @param *number_of_completions:
+ *      Array of completions
+ * @return
+ *      Pointer to a statistics structure
  */
 statistics_t *load_statistics(time_integrated_populations_t *area, int *number_of_completions) 
 {
@@ -614,6 +621,12 @@ int has_to_continue(int *flags)
     return result;
 }
 
+/*
+ * Executes a single run of a simulation
+ *
+ * @return:
+ *      Pointer to statistics collected 
+ */
 statistics_t *simulation_run(void) 
 {
     int number_of_completions[NUMBER_OF_QUEUES];
