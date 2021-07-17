@@ -2,7 +2,7 @@ INCLUDE_DIR		= ./include
 OBJ_DIR 		= ./obj
 BIN_DIR 		= ./bin
 SRC_DIR 		= ./src
-CC				= gcc
+CC			= gcc
 CFLAGS			= -I$(INCLUDE_DIR) -Wall -Wextra
 VAL_FLAG		= -DVALIDATE
 VER_FLAG		= -DVERIFY
@@ -11,12 +11,12 @@ DEPS 			= $(INCLUDE_DIR)/rngs.h $(INCLUDE_DIR)/rvgs.h
 BIN_OBJ 		= $(OBJ_DIR)/simul.o
 DEPS_OBJ 		= $(OBJ_DIR)/rngs.o $(OBJ_DIR)/rvgs.o
 VAL_BIN_OBJ		= $(OBJ_DIR)/simul-val.o 
-VAL_DEPS_OBJ	= $(OBJ_DIR)/rngs-val.o $(OBJ_DIR)/rvgs-val.o
+VAL_DEPS_OBJ		= $(OBJ_DIR)/rngs-val.o $(OBJ_DIR)/rvgs-val.o
 VER_BIN_OBJ		= $(OBJ_DIR)/simul-ver.o 
-VER_DEPS_OBJ	= $(OBJ_DIR)/rngs-ver.o $(OBJ_DIR)/rvgs-ver.o
-BIN				= simul
-VAL				= simul-val
-VER				= simul-ver
+VER_DEPS_OBJ		= $(OBJ_DIR)/rngs-ver.o $(OBJ_DIR)/rvgs-ver.o
+BIN			= simul
+VAL			= simul-val
+VER			= simul-ver
 
 # N.B.	$@ è la variabile contenente il nome del target da generare, 
 #	$< è la prima dipendenza (in questo caso il file sorgente).
