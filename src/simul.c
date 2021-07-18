@@ -19,14 +19,13 @@
 
 
 #define START 0.0                       /* Initial time */
-#define STOP (60.0 * (44.0 / 7))        /* Terminal ("close the door") time */
+#define STOP (480.0)                    /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
-#define TICK 150                        /* Threshold at which lambda changes */
+#define TICK 120                        /* Threshold at which lambda changes */
 #define TIME_SLOTS 4                    /* Slots in which time is divided */
 
-#define REPLIES 10                      /* Simulation replies */
-#define BATCH 50                        
+#define ENSEMBLE_SIZE 100000            /* Number of simulation replies */                       
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
 #define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
@@ -77,7 +76,7 @@ typedef struct event_list {
 typedef struct times {
     double next;                        /* Occurrence of the next event */                                         
     double current;                     /* System clock */
-    double last;                        /* Last simulation event */ 
+    double last[NUMBER_OF_QUEUES];      /* Last arrival time for each flow */ 
 } times_t;
 
 typedef struct time_integrated_populations {
@@ -143,7 +142,7 @@ double lambda(void)
     double lt = LAMBDA;
 
     for (int i = 0; i < TIME_SLOTS; ++i) {
-        if (t->current < i * TICK) {
+        if (t->current < (i + 1) * TICK) {
             lt = LAMBDA * multipliers[i];
             break;
         }
@@ -595,7 +594,7 @@ void print_report(int *number_of_completions, time_integrated_populations_t *are
     
     printf("\nTotal completions              = %3d\n\n", tot_completions);
 
-    printf("Average interarrival time      = %10.6f\n", t->last / tot_completions);
+    // printf("Average interarrival time      = %10.6f\n", t->last / tot_completions);
     printf("Average wait                   = %10.6f\n", area_customers / tot_completions);
     printf("Average delay                  = %10.6f\n", area_queue / tot_completions);
     printf("Average service time           = %10.6f\n", area_service / tot_completions);
@@ -606,7 +605,7 @@ void print_report(int *number_of_completions, time_integrated_populations_t *are
 
     printf("\n");
     for (int j = 0; j < NUMBER_OF_QUEUES; j++) {
-        printf("Average interarrival time %s = %lf\n", types_of_service[j], t->last / number_of_completions[j]);
+        printf("Average interarrival time %s = %lf\n", types_of_service[j], t->last[j] / number_of_completions[j]);
         printf("Average delay %s = %lf\n\n", types_of_service[j], area->queue[j] / number_of_completions[j]);
     }
 }
@@ -630,7 +629,7 @@ statistics_t *load_statistics(time_integrated_populations_t *area, int *number_o
         abort();
 
     for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
-        stat->r[i] = t->last / number_of_completions[i];
+        stat->r[i] = t->last[i] / number_of_completions[i];
         stat->w[i] = area->customers[i] / number_of_completions[i];
         stat->d[i] = area->queue[i] / number_of_completions[i];
         stat->s[i] = area->service[i] / number_of_completions[i];
@@ -639,7 +638,7 @@ statistics_t *load_statistics(time_integrated_populations_t *area, int *number_o
         stat->n[i] = area->service[i] / t->current;
     }
 
-    return stat;
+    return (stat);
 }
 
 /*
@@ -694,9 +693,7 @@ statistics_t *simulation_run(void)
             if (events->arrivals[next_event_index] > STOP) {
                 continue_simul[next_event_index] = 0;
                 events->arrivals[next_event_index] = INFTY;
-
-                if (!has_to_continue(continue_simul))
-                    t->last = t->current;
+                t->last[next_event_index] = t->current;
             }
 
             if ((next_event_index != SR_BP) && (next_event_index != SR_STD)) {
@@ -735,7 +732,6 @@ statistics_t *simulation_run(void)
 int main(void) 
 {
     statistics_t *stat;
-    long seed = 0L;
 
 #ifdef VERIFY
     printf("\n*** VERIFY MODE ***\n\n\n");
@@ -744,27 +740,23 @@ int main(void)
     printf("\n*** VALIDATE MODE ***\n\n\n");
 #endif
 
-    PlantSeeds(seed);
+    PlantSeeds(9);
     
-    // for (int j = 0; j < REPLIES; ++j) {
-    //     for (int i = 0; i < BATCH; ++i) {
-    //         stat = simulation_run();
-    //         printf("%lf\n", stat->r[0]);
-    //         free(stat);
-    //     }
-    //     GetSeed(&seed);
-    //     PlantSeeds(seed);
-    // }
-    stat = simulation_run();
-    for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
-        printf("Average interarrival time[%d]      = %10.6f\n", i, stat->r[i]);
-        printf("Average wait[%d]                   = %10.6f\n", i, stat->w[i]);
-        printf("Average delay[%d]                  = %10.6f\n", i, stat->d[i]);
-        printf("Average service time[%d]           = %10.6f\n", i, stat->s[i]);
-        printf("Average # in the node[%d]          = %10.6f\n", i, stat->l[i]);
-        printf("Average # in the queue[%d]         = %10.6f\n", i, stat->q[i]);
-        printf("Average # in service[%d]           = %10.6f\n\n", i, stat->n[i]);
+    for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
+        stat = simulation_run();
+        printf("%lf\n", stat->r[0]);
+        free(stat);
     }
+
+    // for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
+    //     printf("Average interarrival time[%d]      = %10.6f\n", i, stat->r[i]);
+    //     printf("Average wait[%d]                   = %10.6f\n", i, stat->w[i]);
+    //     printf("Average delay[%d]                  = %10.6f\n", i, stat->d[i]);
+    //     printf("Average service time[%d]           = %10.6f\n", i, stat->s[i]);
+    //     printf("Average # in the node[%d]          = %10.6f\n", i, stat->l[i]);
+    //     printf("Average # in the queue[%d]         = %10.6f\n", i, stat->q[i]);
+    //     printf("Average # in service[%d]           = %10.6f\n\n", i, stat->n[i]);
+    // }
     
     return (0);
 }

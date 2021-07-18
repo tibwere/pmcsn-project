@@ -57,7 +57,7 @@ Lo stato del sistema può cambiare all'occorrenza delle seguenti tipologie di ev
 L'orologio di sistema adottato nel simulatore è contenuto all'interno di una struttura dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}times\_t} t}.}, riportata nello snippet \ref{lst:modello-computazionale-2}, che memorizza informazioni relative al tempo di simulazione. In particolare:
 \begin{itemize}
 \item \texttt{{\color{code_purple}double} next}: istante di occorenza del successivo evento nel sistema.
-\item \texttt{{\color{code_purple}double} last}: istante di fine simulazione.
+\item \texttt{{\color{code_purple}double} last[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{i} rappresenta l'istante dell'ultimo arrivo di tipo \texttt{i}.
 \item \texttt{{\color{code_purple}double} current}: orologio di sistema.
 \end{itemize}
 
@@ -72,7 +72,7 @@ Di seguito sono riportate alcune osservazioni relative al tempo di simulazione:
 Per il caso di studio in analisi è stata adottata la seguente configurazione di parametri:
 \begin{center}
 \begin{tabular}{l c r}
-\texttt{START = 0}, & \texttt{STOP = 514.285714\footnotemark}, & \texttt{INFTY = 100 $\cdot$ STOP}
+\texttt{START = 0}, & \texttt{STOP = 480\footnotemark}, & \texttt{INFTY = 100 $\cdot$ STOP}
 \end{tabular}
 \footnotetext{Numero medio di minuti di una giornata lavorativa, calcolato a partire dalla \ref{eqn:modello-specifiche-15}.}
 \end{center}
