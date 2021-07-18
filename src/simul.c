@@ -22,7 +22,11 @@
 #define STOP (60.0 * (44.0 / 7))        /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
-#define REPLIES 1                       /* Simulation replies */
+#define TICK 150                        /* Threshold at which lambda changes */
+#define TIME_SLOTS 5                    /* Slots in which time is divided */
+
+#define REPLIES 10                      /* Simulation replies */
+#define BATCH 50                        
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
 #define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
@@ -45,11 +49,11 @@
 #define P_PP 0.35                       /* Probability of taking a ticket "Pagamenti & Prelievi" */
 #define P_SR 0.15                       /* Probability of taking a ticket "Spedizioni & Ritiri" */
 
-#define LAMBDA (21875.0 / 70466)        /* Average arrival rate */
+#define LAMBDA (3125.0 / 12812)        /* Average arrival rate */
 
-#define MU_UO (41.0 / 408)              /* Average service rate for "Unica Operazione" */
-#define MU_PP (41.0 / 612)              /* Average service rate for "Pagamenti & Prelievi" */
-#define MU_SR (41.0 / 816)              /* Average service rate for "Spedizioni & Ritiri" */
+#define MU_UO (41.0 / 510)              /* Average service rate for "Unica Operazione" */
+#define MU_PP (41.0 / 765)              /* Average service rate for "Pagamenti & Prelievi" */
+#define MU_SR (41.0 / 1020)             /* Average service rate for "Spedizioni & Ritiri" */
 
 #define IDLE -1                         /* The server is idle */
 #define UO_BP 0                         /* The server is processing a ticket "Unica Operazione BancoPosta" */
@@ -105,6 +109,7 @@ times_t *t;
 
 
 /* Prototypes */
+double                          lambda(void);
 int                             integers_sum(int *, int);
 double                          doubles_sum(double *, int);
 double                          min_from_array(double *, int, int *);
@@ -126,6 +131,26 @@ statistics_t *                  load_statistics(time_integrated_populations_t *,
 int                             has_to_continue(int *);
 statistics_t *                  simulation_run(void);
 
+/*
+ * Compute current lambda
+ * 
+ * @return:
+ *      Lambda of current time slot
+ */
+double lambda(void) 
+{
+    double multipliers[TIME_SLOTS] = {1.5, 1, 0.5, 0.8, 1.2};
+    double lt = LAMBDA;
+
+    for (int i = 0; i < TIME_SLOTS; ++i) {
+        if (t->current < i * TICK) {
+            lt = LAMBDA * multipliers[i];
+            break;
+        }
+    }
+
+    return (lt);
+}
 
 /*
  * Sum of the elements belonging to an array of integers
@@ -244,33 +269,33 @@ double next_event(int *min_event_type, int *min_index)
  */
 void GetArrival(int type)
 {
-    //static double arrivals[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = START};
+    double lt = lambda();
 
     switch (type)
     {
     case UO_BP:
         SelectStream(UNICA_OP_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_UO * P_BP * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_UO * P_BP * lt));
         break;
     case UO_STD:
         SelectStream(UNICA_OP_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_UO * (1 - P_BP) * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_UO * (1 - P_BP) * lt));
         break;
     case PP_BP:
         SelectStream(PAGAM_PREL_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_PP * P_BP * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_PP * P_BP * lt));
         break;
     case PP_STD:
         SelectStream(PAGAM_PREL_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_PP * (1 - P_BP) * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_PP * (1 - P_BP) * lt));
         break;
     case SR_BP:
         SelectStream(SPED_RIT_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_SR * P_BP * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_SR * P_BP * lt));
         break;
     case SR_STD:
         SelectStream(SPED_RIT_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_SR * (1 - P_BP) * LAMBDA));
+        events->arrivals[type] += Exponential(1 / (P_SR * (1 - P_BP) * lt));
         break;
     default:
         abort();
@@ -652,8 +677,8 @@ statistics_t *simulation_run(void)
     int current_state;
 
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
-    init_event_list();
     init_times();
+    init_event_list();
     area = init_tip();
    
     while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {        
@@ -710,9 +735,26 @@ statistics_t *simulation_run(void)
 int main(void) 
 {
     statistics_t *stat;
+    long seed = 0L;
 
-    PlantSeeds(0);
+#ifdef VERIFY
+    printf("\n*** VERIFY MODE ***\n\n\n");
+#endif
+#ifdef VALIDATE
+    printf("\n*** VALIDATE MODE ***\n\n\n");
+#endif
+
+    PlantSeeds(seed);
     
+    // for (int j = 0; j < REPLIES; ++j) {
+    //     for (int i = 0; i < BATCH; ++i) {
+    //         stat = simulation_run();
+    //         printf("%lf\n", stat->r[0]);
+    //         free(stat);
+    //     }
+    //     GetSeed(&seed);
+    //     PlantSeeds(seed);
+    // }
     stat = simulation_run();
     for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
         printf("Average interarrival time[%d]      = %10.6f\n", i, stat->r[i]);
@@ -723,7 +765,7 @@ int main(void)
         printf("Average # in the queue[%d]         = %10.6f\n", i, stat->q[i]);
         printf("Average # in service[%d]           = %10.6f\n\n", i, stat->n[i]);
     }
-
+    
     return (0);
 }
 
