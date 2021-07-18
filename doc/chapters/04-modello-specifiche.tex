@@ -180,7 +180,7 @@ Assumendo che:
 \begin{itemize}
 \item Per ogni servente generale:
 \begin{equation}
-E[S_i] = 12\ min
+E[S_i] = 15\ min
 \end{equation}
 con $i \in \lbrace 1, 2, \dots, \ded-1, \ded+1, \dots, M\rbrace$.
 \item Il tempo medio di servizio per una richiesta di tipo \pp{} sia pari a:
@@ -197,9 +197,9 @@ con $i \in \lbrace 1, 2, \dots, M\rbrace$.
 dalla \ref{eqn:modello-specifiche-7} è possibile ricavare:
 \begin{equation}
 \begin{cases}
-E[S_{i,UO}] = \frac{E[S_i]}{(\frac{p_{UO}}{p_{UO} + p_{PP}} + 1.5\cdot \frac{p_{PP}}{p_{UO} + p_{PP}})} = \frac{408}{41} \simeq 9.9512195\ min \\[2em]
-E[S_{i,PP}] = 1.5\cdot E[S_{i,UO}] = \frac{612}{41} \simeq 14.9268293\ min \\[2em]
-E[S_{\ded,SR}] = 2 \cdot E[S_{i,UO}] = \frac{816}{41} \simeq 19.902439\ min
+E[S_{i,UO}] = \frac{E[S_i]}{(\frac{p_{UO}}{p_{UO} + p_{PP}} + 1.5\cdot \frac{p_{PP}}{p_{UO} + p_{PP}})} = \frac{510}{41} \simeq 12.439024\ min \\[2em]
+E[S_{i,PP}] = 1.5\cdot E[S_{i,UO}] = \frac{765}{41} \simeq 18.6585366\ min \\[2em]
+E[S_{\ded,SR}] = 2 \cdot E[S_{i,UO}] = \frac{1020}{41} \simeq 24.878049\ min
 \end{cases}
 \end{equation}
 
@@ -226,17 +226,37 @@ N$^o$ di uffici postali & 12 812 \\
 
 Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
 \begin{equation}
-X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace \cdot minuti\_lavoro}_{g} = \frac{1500000}{12812\cdot \frac{2640}{7}} = \frac{21875}{70466} \simeq 0.3104334\ req/min
+X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace \cdot minuti\_lavoro}_{g} = \frac{1500000}{12812\cdot 480} = \frac{3125}{12812} \simeq 0.24391196\ req/min
 \end{equation} 
-dove $minuti\_lavoro_{g}$ rappresenta l'ammontare medio di minuti che costituiscono la giornata lavorativa e viene computato\footnote{In assenza di dati ufficiali si è assunta una settimana tipo di lavoro per un'attività.} come segue:
+dove $minuti\_lavoro_{g}$ rappresenta l'ammontare medio di minuti che costituiscono la giornata lavorativa e viene computato\footnote{In assenza di dati ufficiali si è assunta una giornata tipo di lavoro per un'attività.} come segue:
 \begin{equation}
 \label{eqn:modello-specifiche-15}
-minuti\_lavoro_{g} = 60\cdot \frac{8h \cdot 5gg + 4h \cdot 1gg + 0h \cdot 1gg}{7gg} = \frac{2640}{7} \simeq 377.142857\ min/gg  
+minuti\_lavoro_{g} = 8\ h/gg = (60 \cdot 8)\ min/gg = 480\ min/gg
 \end{equation}
 
 È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
 
+Per aumentare la fedeltà del modello al caso reale, il tasso medio di arrivi al sistema è stato definito per fasce orarie, in accordo alla tabella \ref{table:modello-specifiche-3}.
 
+\begin{table}[ht]
+\centering
+{\tablecolors
+\begin{tabular}{| c | c |}
+\hline
+Fascia oraria & $\lambda(t)$ \\
+\hline
+09:30 - 11:30 & $\lambda \cdot 1.2$ \\
+\hline
+11:30 - 13:30 & $\lambda \cdot 1.5$ \\
+\hline
+13:30 - 15:30 & $\lambda \cdot 0.5$ \\
+\hline
+15:30 - 17:30 & $\lambda \cdot 0.8$ \\
+\hline
+\end{tabular}}
+\caption{Suddivisione del tasso medio degli arrivi in fasce orarie}
+\label{table:modello-specifiche-3}
+\end{table}
 
 
 

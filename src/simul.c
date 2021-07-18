@@ -23,7 +23,7 @@
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
 #define TICK 150                        /* Threshold at which lambda changes */
-#define TIME_SLOTS 5                    /* Slots in which time is divided */
+#define TIME_SLOTS 4                    /* Slots in which time is divided */
 
 #define REPLIES 10                      /* Simulation replies */
 #define BATCH 50                        
@@ -39,7 +39,7 @@
 #define PAGAM_PREL_SERV_STREAM 7        /* Stream for "Pagamenti & Prelievi" [SERVICES] */
 #define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
-#define M 3                             /* Number of servers */
+#define M 4                             /* Number of servers */
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
 #define NUMBER_OF_GP_QUEUES 4           /* Number of queues (only SPED_RIT) */
 
@@ -139,7 +139,7 @@ statistics_t *                  simulation_run(void);
  */
 double lambda(void) 
 {
-    double multipliers[TIME_SLOTS] = {1.5, 1, 0.5, 0.8, 1.2};
+    double multipliers[TIME_SLOTS] = {1.2, 1.5, 0.5, 0.8};
     double lt = LAMBDA;
 
     for (int i = 0; i < TIME_SLOTS; ++i) {
