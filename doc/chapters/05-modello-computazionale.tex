@@ -29,7 +29,12 @@ $Server_\ded(t)$ & \texttt{{\color{code_purple}int} ded\_status} \\
 \end{table}
 \newpage
 Ad inizio simulazione lo stato del sistema viene impostato come mostrato nello snippet \ref{lst:modello-computazionale-1}.
-\lstinputlisting[label={lst:modello-computazionale-1}, caption={Inizializzazione dello stato del sistema}, firstline=69, lastline=72]{../src/simul.c}
+\begin{lstlisting}[label={lst:modello-computazionale-1}, caption={Inizializzazione dello stato del sistema}]
+int customers[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = 0};
+int gen_status[M-1] = {[0 ... M - 2] = IDLE};
+int ded_status = IDLE;
+\end{lstlisting}
+
 \section{Eventi}\label{sec:modello-computazionale-eventi}
 Siano:
 \begin{itemize}
@@ -61,7 +66,14 @@ L'orologio di sistema adottato nel simulatore è contenuto all'interno di una st
 \item \texttt{{\color{code_purple}double} current}: orologio di sistema.
 \end{itemize}
 
-\lstinputlisting[label={lst:modello-computazionale-2}, caption={Struttura dati per la gestione del tempo}, firstline=60, lastline=64]{../src/simul.c}
+\begin{lstlisting}[label={lst:modello-computazionale-2}, caption={Struttura dati per la gestione del tempo}]
+typedef struct times {
+    double next;                 	                                         
+    double current;                	
+    double last[NUMBER_OF_QUEUES];  
+} times_t;
+\end{lstlisting}
+
 Di seguito sono riportate alcune osservazioni relative al tempo di simulazione:
 \begin{itemize}
 \item L'unità di misura di riferimento è il minuto.
@@ -97,7 +109,14 @@ Ciascun campo della struttura mantiene gli istanti di tempo di occorrenza di una
 \item \texttt{{\color{code_purple}double} ded\_completion}: rappresenta l'istante del successivo completamento del server dedicato.
 \end{itemize}
 
-\lstinputlisting[label={lst:modello-computazionale-3}, caption={Struttura dati per la lista degli eventi}, firstline=54, lastline=58]{../src/simul.c}
+\begin{lstlisting}[label={lst:modello-computazionale-3}, caption={Struttura dati per la lista degli eventi}]
+typedef struct event_list {
+    double arrivals[NUMBER_OF_QUEUES];  
+    double gen_completions[M-1];               
+    double ded_completion;                         
+} event_list_t; 
+\end{lstlisting}
+
 \section{Algoritmo next-event}\label{sec:modello-computazionale-algoritmo}
 L'algoritmo di simulazione implementato consiste nei seguenti quattro passi:
 \begin{enumerate}[label=Step \arabic*), align=left, leftmargin=*]
