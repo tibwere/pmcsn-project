@@ -19,13 +19,13 @@
 
 
 #define START 0.0                       /* Initial time */
-#define STOP (48000.0)                  /* Terminal ("close the door") time */
+#define STOP (480.0)                  /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
 #define TICK 120                        /* Threshold at which lambda changes */
 #define TIME_SLOTS 4                    /* Slots in which time is divided */
 
-#define ENSEMBLE_SIZE 100//000            /* Number of simulation replies */                       
+#define ENSEMBLE_SIZE 100000            /* Number of simulation replies */                       
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
 #define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
@@ -38,7 +38,13 @@
 #define PAGAM_PREL_SERV_STREAM 7        /* Stream for "Pagamenti & Prelievi" [SERVICES] */
 #define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
-#define M 100                            /* Number of servers */
+#ifdef VALIDATE
+    #define M 2                         /* Number of servers */
+    #define OLD_M 5
+#else 
+    #define M 5
+#endif
+
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
 #define NUMBER_OF_GP_QUEUES 4           /* Number of queues (only SPED_RIT) */
 
@@ -48,10 +54,16 @@
 #define P_PP 0.35                       /* Probability of taking a ticket "Pagamenti & Prelievi" */
 #define P_SR 0.15                       /* Probability of taking a ticket "Spedizioni & Ritiri" */
 
-#define LAMBDA (3125.0 / 12812)        /* Average arrival rate */
+#define LAMBDA (3125.0 / 12812)         /* Average arrival rate */
 
-#define MU_UO (41.0 / 510)              /* Average service rate for "Unica Operazione" */
-#define MU_PP (41.0 / 765)              /* Average service rate for "Pagamenti & Prelievi" */
+#ifdef VALIDATE
+    #define MU_UO ((OLD_M - 1) / 15.0)              
+    #define MU_PP ((OLD_M - 1) / 15.0)
+#else
+    #define MU_UO (41.0 / 510)              /* Average service rate for "Unica Operazione" */
+    #define MU_PP (41.0 / 765)              /* Average service rate for "Pagamenti & Prelievi" */
+#endif
+
 #define MU_SR (41.0 / 1020)             /* Average service rate for "Spedizioni & Ritiri" */
 
 #define IDLE -1                         /* The server is idle */
@@ -108,7 +120,6 @@ times_t *t;
 
 
 /* Prototypes */
-double                          lambda(void);
 int                             integers_sum(int *, int);
 double                          doubles_sum(double *, int);
 double                          min_from_array(double *, int, int *);
@@ -476,7 +487,12 @@ void next_assignment_ded_server(void)
         ded_status = SR_STD;
         events->ded_completion = t->current + GetService(SR_STD);
     } else {
+#ifdef VALIDATE
+        ded_status = IDLE;
+        events->ded_completion = INFTY;
+#else
         toggle_server_status(-1);
+#endif
     }
 }
 
@@ -675,7 +691,11 @@ statistics_t *simulation_run(void)
             }
 
             if ((next_event_index != SR_BP) && (next_event_index != SR_STD)) {
+#ifdef VALIDATE
+                if ((idle_server_index = get_idle_server_gp()) != -1)
+#else
                 if ((idle_server_index = get_idle_server_gp()) != -1 || ded_status == IDLE)
+#endif
                     toggle_server_status(idle_server_index);
             } else {
                 if (ded_status == IDLE) {
@@ -711,18 +731,11 @@ int main(void)
 {
     statistics_t *stat;
 
-#ifdef VERIFY
-    printf("\n*** VERIFY MODE ***\n\n\n");
-#endif
-#ifdef VALIDATE
-    printf("\n*** VALIDATE MODE ***\n\n\n");
-#endif
-
     PlantSeeds(9);
     
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         stat = simulation_run();
-        printf("%lf\n", stat->d[4]);
+        printf("%lf\n", stat->d[0]);
         free(stat);
     }
 
