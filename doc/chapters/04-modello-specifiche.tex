@@ -228,7 +228,7 @@ N$^o$ di uffici postali & 12 812 \\
 
 Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
 \begin{equation}
-X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace \cdot minuti\_lavoro}_{g} = \frac{1500000}{12812\cdot 480} = \frac{3125}{12812} \simeq 0.24391196\ req/min
+X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace \cdot minuti\_lavoro}_{g} = \frac{1500000}{12812\cdot 480} = \frac{3125}{12812} \simeq 0.243912\ req/min
 \end{equation} 
 dove $minuti\_lavoro_{g}$ rappresenta l'ammontare medio di minuti che costituiscono la giornata lavorativa e viene computato\footnote{In assenza di dati ufficiali si è assunta una giornata tipo di lavoro per un'attività.} come segue:
 \begin{equation}
@@ -237,41 +237,3 @@ minuti\_lavoro_{g} = 8\ h/gg = (60 \cdot 8)\ min/gg = 480\ min/gg
 \end{equation}
 
 È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
-
-Per aumentare la fedeltà del modello al caso reale, il tasso medio di arrivi al sistema è stato definito per fasce orarie, in accordo alla tabella \ref{table:modello-specifiche-3}.
-
-\begin{table}[ht]
-\centering
-{\tablecolors
-\begin{tabular}{| c | c |}
-\hline
-Fascia oraria & $\lambda(t)$ \\
-\hline
-09:30 - 11:30 & $\lambda \cdot 1.2$ \\
-\hline
-11:30 - 13:30 & $\lambda \cdot 1.5$ \\
-\hline
-13:30 - 15:30 & $\lambda \cdot 0.5$ \\
-\hline
-15:30 - 17:30 & $\lambda \cdot 0.8$ \\
-\hline
-\end{tabular}}
-\caption{Suddivisione del tasso medio degli arrivi in fasce orarie}
-\label{table:modello-specifiche-3}
-\end{table}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

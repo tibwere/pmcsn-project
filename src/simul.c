@@ -19,13 +19,13 @@
 
 
 #define START 0.0                       /* Initial time */
-#define STOP (480.0)                    /* Terminal ("close the door") time */
+#define STOP (48000.0)                  /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
 #define TICK 120                        /* Threshold at which lambda changes */
 #define TIME_SLOTS 4                    /* Slots in which time is divided */
 
-#define ENSEMBLE_SIZE 100000            /* Number of simulation replies */                       
+#define ENSEMBLE_SIZE 100//000            /* Number of simulation replies */                       
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
 #define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
@@ -38,7 +38,7 @@
 #define PAGAM_PREL_SERV_STREAM 7        /* Stream for "Pagamenti & Prelievi" [SERVICES] */
 #define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
-#define M 4                             /* Number of servers */
+#define M 100                            /* Number of servers */
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
 #define NUMBER_OF_GP_QUEUES 4           /* Number of queues (only SPED_RIT) */
 
@@ -129,27 +129,6 @@ void                            print_report(int *, time_integrated_populations_
 statistics_t *                  load_statistics(time_integrated_populations_t *, int *);
 int                             has_to_continue(int *);
 statistics_t *                  simulation_run(void);
-
-/*
- * Compute current lambda
- * 
- * @return:
- *      Lambda of current time slot
- */
-double lambda(void) 
-{
-    double multipliers[TIME_SLOTS] = {1.2, 1.5, 0.5, 0.8};
-    double lt = LAMBDA;
-
-    for (int i = 0; i < TIME_SLOTS; ++i) {
-        if (t->current < (i + 1) * TICK) {
-            lt = LAMBDA * multipliers[i];
-            break;
-        }
-    }
-
-    return (lt);
-}
 
 /*
  * Sum of the elements belonging to an array of integers
@@ -268,33 +247,31 @@ double next_event(int *min_event_type, int *min_index)
  */
 void GetArrival(int type)
 {
-    double lt = lambda();
-
     switch (type)
     {
     case UO_BP:
         SelectStream(UNICA_OP_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_UO * P_BP * lt));
+        events->arrivals[type] += Exponential(1 / (P_UO * P_BP * LAMBDA));
         break;
     case UO_STD:
         SelectStream(UNICA_OP_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_UO * (1 - P_BP) * lt));
+        events->arrivals[type] += Exponential(1 / (P_UO * (1 - P_BP) * LAMBDA));
         break;
     case PP_BP:
         SelectStream(PAGAM_PREL_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_PP * P_BP * lt));
+        events->arrivals[type] += Exponential(1 / (P_PP * P_BP * LAMBDA));
         break;
     case PP_STD:
         SelectStream(PAGAM_PREL_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_PP * (1 - P_BP) * lt));
+        events->arrivals[type] += Exponential(1 / (P_PP * (1 - P_BP) * LAMBDA));
         break;
     case SR_BP:
         SelectStream(SPED_RIT_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_SR * P_BP * lt));
+        events->arrivals[type] += Exponential(1 / (P_SR * P_BP * LAMBDA));
         break;
     case SR_STD:
         SelectStream(SPED_RIT_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_SR * (1 - P_BP) * lt));
+        events->arrivals[type] += Exponential(1 / (P_SR * (1 - P_BP) * LAMBDA));
         break;
     default:
         abort();
@@ -680,7 +657,8 @@ statistics_t *simulation_run(void)
     init_event_list();
     area = init_tip();
    
-    while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {        
+    while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) { 
+
         t->next = next_event(&next_event_type, &next_event_index);
         update_tip(area);
         t->current = t->next;
@@ -744,7 +722,7 @@ int main(void)
     
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         stat = simulation_run();
-        printf("%lf\n", stat->r[0]);
+        printf("%lf\n", stat->d[4]);
         free(stat);
     }
 
