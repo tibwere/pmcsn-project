@@ -17,23 +17,14 @@
 #include "rngs.h"                       /* Multi-stream generator */
 #include "rvgs.h"                       /* Random variate generators */
 
-/* Configuration file */
-#include "config.h"
+/* Uncomment the following line to enable debug prints to verify the system */
+//#VERIFY
 
 #define START 0.0                       /* Initial time */
-#ifdef STATIONARY
-    #define STOP (480.0 * 300)          /* Conceptual infinity time for the end of the simulation */
-#else
-    #define STOP (480.0)                /* Terminal ("close the door") time */
-#endif
+#define STOP (480.0)                    /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
-#ifdef STATIONARY
-    #define B 2250                      /* Length of a single batch */
-    #define K 64                        /* Number of batches */
-#else
-    #define ENSEMBLE_SIZE 100000        /* Number of simulation replies */                       
-#endif
+#define ENSEMBLE_SIZE 100000            /* Number of simulation replies */                       
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
 #define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
@@ -46,12 +37,7 @@
 #define PAGAM_PREL_SERV_STREAM 7        /* Stream for "Pagamenti & Prelievi" [SERVICES] */
 #define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
-#ifdef VALIDATE
-    #define M 2                         /* Number of servers */
-    #define OLD_M 5
-#else 
-    #define M 5
-#endif
+#define M 5
 
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
 #define NUMBER_OF_GP_QUEUES 4           /* Number of queues (only SPED_RIT) */
@@ -64,14 +50,8 @@
 
 #define LAMBDA (3125.0 / 12812)         /* Average arrival rate */
 
-#ifdef VALIDATE
-    #define MU_UO ((OLD_M - 1) / 15.0)              
-    #define MU_PP ((OLD_M - 1) / 15.0)
-#else
-    #define MU_UO (41.0 / 510)              /* Average service rate for "Unica Operazione" */
-    #define MU_PP (41.0 / 765)              /* Average service rate for "Pagamenti & Prelievi" */
-#endif
-
+#define MU_UO (41.0 / 510)              /* Average service rate for "Unica Operazione" */
+#define MU_PP (41.0 / 765)              /* Average service rate for "Pagamenti & Prelievi" */
 #define MU_SR (41.0 / 1020)             /* Average service rate for "Spedizioni & Ritiri" */
 
 #define IDLE -1                         /* The server is idle */
@@ -115,21 +95,6 @@ typedef struct statistics {
     double n[NUMBER_OF_QUEUES];         /* Requests in service */
 } statistics_t;
 
-#ifdef ACS
-typedef struct acs_util 
-{
-    double arrival;
-    struct acs_util *prev;  
-    struct acs_util *next;
-} acs_util_t;
-
-acs_util_t *head;
-acs_util_t **last;
-
-void push(acs_util_t **head, double arrival);
-double pop(acs_util_t **last);
-#endif
-
 /* System Status */
 int customers[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = 0};
 int gen_status[M-1] = {[0 ... M - 2] = IDLE};
@@ -140,11 +105,6 @@ event_list_t *events;
 
 /* Simulation Clock */
 times_t *t;
-
-#ifdef STATIONARY
-/* Number of current batch */
-int batch_index = 0;
-#endif
 
 /* Prototypes */
 int                             integers_sum(int *, int);
@@ -541,12 +501,7 @@ void next_assignment_ded_server(void)
         ded_status = SR_STD;
         events->ded_completion = t->current + GetService(SR_STD);
     } else {
-#ifdef VALIDATE
-        ded_status = IDLE;
-        events->ded_completion = INFTY;
-#else
         toggle_server_status(-1);
-#endif
     }
 }
 
@@ -680,15 +635,9 @@ statistics_t *load_statistics(time_integrated_populations_t *area, int *number_o
         stat->w[i] = area->customers[i] / number_of_completions[i];
         stat->d[i] = area->queue[i] / number_of_completions[i];
         stat->s[i] = area->service[i] / number_of_completions[i];
-#ifdef STATIONARY
-        stat->l[i] = area->customers[i] / (t->current - ((batch_index - 1) * B));
-        stat->q[i] = area->queue[i] / (t->current - ((batch_index - 1) * B));
-        stat->n[i] = area->service[i] / (t->current - ((batch_index - 1) * B));
-#else
         stat->l[i] = area->customers[i] / t->current;
         stat->q[i] = area->queue[i] / t->current;
         stat->n[i] = area->service[i] / t->current;
-#endif
     }
 
     return (stat);
@@ -727,9 +676,6 @@ statistics_t *simulation_run(void)
     int next_event_type;
     int next_event_index;
     int current_state;
-#ifdef STATIONARY
-    statistics_t *stat;
-#endif
 
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_times();
@@ -737,19 +683,6 @@ statistics_t *simulation_run(void)
     area = init_tip();
    
     while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) { 
-#ifdef STATIONARY
-        if (t->current > B * (batch_index + 1)) {
-            batch_index++;
-            stat = load_statistics(area, number_of_completions);
-            printf("%lf\n", stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]);
-            free(stat);
-            memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
-            free(area);
-            area = init_tip();
-            update_tip(area);
-        }
-#endif
-
         t->next = next_event(&next_event_type, &next_event_index);
         update_tip(area);
         t->current = t->next;
@@ -766,11 +699,7 @@ statistics_t *simulation_run(void)
             }
 
             if ((next_event_index != SR_BP) && (next_event_index != SR_STD)) {
-#ifdef VALIDATE
-                if ((idle_server_index = get_idle_server_gp()) != -1)
-#else
                 if ((idle_server_index = get_idle_server_gp()) != -1 || ded_status == IDLE)
-#endif
                     toggle_server_status(idle_server_index);
             } else {
                 if (ded_status == IDLE) {
@@ -802,30 +731,16 @@ statistics_t *simulation_run(void)
 }
 
 int main(void) 
-{   
-    PlantSeeds(9);
-    
-#ifdef STATIONARY 
-    simulation_run();
-
-    // for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
-    //     printf("Average interarrival time[%d]      = %10.6f\n", i, stat->r[i]);
-    //     printf("Average wait[%d]                   = %10.6f\n", i, stat->w[i]);
-    //     printf("Average delay[%d]                  = %10.6f\n", i, stat->d[i]);
-    //     printf("Average service time[%d]           = %10.6f\n", i, stat->s[i]);
-    //     printf("Average # in the node[%d]          = %10.6f\n", i, stat->l[i]);
-    //     printf("Average # in the queue[%d]         = %10.6f\n", i, stat->q[i]);
-    //     printf("Average # in service[%d]           = %10.6f\n\n", i, stat->n[i]);
-    // }
-#else
+{
     statistics_t *stat;
+
+    PlantSeeds(9);
 
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         stat = simulation_run();
         printf("%lf\n", stat->n[4] + stat->n[5]);
         free(stat);
     }
-#endif
     
     return (0);
 }
