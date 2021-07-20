@@ -17,7 +17,8 @@
 #include "rngs.h"                       /* Multi-stream generator */
 #include "rvgs.h"                       /* Random variate generators */
 
-#define STATIONARY
+/* Configuration file */
+#include "config.h"
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
@@ -114,6 +115,21 @@ typedef struct statistics {
     double n[NUMBER_OF_QUEUES];         /* Requests in service */
 } statistics_t;
 
+#ifdef ACS
+typedef struct acs_util 
+{
+    double arrival;
+    struct acs_util *prev;  
+    struct acs_util *next;
+} acs_util_t;
+
+acs_util_t *head;
+acs_util_t **last;
+
+void push(acs_util_t **head, double arrival);
+double pop(acs_util_t **last);
+#endif
+
 /* System Status */
 int customers[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = 0};
 int gen_status[M-1] = {[0 ... M - 2] = IDLE};
@@ -151,6 +167,33 @@ void                            print_report(int *, time_integrated_populations_
 statistics_t *                  load_statistics(time_integrated_populations_t *, int *);
 int                             has_to_continue(int *);
 statistics_t *                  simulation_run(void);
+
+#ifdef ACS
+void push(acs_util_t **head_ref, double arrival)
+{
+    acs_util_t *new_node = malloc(sizeof(acs_util_t));
+    if (new_node == NULL)
+        abort();
+  
+    new_node->arrival  = arrival;
+    new_node->prev = NULL;
+    new_node->next = (*head_ref);
+  
+    (*head_ref) = new_node;
+}
+
+double pop(acs_util_t **last)
+{
+    double time_in_queue;
+
+    time_in_queue = t->current - (*last)->arrival;
+    *last = (*last)->prev;
+    free((*last)->next);
+    (*last)->next = NULL;
+
+    return (time_in_queue);
+}
+#endif
 
 /*
  * Sum of the elements belonging to an array of integers
@@ -698,7 +741,7 @@ statistics_t *simulation_run(void)
         if (t->current > B * (batch_index + 1)) {
             batch_index++;
             stat = load_statistics(area, number_of_completions);
-            printf("%lf\n", stat->n[4] + stat->n[5]);
+            printf("%lf\n", stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]);
             free(stat);
             memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
             free(area);
@@ -779,7 +822,7 @@ int main(void)
 
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         stat = simulation_run();
-        printf("%lf\n", stat->r[0]);
+        printf("%lf\n", stat->n[4] + stat->n[5]);
         free(stat);
     }
 #endif
