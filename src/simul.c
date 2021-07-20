@@ -18,7 +18,7 @@
 #include "rvgs.h"                       /* Random variate generators */
 
 /* Uncomment the following line to enable debug prints to verify the system */
-//#VERIFY
+//#define VERIFY
 
 #define START 0.0                       /* Initial time */
 #define STOP (480.0)                    /* Terminal ("close the door") time */
@@ -37,7 +37,7 @@
 #define PAGAM_PREL_SERV_STREAM 7        /* Stream for "Pagamenti & Prelievi" [SERVICES] */
 #define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
-#define M 5
+#define M 4
 
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
 #define NUMBER_OF_GP_QUEUES 4           /* Number of queues (only SPED_RIT) */
@@ -128,32 +128,6 @@ statistics_t *                  load_statistics(time_integrated_populations_t *,
 int                             has_to_continue(int *);
 statistics_t *                  simulation_run(void);
 
-#ifdef ACS
-void push(acs_util_t **head_ref, double arrival)
-{
-    acs_util_t *new_node = malloc(sizeof(acs_util_t));
-    if (new_node == NULL)
-        abort();
-  
-    new_node->arrival  = arrival;
-    new_node->prev = NULL;
-    new_node->next = (*head_ref);
-  
-    (*head_ref) = new_node;
-}
-
-double pop(acs_util_t **last)
-{
-    double time_in_queue;
-
-    time_in_queue = t->current - (*last)->arrival;
-    *last = (*last)->prev;
-    free((*last)->next);
-    (*last)->next = NULL;
-
-    return (time_in_queue);
-}
-#endif
 
 /*
  * Sum of the elements belonging to an array of integers
@@ -363,6 +337,9 @@ void init_event_list(void)
 
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
         GetArrival(i);
+
+    events->arrivals[4] = INFTY;        /* VALIDAZIONE */
+    events->arrivals[5] = INFTY;        /* VALIDAZIONE */
 
     for (i = 0; i < M - 1; ++i) 
         events->gen_completions[i] = INFTY;
@@ -677,6 +654,9 @@ statistics_t *simulation_run(void)
     int next_event_index;
     int current_state;
 
+    continue_simul[4] = 0;      /* VALIDAZIONE */
+    continue_simul[5] = 0;      /* VALIDAZIONE */
+
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_times();
     init_event_list();
@@ -738,7 +718,7 @@ int main(void)
 
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         stat = simulation_run();
-        printf("%lf\n", stat->n[4] + stat->n[5]);
+        printf("%lf\n", (1.0 / stat->r[2]));
         free(stat);
     }
     
