@@ -17,15 +17,22 @@
 #include "rngs.h"                       /* Multi-stream generator */
 #include "rvgs.h"                       /* Random variate generators */
 
+#define STATIONARY
 
 #define START 0.0                       /* Initial time */
-#define STOP (480.0)                  /* Terminal ("close the door") time */
+#ifdef STATIONARY
+    #define STOP (480.0 * 300)          /* Conceptual infinity time for the end of the simulation */
+#else
+    #define STOP (480.0)                /* Terminal ("close the door") time */
+#endif
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
-#define TICK 120                        /* Threshold at which lambda changes */
-#define TIME_SLOTS 4                    /* Slots in which time is divided */
-
-#define ENSEMBLE_SIZE 100000            /* Number of simulation replies */                       
+#ifdef STATIONARY
+    #define B 2250                      /* Length of a single batch */
+    #define K 64                        /* Number of batches */
+#else
+    #define ENSEMBLE_SIZE 100000        /* Number of simulation replies */                       
+#endif
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
 #define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
@@ -118,6 +125,10 @@ event_list_t *events;
 /* Simulation Clock */
 times_t *t;
 
+#ifdef STATIONARY
+/* Number of current batch */
+int batch_index = 0;
+#endif
 
 /* Prototypes */
 int                             integers_sum(int *, int);
@@ -158,7 +169,7 @@ int integers_sum(int *items, int len)
     for (int i = 0; i < len; ++i)
         sum += items[i];
     
-    return sum;
+    return (sum);
 }
 
 /*
@@ -178,7 +189,7 @@ double doubles_sum(double *items, int len)
     for (int i = 0; i < len; ++i)
         sum += items[i];
     
-    return sum;
+    return (sum);
 }
 
 /*
@@ -206,7 +217,7 @@ double min_from_array(double *items, int len, int *index)
     }
 
     *index = min_index;
-    return min_val;
+    return (min_val);
 }
 
 /*
@@ -626,9 +637,15 @@ statistics_t *load_statistics(time_integrated_populations_t *area, int *number_o
         stat->w[i] = area->customers[i] / number_of_completions[i];
         stat->d[i] = area->queue[i] / number_of_completions[i];
         stat->s[i] = area->service[i] / number_of_completions[i];
+#ifdef STATIONARY
+        stat->l[i] = area->customers[i] / (t->current - ((batch_index - 1) * B));
+        stat->q[i] = area->queue[i] / (t->current - ((batch_index - 1) * B));
+        stat->n[i] = area->service[i] / (t->current - ((batch_index - 1) * B));
+#else
         stat->l[i] = area->customers[i] / t->current;
         stat->q[i] = area->queue[i] / t->current;
         stat->n[i] = area->service[i] / t->current;
+#endif
     }
 
     return (stat);
@@ -667,6 +684,9 @@ statistics_t *simulation_run(void)
     int next_event_type;
     int next_event_index;
     int current_state;
+#ifdef STATIONARY
+    statistics_t *stat;
+#endif
 
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_times();
@@ -674,6 +694,18 @@ statistics_t *simulation_run(void)
     area = init_tip();
    
     while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) { 
+#ifdef STATIONARY
+        if (t->current > B * (batch_index + 1)) {
+            batch_index++;
+            stat = load_statistics(area, number_of_completions);
+            printf("%lf\n", stat->n[4] + stat->n[5]);
+            free(stat);
+            memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
+            free(area);
+            area = init_tip();
+            update_tip(area);
+        }
+#endif
 
         t->next = next_event(&next_event_type, &next_event_index);
         update_tip(area);
@@ -720,7 +752,6 @@ statistics_t *simulation_run(void)
 #ifdef VERIFY
         print_update(next_event_type, next_event_index, current_state);
 #endif
-
     }
 
     //print_report(number_of_completions, area);
@@ -728,16 +759,11 @@ statistics_t *simulation_run(void)
 }
 
 int main(void) 
-{
-    statistics_t *stat;
-
+{   
     PlantSeeds(9);
     
-    for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
-        stat = simulation_run();
-        printf("%lf\n", stat->d[0]);
-        free(stat);
-    }
+#ifdef STATIONARY 
+    simulation_run();
 
     // for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
     //     printf("Average interarrival time[%d]      = %10.6f\n", i, stat->r[i]);
@@ -748,8 +774,15 @@ int main(void)
     //     printf("Average # in the queue[%d]         = %10.6f\n", i, stat->q[i]);
     //     printf("Average # in service[%d]           = %10.6f\n\n", i, stat->n[i]);
     // }
+#else
+    statistics_t *stat;
+
+    for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
+        stat = simulation_run();
+        printf("%lf\n", stat->r[0]);
+        free(stat);
+    }
+#endif
     
     return (0);
 }
-
-
