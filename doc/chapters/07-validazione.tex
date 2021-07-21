@@ -1,9 +1,7 @@
 \chapter{Validazione}\label{chp:validazione}
-Al fine di rendere confrontabili i risultati della simulazione con quelli teorici, per i casi di validazione che seguiranno: 
-\begin{itemize}
-\item Il periodo di simulazione $\tau$ (\texttt{STOP}) è stato settato pari a mille giorni lavorativi, ovvero $480\cdot 1000\ min$.
-\item Sono state effettuate cinquecento repliche di simulazione. 
-\end{itemize}
+Poiché i risultati dei modelli analitici sono validi per periodi d'osservazione tendenzialmente infiniti, è stato scelto in fase di validazione di adottare una simulazione di tipo \textit{steady-state}, al fine di inferire statistiche confrontabili con i valori teorici.
+
+Il metodo adottato è stato quello delle batch means con parametri $(b,k) = (2250, 64)$ e periodo d'osservazione $\tau = 480 \cdot 300$\footnote{Si è assunto che mediamente un anno lavorativo sia composto da 300 giorni.}.
 
 Inoltre:
 \begin{itemize}
@@ -216,11 +214,11 @@ Privando il sistema della generazione di arrivi di tipo \sr{}, come mostrato in 
 \begin{itemize}
 \item Il tempo d'attesa globale ottenuto è pari a:
 \begin{equation} 
-\bar{d}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{d}_{g,i} = (8.82 \pm 0.03)\ min
+\bar{d}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{d}_{g,i} = (8.26 \pm 0.96)\ min
 \end{equation}
 \item Il tempo di risposta globale ottenuto è pari a:
 \begin{equation}
-\bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (23.82 \pm 0.04)\ min
+\bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (23.35 \pm 1.08)\ min
 \end{equation}
 \end{itemize}
 
@@ -245,7 +243,7 @@ I risultati ottenuti sono ragionevoli poiché:
 \begin{itemize}
 \item L'occupazione media ottenuta tramite la simulazione è pari a:
 \begin{equation}
-\bar{x}_g = 0.78 \pm 0.00
+\bar{x}_g = 0.78 \pm 0.01
 \end{equation}
 \item L'occupazione media teorica, in accordo alla \ref{eqn:validazione-modello-analitico-8}, è pari a:
 \begin{equation}
@@ -259,23 +257,17 @@ le prestazioni del multiserver, in termini di risposta, sono inferiori al sistem
 
 
 \section{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.5\linewidth]{modello-concettuale-sempl-2}
-\caption{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}
-\label{fig:modello-concettuale-semp-2}
-\end{figure}
-Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, si ottengono i seguenti risultati:
+Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come mostrato in figura \ref{fig:modello-concettuale-semp-2}, si ottengono i seguenti risultati:
 \begin{itemize}
 \item Mediante la simulazione:
 \begin{itemize}
 \item Il tempo d'attesa globale ottenuto è pari a:
 \begin{equation} 
-\bar{d}_d = p_{d,1}\cdot \bar{d}_{d,1} + p_{d,2}\cdot \bar{d}_{d,2} = (252.62 \pm 3.83)\ min
+\bar{d}_d = p_{d,1}\cdot \bar{d}_{d,1} + p_{d,2}\cdot \bar{d}_{d,2} = (210.04 \pm 51.51)\ min
 \end{equation}
 \item Il tempo di risposta globale ottenuto è pari a:
 \begin{equation}
-\bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (277.51 \pm 3.84)\ min
+\bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (234.77 \pm 51.81)\ min
 \end{equation}
 \end{itemize}
 
@@ -295,4 +287,9 @@ in accordo rispettivamente alle equazioni \ref{eqn:validazione-modello-analitico
 
 Poiché i valori teorici ricadono all'interno dei rispettivi intervalli, con un livello di confidenza del 95\%, il comportamento del simulatore è conforme al modello analitico \ref{fig:validazione-modello-analitico-1b}.
 
-
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\linewidth]{modello-concettuale-sempl-2}
+\caption{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}
+\label{fig:modello-concettuale-semp-2}
+\end{figure}
