@@ -9,8 +9,10 @@ DEPS 			= $(INCLUDE_DIR)/rngs.h $(INCLUDE_DIR)/rvgs.h $(INCLUDE_DIR)/rvms.h
 BIN_OBJ 		= $(OBJ_DIR)/simul.o
 DEPS_OBJ 		= $(OBJ_DIR)/rngs.o $(OBJ_DIR)/rvgs.o $(OBJ_DIR)/rvms.o
 EST_OBJ		= $(OBJ_DIR)/estimate.o
+UVS_OBJ		= $(OBJ_DIR)/uvs.o
 BIN			= simul
 EST			= estimate
+UVS			= uvs
 
 # N.B.	$@ è la variabile contenente il nome del target da generare, 
 #	$< è la prima dipendenza (in questo caso il file sorgente).
@@ -24,7 +26,10 @@ simulator: $(BIN_OBJ) $(DEPS_OBJ)
 estimate: $(EST_OBJ) $(DEPS_OBJ)
 	$(CC) -o $(BIN_DIR)/$(EST) $^ $(CFLAGS) $(LIBS)
 
-all: simulator estimate
+uvs: $(UVS_OBJ) $(DEPS_OBJ)
+	$(CC) -o $(BIN_DIR)/$(UVS) $^ $(CFLAGS) $(LIBS)
+
+all: simulator estimate uvs
 
 .PHONY: create-directories clean clean-all
 
