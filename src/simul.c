@@ -21,10 +21,10 @@
 //#define VERIFY
 
 #define START 0.0                       /* Initial time */
-#define STOP (480000.0)                    /* Terminal ("close the door") time */
+#define STOP (480.0)               /* Terminal ("close the door") time */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
-#define ENSEMBLE_SIZE 100//000            /* Number of simulation replies */                       
+#define ENSEMBLE_SIZE 50000               /* Number of simulation replies */                       
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
 #define PAGAM_PREL_BP_ARR_STREAM 1      /* Stream for "Pagamenti & Prelievi Banco Posta" [ARRIVALS] */
@@ -338,9 +338,6 @@ void init_event_list(void)
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
         GetArrival(i);
 
-    events->arrivals[4] = INFTY;        /* VALIDAZIONE */
-    events->arrivals[5] = INFTY;        /* VALIDAZIONE */
-
     for (i = 0; i < M - 1; ++i) 
         events->gen_completions[i] = INFTY;
     
@@ -653,10 +650,7 @@ statistics_t *simulation_run(void)
     int next_event_type;
     int next_event_index;
     int current_state;
-
-    continue_simul[4] = 0;      /* VALIDAZIONE */
-    continue_simul[5] = 0;      /* VALIDAZIONE */
-
+        
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_times();
     init_event_list();
@@ -722,9 +716,12 @@ int main(void)
     double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP); 
 
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
-        stat = simulation_run();
+        stat = simulation_run(); 
+        //printf("%lf\n", stat->n[4] + stat->n[5]);
+        //printf("%lf\n", (1/stat->r[0] + 1/stat->r[1] + 1/stat->r[2] + 1/stat->r[3]));
         printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-        //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
+        //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
+        //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
         free(stat);
     }
     
