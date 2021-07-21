@@ -20,7 +20,7 @@
 /* Uncomment the following line to enable debug prints to verify the system */
 //#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
-#define STATIONARY
+//#define STATIONARY
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
@@ -350,8 +350,9 @@ void init_event_list(void)
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
         GetArrival(i);
 
-    for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
-        events->arrivals[i] = INFTY;
+    /* Uncomment these lines in validation phase */
+    // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
+    //     events->arrivals[i] = INFTY;
 
     for (i = 0; i < M - 1; ++i) 
         events->gen_completions[i] = INFTY;
@@ -680,8 +681,9 @@ statistics_t *simulation_run(void)
     init_event_list();
     area = init_tip();
 
-    for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
-        continue_simul[i] = 0;
+    /* Uncomment these lines in validation phase */
+    // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
+    //     continue_simul[i] = 0;
    
     while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) { 
 #ifdef STATIONARY
@@ -754,26 +756,26 @@ statistics_t *simulation_run(void)
 
 int main(void) 
 {
-    //statistics_t *stat;
+    statistics_t *stat;
 
     PlantSeeds(9);
 
-    simulation_run();
+    //simulation_run();
 
-    // double p0 = (P_BP * P_UO)/(P_UO + P_PP);
-    // double p1 = (P_BP * P_PP)/(P_UO + P_PP);
-    // double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
-    // double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP); 
+    double p0 = (P_BP * P_UO)/(P_UO + P_PP);
+    double p1 = (P_BP * P_PP)/(P_UO + P_PP);
+    double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
+    double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP); 
 
-    // for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
-    //     stat = simulation_run(); 
-    //     //printf("%lf\n", stat->n[4] + stat->n[5]);
-    //     //printf("%lf\n", (1/stat->r[0] + 1/stat->r[1] + 1/stat->r[2] + 1/stat->r[3]));
-    //     //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-    //     //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
-    //     //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
-    //     free(stat);
-    // }
+    for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
+        stat = simulation_run(); 
+        //printf("%lf\n", stat->n[4] + stat->n[5]);
+        printf("%lf\n", stat->d[5]);
+        //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
+        //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
+        //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
+        free(stat);
+    }
     
     return (0);
 }
