@@ -20,7 +20,7 @@
 /* Uncomment the following line to enable debug prints to verify the system */
 //#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
-#define STATIONARY
+//#define STATIONARY
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
@@ -28,8 +28,8 @@
     #define B 2250                      /* Length of a single batch */
     #define K 64                        /* Number of batches */
 #else
-    #define STOP (480.0)                /* Terminal ("close the door") time */
-    #define ENSEMBLE_SIZE 100000        /* Number of simulation replies */                       
+    #define STOP (480.0)//(480.0)                /* Terminal ("close the door") time */
+    #define ENSEMBLE_SIZE 300//100000        /* Number of simulation replies */                       
 #endif
 
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
@@ -104,9 +104,9 @@ typedef struct statistics {
 } statistics_t;
 
 /* System Status */
-int customers[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = 0};
-int gen_status[M-1] = {[0 ... M - 2] = IDLE};
-int ded_status = IDLE;
+int customers[NUMBER_OF_QUEUES];
+int gen_status[M-1];
+int ded_status;
 
 /* Event List */
 event_list_t *events;
@@ -332,6 +332,20 @@ time_integrated_populations_t *init_tip(void)
     memset(p, 0x0, sizeof(time_integrated_populations_t));
 
     return (p);
+}
+
+/*
+ * Initialize system status
+ */
+void init_status(void)
+{
+ int i;
+ 
+ for(i = 0; i < NUMBER_OF_QUEUES; ++i)
+ customers[i] = 0;
+ for (i = 0; i < (M - 1); ++i)
+ gen_status[i] = IDLE;
+ ded_status = IDLE;
 }
 
 /*
@@ -619,12 +633,15 @@ statistics_t *load_statistics(time_integrated_populations_t *area, int *number_o
     stat = malloc(sizeof(statistics_t));
     if (stat == NULL)
         abort();
+    memset(stat, 0x0, sizeof(statistics_t));
 
     for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
-        stat->r[i] = t->last[i] / number_of_completions[i];
-        stat->w[i] = area->customers[i] / number_of_completions[i];
-        stat->d[i] = area->queue[i] / number_of_completions[i];
-        stat->s[i] = area->service[i] / number_of_completions[i];
+        if (number_of_completions[i] != 0) {
+            stat->r[i] = t->last[i] / number_of_completions[i];
+            stat->w[i] = area->customers[i] / number_of_completions[i];
+            stat->d[i] = area->queue[i] / number_of_completions[i];
+            stat->s[i] = area->service[i] / number_of_completions[i];
+        }
 #ifdef STATIONARY
         stat->l[i] = area->customers[i] / (t->current - ((batch_index - 1) * B));
         stat->q[i] = area->queue[i] / (t->current - ((batch_index - 1) * B));
@@ -679,6 +696,7 @@ statistics_t *simulation_run(void)
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_times();
     init_event_list();
+    init_status();
     area = init_tip();
 
     /* Uncomment these lines in validation phase */
@@ -707,9 +725,12 @@ statistics_t *simulation_run(void)
             update_tip(area);
         }
 #else
-	while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
+    
+	while (has_to_continue(continue_simul) /*|| (integers_sum(customers, NUMBER_OF_QUEUES) > 0)*/) {
 #endif
         t->next = next_event(&next_event_type, &next_event_index);
+        if (t->next > STOP)
+            break;
         update_tip(area);
         t->current = t->next;
 
@@ -776,7 +797,7 @@ int main(void)
         //printf("%lf\n", stat->n[4] + stat->n[5]);
         //printf("%lf\n", stat->d[0]);
         //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-        //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
+        printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
         //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
         free(stat);
     }
