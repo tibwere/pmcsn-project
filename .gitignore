@@ -17,3 +17,6 @@
 ## C ##
 bin/
 obj/
+
+## VSCODE ##
+.vscode/
