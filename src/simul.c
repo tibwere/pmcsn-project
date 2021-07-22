@@ -20,12 +20,12 @@
 /* Uncomment the following line to enable debug prints to verify the system */
 //#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
-//#define STATIONARY
+#define STATIONARY
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
-    #define STOP (480.0 * 300)           /* Conceptual infinity time for the end of the simulation */
-    #define B 2250                       /* Length of a single batch */
+    #define STOP (480.0 * 300)          /* Conceptual infinity time for the end of the simulation */
+    #define B 2250                      /* Length of a single batch */
     #define K 64                        /* Number of batches */
 #else
     #define STOP (480.0)                /* Terminal ("close the door") time */
@@ -684,9 +684,10 @@ statistics_t *simulation_run(void)
     /* Uncomment these lines in validation phase */
     // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
     //     continue_simul[i] = 0;
-   
-    while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) { 
-#ifdef STATIONARY
+
+#ifdef STATIONARY   
+    while (has_to_continue(continue_simul)) { 
+
         double p0 = (P_BP * P_UO)/(P_UO + P_PP);
         double p1 = (P_BP * P_PP)/(P_UO + P_PP);
         double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
@@ -695,8 +696,8 @@ statistics_t *simulation_run(void)
         if (t->current > B * (batch_index + 1)) {
             batch_index++;
             stat = load_statistics(area, number_of_completions);
-            //printf("%lf\n", stat->n[4]);
-            printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
+            printf("%d,%lf\n", batch_index, stat->d[3]);
+            //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
             //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
             //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
             free(stat);
@@ -705,8 +706,9 @@ statistics_t *simulation_run(void)
             area = init_tip();
             update_tip(area);
         }
+#else
+	while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
 #endif
-
         t->next = next_event(&next_event_type, &next_event_index);
         update_tip(area);
         t->current = t->next;
@@ -756,11 +758,13 @@ statistics_t *simulation_run(void)
 
 int main(void) 
 {
+#ifdef STATIONARY
+    PlantSeeds(10);
+    simulation_run();
+#else
     statistics_t *stat;
-
+    
     PlantSeeds(9);
-
-    //simulation_run();
 
     double p0 = (P_BP * P_UO)/(P_UO + P_PP);
     double p1 = (P_BP * P_PP)/(P_UO + P_PP);
@@ -770,12 +774,16 @@ int main(void)
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         stat = simulation_run(); 
         //printf("%lf\n", stat->n[4] + stat->n[5]);
-        printf("%lf\n", stat->d[5]);
+        //printf("%lf\n", stat->d[0]);
         //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
         //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
         //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
         free(stat);
     }
+#endif
     
     return (0);
 }
+
+/* bel comandino proprio */
+// echo src/simul.c | entr /bin/bash -c "make && ./bin/simul | ./bin/estimate >> plots/data/d0-stat.csv"
