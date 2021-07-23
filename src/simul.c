@@ -20,13 +20,13 @@
 /* Uncomment the following line to enable debug prints to verify the system */
 //#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
-//#define STATIONARY
+#define STATIONARY
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
-    #define STOP (480.0 * 300)          /* Conceptual infinity time for the end of the simulation */
-    #define B 2250                      /* Length of a single batch */
+    #define B 960.0                     /* Length of a single batch */
     #define K 64                        /* Number of batches */
+    #define STOP (B * K)                /* Conceptual infinity time for the end of the simulation */
 #else
     #define STOP (480.0)                /* Terminal ("close the door") time */
     #define ENSEMBLE_SIZE 300           /* Number of simulation replies */                       
@@ -372,9 +372,13 @@ void init_event_list(void)
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
         GetArrival(i);
 
-    /* Uncomment these lines in validation phase */
+    /* Uncomment these lines in validation phase (sec. 7.2) */
     // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
     //     events->arrivals[i] = INFTY;
+
+    /* Uncomment these lines in validation phase (sec. 7.3) */
+    for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
+        events->arrivals[i] = INFTY;
 
     for (i = 0; i < M - 1; ++i) 
         events->gen_completions[i] = INFTY;
@@ -707,9 +711,13 @@ statistics_t *simulation_run(void)
     init_status();
     area = init_tip();
 
-    /* Uncomment these lines in validation phase */
+    /* Uncomment these lines in validation phase (sec. 7.2) */
     // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
     //     continue_simul[i] = 0;
+
+    /* Uncomment these lines in validation phase (sec. 7.3) */
+    for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
+        continue_simul[i] = 0;
 
 #ifdef STATIONARY   
     while (has_to_continue(continue_simul)) { 
@@ -722,10 +730,12 @@ statistics_t *simulation_run(void)
         if (t->current > B * (batch_index + 1)) {
             batch_index++;
             stat = load_statistics(area, number_of_completions);
-            printf("%d,%lf\n", batch_index, stat->d[3]);
-            //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
+            //printf("%d,%lf\n", batch_index, stat->d[3]);
+            //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
             //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
-            //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
+            //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
+            //printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
+            printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
             free(stat);
             memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
             free(area);
@@ -790,7 +800,7 @@ statistics_t *simulation_run(void)
 int main(void) 
 {
 #ifdef STATIONARY
-    PlantSeeds(10);
+    PlantSeeds(12345);
     simulation_run();
 #else
     statistics_t *stat;
