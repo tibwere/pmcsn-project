@@ -28,9 +28,11 @@
     #define B 2250                      /* Length of a single batch */
     #define K 64                        /* Number of batches */
 #else
-    #define STOP (480.0)//(480.0)                /* Terminal ("close the door") time */
-    #define ENSEMBLE_SIZE 300//100000        /* Number of simulation replies */                       
+    #define STOP (480.0)                /* Terminal ("close the door") time */
+    #define ENSEMBLE_SIZE 300           /* Number of simulation replies */                       
 #endif
+
+#define FLUSH                           /* Flush the system after close the door */
 
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
@@ -46,7 +48,6 @@
 #define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
 #define M 4
-
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
 #define NUMBER_OF_GP_QUEUES 4           /* Number of queues (only SPED_RIT) */
 
@@ -60,7 +61,7 @@
 
 #define MU_UO (41.0 / 510)              /* Average service rate for "Unica Operazione" */
 #define MU_PP (41.0 / 765)              /* Average service rate for "Pagamenti & Prelievi" */
-#define MU_SR (41.0 / 1020)             /* Average service rate for "Spedizioni & Ritiri" */
+#define MU_SR (1.0 / 15)                /* Average service rate for "Spedizioni & Ritiri" */
 
 #define IDLE -1                         /* The server is idle */
 #define UO_BP 0                         /* The server is processing a ticket "Unica Operazione BancoPosta" */
@@ -339,13 +340,19 @@ time_integrated_populations_t *init_tip(void)
  */
 void init_status(void)
 {
- int i;
- 
- for(i = 0; i < NUMBER_OF_QUEUES; ++i)
- customers[i] = 0;
- for (i = 0; i < (M - 1); ++i)
- gen_status[i] = IDLE;
- ded_status = IDLE;
+    int i;
+
+    for(i = 0; i < NUMBER_OF_QUEUES; ++i)
+        customers[i] = 0;
+    for (i = 0; i < (M - 1); ++i)
+        gen_status[i] = IDLE;
+        
+    ded_status = IDLE;
+
+    /* Uncomment these lines to start with not empty center */
+    // int initial_customers[NUMBER_OF_QUEUES] = {1, 1, 2, 3, 1, 2};
+    // for (i = 0; i < NUMBER_OF_QUEUES; ++i)
+    //     customers[i] = initial_customers[i];
 }
 
 /*
@@ -361,6 +368,7 @@ void init_event_list(void)
 
     memset(events, 0x0, sizeof(event_list_t));
 
+    /* Comment these lines if you want to start with a non-empty center */
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
         GetArrival(i);
 
@@ -671,7 +679,7 @@ int has_to_continue(int *flags)
     for (int i = 1; i < NUMBER_OF_QUEUES; ++i) 
         result = result || flags[i];
     
-    return result;
+    return (result);
 }
 
 /*
@@ -725,12 +733,14 @@ statistics_t *simulation_run(void)
             update_tip(area);
         }
 #else
-    
-	while (has_to_continue(continue_simul) /*|| (integers_sum(customers, NUMBER_OF_QUEUES) > 0)*/) {
+	while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
 #endif
         t->next = next_event(&next_event_type, &next_event_index);
+        
+#ifndef FLUSH
         if (t->next > STOP)
             break;
+#endif
         update_tip(area);
         t->current = t->next;
 
@@ -795,9 +805,9 @@ int main(void)
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         stat = simulation_run(); 
         //printf("%lf\n", stat->n[4] + stat->n[5]);
-        //printf("%lf\n", stat->d[0]);
+        printf("%lf\n", stat->d[INDEX]);
         //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-        printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
+        //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
         //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
         free(stat);
     }
