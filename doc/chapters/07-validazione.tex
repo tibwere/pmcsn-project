@@ -1,11 +1,11 @@
 \chapter{Validazione}\label{chp:validazione}
 Poiché i risultati dei modelli analitici sono validi per periodi d'osservazione tendenzialmente infiniti, è stato scelto in fase di validazione di adottare una simulazione di tipo \textit{steady-state}, al fine di inferire statistiche confrontabili con i valori teorici.
 
-Il metodo adottato è stato quello delle batch means con parametri $(b,k) = (2250, 64)$ e periodo d'osservazione $\tau = 480 \cdot 300$\footnote{Si è assunto che mediamente un anno lavorativo sia composto da 300 giorni.}.
+Il metodo adottato è stato quello delle batch means con parametri $(b,k) = (960\footnote{Si è assunta una dimensione del batch pari a due giorni lavorativi.}, 64)$ e periodo d'osservazione $\tau = 61440\ min$.
 
 Inoltre:
 \begin{itemize}
-\item È stato utilizzato il programma \texttt{uvs} per il calcolo dei valori medi.
+\item Il seed iniziale utilizzato per le simulazioni che seguiranno in questo capitolo è \texttt{12345}.
 \item È stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza.
 \end{itemize}
 
@@ -70,7 +70,7 @@ I risultati ottenuti possono essere verificati con il seguente consistency check
 
 \item Il tasso di servizio medio è pari a:
 \begin{equation}
-\label{eqn:validazione-modello-analitico-6}
+\label{eqn:validazione-6}
 \mu_g = \frac{1}{E[S_g]} = \frac{M}{15}\ req/min
 \end{equation}
 dove $15\ min$ è il tempo medio di servizio del caso di studio definito nella \ref{eqn:modello-specifiche-9}.
@@ -83,10 +83,10 @@ dove $15\ min$ è il tempo medio di servizio del caso di studio definito nella \
 \end{equation}
 da cui:
 \begin{equation}
-\label{eqn:validazione-modello-analitico-8}
+\label{eqn:validazione-8}
 \rho_g = \sum_{i=1}^4 \rho_{g,i} = \frac{3.109875}{M}
 \end{equation}
-Dalla \ref{eqn:validazione-modello-analitico-8} è immediato osservare che è necessario imporre $M \geq 4$ al fine di garantire la stabilità del sistema.
+Dalla \ref{eqn:validazione-8} è immediato osservare che è necessario imporre $M \geq 4$ al fine di garantire la stabilità del sistema.
 \end{itemize}
 
 Tale sistema è modellato con una coda $M/M/1$ per cui, a partire dall'analisi teorica dei modelli a classi di priorità astratta\footnote{\label{note:validazione-1}Come nei precedenti capitoli, la priorità è inversamente proporzionale all'indice numerico della classe.}, è possibile ricavare i seguenti indici:
@@ -106,7 +106,7 @@ E[T_{Q_{g,4}}] = \frac{46.6481}{(M-3.109875)\cdot(M-2.149470)}\ min
 \end{equation}
 \item Il \textbf{tempo medio d'attesa} globale è pari a:
 \begin{equation}
-\label{eqn:validazione-modello-analitico-11}
+\label{eqn:validazione-11}
 E[T_{Q_g}]^{KP} = \frac{\rho_g E[S_g]}{1-\rho_g} = \frac{3.109875\cdot 15}{M\cdot (M-3.109875)}\ min
 \end{equation}
 \item Il \textbf{tempo medio di risposta} dell'$i$-esima classe, con $i\in\lbrace 1, 2, 3, 4\rbrace$ è pari a:
@@ -115,7 +115,7 @@ E[T_{S_{g,i}}] = E[T_{Q_{g,i}}] + E[S_g]
 \end{equation}
 \item Il \textbf{tempo medio di risposta} globale è pari a:
 \begin{equation}
-\label{eqn:validazione-modello-analitico-13}
+\label{eqn:validazione-13}
 E[T_{S_g}] = \frac{1}{\mu_g - \lambda_g} = \frac{15}{M-3.109875}\ min
 \end{equation}
 \end{itemize}
@@ -155,20 +155,19 @@ I risultati ottenuti possono essere verificati con il seguente consistency check
 
 \item Il tasso di servizio medio è pari a:
 \begin{equation}
-\mu_d = \frac{1}{E[S_d]} = 0.040196\ req/min
+\mu_d = \frac{1}{E[S_d]} = \frac{1}{15} = 0.066667\ req/min
 \end{equation}
-dove $E[S_d] = E[S_{\ded{}, SR}]$ in accordo alla terza equazione nella \ref{eqn:modello-specifiche-12}.
+dove $E[S_d] = E[S_{\ded{}, SR}]$ in accordo alla \ref{eqn:modello-specifiche-11}.
 
 \item L'occupazione media delle classi $\rho_{d,j} = \lambda_{d,j}/\mu_d$ è pari a:
 \begin{equation}
 \begin{array}{l l}
-\rho_{d,1} = 0.227560, & \rho_{d,2} = 0.682655
+\rho_{d,1} = 0.137205, & \rho_{d,2} = 0.4116
 \end{array}
 \end{equation}
 da cui:
 \begin{equation}
-\label{eqn:validazione-11}
-\rho_d = \sum_{i=1}^2 \rho_{d,2} = 0.910215
+\rho_d = \rho_{d,1} + \rho_{d,2} = 0.548805
 \end{equation}
 \end{itemize}
 
@@ -182,13 +181,14 @@ E[T_{Q_{d,j}}] = \frac{\rho_d E[S_d]}{\left(1- \sum_{k=1}^{j} \rho_{d,k}\right)\
 da cui:
 \begin{equation}
 \begin{cases}
-E[T_{Q_{d,1}}] = 29.315144\ min \\[1.5em]
-E[T_{Q_{d,2}}] = 326.503808\ min
+E[T_{Q_{d,1}}] = 9.541171\ min \\[1.5em]
+E[T_{Q_{d,2}}] = 21.146448\ min
 \end{cases}
 \end{equation}
 \item Il \textbf{tempo medio d'attesa} globale, per il sottosistema in figura \ref{fig:validazione-modello-analitico-1b} è pari a:
 \begin{equation}
-E[T_{Q_d}]^{KP} = \frac{\rho_d \cdot E[S_d]}{1-\rho_d} = 252.206642\ min
+\label{eqn:validazione-24}
+E[T_{Q_d}]^{KP} = \frac{\rho_d \cdot E[S_d]}{1-\rho_d} = 18.245049\ min
 \end{equation}
 \item Il \textbf{tempo medio di risposta} dell'$j$-esima classe, con $j\in\lbrace 1, 2\rbrace$ è pari a:
 \begin{equation}
@@ -196,7 +196,8 @@ E[T_{S_{d,j}}] = E[T_{Q_{d,j}}] + E[S_d]
 \end{equation}
 \item Il \textbf{tempo medio di risposta} globale, per il sottosistema in figura \ref{fig:validazione-modello-analitico-1b} è pari a:
 \begin{equation}
-E[T_{S_d}] = \frac{1}{\mu_d - \lambda_d} = 277.085065\ min
+\label{eqn:validazione-26}
+E[T_{S_d}] = \frac{1}{\mu_d - \lambda_d} = 33.245049\ min
 \end{equation}
 \end{itemize}
 
@@ -214,11 +215,11 @@ Privando il sistema della generazione di arrivi di tipo \sr{}, come mostrato in 
 \begin{itemize}
 \item Il tempo d'attesa globale ottenuto è pari a:
 \begin{equation} 
-\bar{d}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{d}_{g,i} = (8.26 \pm 0.96)\ min
+\bar{d}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{d}_{g,i} = (7.69 \pm 0.76)\ min
 \end{equation}
 \item Il tempo di risposta globale ottenuto è pari a:
 \begin{equation}
-\bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (23.35 \pm 1.08)\ min
+\bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (22.79 \pm 1.31)\ min
 \end{equation}
 \end{itemize}
 
@@ -233,7 +234,7 @@ E[T_{Q_g}]^{KP} = 13.101566\ min
 E[T_{S_g}] = 16.851566\ min 
 \end{equation}
 \end{itemize}
-in accordo rispettivamente alle equazioni \ref{eqn:validazione-modello-analitico-11} e \ref{eqn:validazione-modello-analitico-13}.
+in accordo rispettivamente alle equazioni \ref{eqn:validazione-11} e \ref{eqn:validazione-13}.
 \end{itemize}
 
 I risultati ottenuti sono ragionevoli poiché:
@@ -243,9 +244,9 @@ I risultati ottenuti sono ragionevoli poiché:
 \begin{itemize}
 \item L'occupazione media ottenuta tramite la simulazione è pari a:
 \begin{equation}
-\bar{x}_g = 0.78 \pm 0.01
+\bar{x}_g = 0.77 \pm 0.02
 \end{equation}
-\item L'occupazione media teorica, in accordo alla \ref{eqn:validazione-modello-analitico-8}, è pari a:
+\item L'occupazione media teorica, in accordo alla \ref{eqn:validazione-8}, è pari a:
 \begin{equation}
 \rho_g = 0.777469
 \end{equation}
@@ -253,7 +254,7 @@ I risultati ottenuti sono ragionevoli poiché:
 le prestazioni del multiserver, in termini di risposta, sono inferiori al sistema a capacità concentrata.
 \end{itemize}
 
-È opportuno osservare che i risultati ottenuti in fase di simulazione sono stati computati mantenendo i tassi di servizio delle differenti tipologie di ticket, così come definiti nel modello delle specifiche (cap. \ref{chp:modello-specifiche}). Questo è ragionevole perché la media pesata dei differenti tassi di servizio è pari a quello definito nella \ref{eqn:validazione-modello-analitico-6}.
+È opportuno osservare che i risultati ottenuti in fase di simulazione sono stati computati mantenendo i tassi di servizio delle differenti tipologie di ticket, così come definiti nel modello delle specifiche (cap. \ref{chp:modello-specifiche}). Questo è ragionevole perché la media pesata dei differenti tassi di servizio è pari a quello definito nella \ref{eqn:validazione-6}.
 
 
 \section{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}
@@ -263,11 +264,11 @@ Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come most
 \begin{itemize}
 \item Il tempo d'attesa globale ottenuto è pari a:
 \begin{equation} 
-\bar{d}_d = p_{d,1}\cdot \bar{d}_{d,1} + p_{d,2}\cdot \bar{d}_{d,2} = (210.04 \pm 51.51)\ min
+\bar{d}_d = p_{d,1}\cdot \bar{d}_{d,1} + p_{d,2}\cdot \bar{d}_{d,2} = (17.61 \pm 3.77)\ min
 \end{equation}
 \item Il tempo di risposta globale ottenuto è pari a:
 \begin{equation}
-\bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (234.77 \pm 51.81)\ min
+\bar{w}_d = p_{d,1}\cdot \bar{w}_{d,1} + p_{d,2}\cdot \bar{w}_{d,2} = (32.79 \pm 4.06)\ min
 \end{equation}
 \end{itemize}
 
@@ -275,14 +276,14 @@ Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come most
 \begin{itemize}
 \item Il tempo d'attesa globale ottenuto è pari a:
 \begin{equation}
-E[T_{Q_g}]^{KP} = 252.206642\ min 
+E[T_{Q_d}]^{KP} = 18.245049\ min 
 \end{equation}
 \item Il tempo di risposta globale ottenuto è pari a:
 \begin{equation}
-E[T_{S_g}] = 277.085065\ min 
+E[T_{S_d}] = 33.245049\ min 
 \end{equation}
 \end{itemize}
-in accordo rispettivamente alle equazioni \ref{eqn:validazione-modello-analitico-11} e \ref{eqn:validazione-modello-analitico-13}.
+in accordo rispettivamente alle equazioni \ref{eqn:validazione-24} e \ref{eqn:validazione-26}.
 \end{itemize}
 
 Poiché i valori teorici ricadono all'interno dei rispettivi intervalli, con un livello di confidenza del 95\%, il comportamento del simulatore è conforme al modello analitico \ref{fig:validazione-modello-analitico-1b}.

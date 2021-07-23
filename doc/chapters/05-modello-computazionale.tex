@@ -28,12 +28,15 @@ $Server_\ded(t)$ & \texttt{{\color{code_purple}int} ded\_status} \\
 \label{table:modello-computazionale-1}
 \end{table}
 \newpage
-Ad inizio simulazione lo stato del sistema viene impostato come mostrato nello snippet \ref{lst:modello-computazionale-1}.
-\begin{lstlisting}[label={lst:modello-computazionale-1}, caption={Inizializzazione dello stato del sistema}]
-int customers[NUMBER_OF_QUEUES] = {[0 ... NUMBER_OF_QUEUES - 1] = 0};
-int gen_status[M-1] = {[0 ... M - 2] = IDLE};
-int ded_status = IDLE;
-\end{lstlisting}
+Ad inizio simulazione lo stato del sistema viene impostato come segue:
+\begin{center}
+\begin{tabular}{l l l}
+\texttt{customers[i]} & \texttt{=} & \texttt{0} \\
+\texttt{gen\_status[j]} & \texttt{=} & \texttt{IDLE} \\
+\texttt{ded\_status} & \texttt{=} & \texttt{IDLE}
+\end{tabular}
+\end{center}
+per ogni $\mathtt{i\in \lbrace 0, 1, \dots, 5 \rbrace}$ e per ogni $\mathtt{j\in \lbrace 0, 1, \dots, M-2 \rbrace}$.
 
 \section{Eventi}\label{sec:modello-computazionale-eventi}
 Siano:
@@ -59,14 +62,14 @@ Lo stato del sistema può cambiare all'occorrenza delle seguenti tipologie di ev
 \end{itemize}
 \end{itemize} 
 \section{Clock di simulazione}\label{sec:modello-computazionale-clock}
-L'orologio di sistema adottato nel simulatore è contenuto all'interno di una struttura dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}times\_t} t}.}, riportata nello snippet \ref{lst:modello-computazionale-2}, che memorizza informazioni relative al tempo di simulazione. In particolare:
+L'orologio di sistema adottato nel simulatore è contenuto all'interno di una struttura dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}times\_t} t}.}, riportata nello snippet \ref{lst:modello-computazionale-1}, che memorizza informazioni relative al tempo di simulazione. In particolare:
 \begin{itemize}
 \item \texttt{{\color{code_purple}double} next}: istante di occorenza del successivo evento nel sistema.
 \item \texttt{{\color{code_purple}double} last[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{i} rappresenta l'istante dell'ultimo arrivo di tipo \texttt{i}.
 \item \texttt{{\color{code_purple}double} current}: orologio di sistema.
 \end{itemize}
 
-\begin{lstlisting}[label={lst:modello-computazionale-2}, caption={Struttura dati per la gestione del tempo}]
+\begin{lstlisting}[label={lst:modello-computazionale-1}, caption={Struttura dati per la gestione del tempo}]
 typedef struct times {
     double next;                 	                                         
     double current;                	
@@ -101,7 +104,7 @@ fintantoché è verificata almeno una delle seguenti due condizioni:
 \end{itemize}
 
 \section{Lista degli eventi}\label{sec:modello-computazionale-lista-eventi}
-La lista degli eventi, a livello implementativo, è gestita mediante la struttura dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}event\_list\_t} events}.} riportata nello snippet \ref{lst:modello-computazionale-3}.
+La lista degli eventi, a livello implementativo, è gestita mediante la struttura dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}event\_list\_t} events}.} riportata nello snippet \ref{lst:modello-computazionale-2}.
 Ciascun campo della struttura mantiene gli istanti di tempo di occorrenza di una categoria di eventi. In particolare:
 \begin{itemize}
 \item \texttt{{\color{code_purple}double} arrivals[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{i} rappresenta l'istante del successivo arrivo di tipo \texttt{i}.
@@ -109,7 +112,7 @@ Ciascun campo della struttura mantiene gli istanti di tempo di occorrenza di una
 \item \texttt{{\color{code_purple}double} ded\_completion}: rappresenta l'istante del successivo completamento del server dedicato.
 \end{itemize}
 
-\begin{lstlisting}[label={lst:modello-computazionale-3}, caption={Struttura dati per la lista degli eventi}]
+\begin{lstlisting}[label={lst:modello-computazionale-2}, caption={Struttura dati per la lista degli eventi}]
 typedef struct event_list {
     double arrivals[NUMBER_OF_QUEUES];  
     double gen_completions[M-1];               

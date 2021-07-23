@@ -170,6 +170,7 @@ E[S_i] = \frac{p_{UO}}{p_{UO} + p_{PP}} \cdot E[S_{i, UO}] +  \frac{p_{PP}}{p_{U
 
 Per il servente dedicato si ha:
 \begin{equation}
+\label{eqn:modello-specifiche-8}
 E[S_\ded] = \pi \cdot E[S_{\ded, SR}] + (1-\pi) \cdot E[S_i]
 \end{equation}
 Tuttavia, è complesso individuare un'espressione in forma chiusa di $\pi$ perché pari alla probabilità che vi siano clienti in possesso di ticket \sr{} da servire, ma che non vi siano richieste \uo{} o \pp{} in servizio su tale sportello.
@@ -191,17 +192,17 @@ E[S_{i, PP}] = 1.5 \cdot E[S_{i, UO}]
 con $i \in \lbrace 1, 2, \dots, M\rbrace$.
 \item Il tempo medio di servizio per una richiesta di tipo \sr{} sia pari a:
 \begin{equation}
-E[S_{\ded, SR}] = 2 \cdot E[S_{i, UO}]
+\label{eqn:modello-specifiche-11}
+E[S_{\ded, SR}] = E[S_i] = 15\ min
 \end{equation}
-con $i \in \lbrace 1, 2, \dots, M\rbrace$.
+con $i \in \lbrace 1, 2, \dots, \ded-1, \ded+1, \dots, M\rbrace$.
 \end{itemize}
 dalla \ref{eqn:modello-specifiche-7} è possibile ricavare:
 \begin{equation}
 \label{eqn:modello-specifiche-12}
 \begin{cases}
 E[S_{i,UO}] = \frac{E[S_i]}{(\frac{p_{UO}}{p_{UO} + p_{PP}} + 1.5\cdot \frac{p_{PP}}{p_{UO} + p_{PP}})} = \frac{510}{41} \simeq 12.439024\ min \\[2em]
-E[S_{i,PP}] = 1.5\cdot E[S_{i,UO}] = \frac{765}{41} \simeq 18.6585366\ min \\[2em]
-E[S_{\ded,SR}] = 2 \cdot E[S_{i,UO}] = \frac{1020}{41} \simeq 24.878049\ min
+E[S_{i,PP}] = 1.5\cdot E[S_{i,UO}] = \frac{765}{41} \simeq 18.6585366\ min
 \end{cases}
 \end{equation}
 
@@ -209,6 +210,23 @@ I risultati ottenuti possono essere verificati con il seguente consistency check
 \begin{equation}
 \frac{p_{UO}}{p_{UO} + p_{PP}} \cdot E[S_{i, UO}] +  \frac{p_{PP}}{p_{UO} + p_{PP}} \cdot E[S_{i, PP}] = 15\ min = E[S_i]\qquad \text{\color{forestgreen}\textbf{OK} \checkmark}
 \end{equation}
+
+Inoltre, dalla \ref{eqn:modello-specifiche-11} è possibile ricavare la seguente espressione numerica per la \ref{eqn:modello-specifiche-8}:
+\begin{equation}
+E[S_\ded] = \pi \cdot E[S_{\ded, SR}] + (1-\pi) \cdot E[S_i] = (\cancel{\pi} + (1 - \cancel{\pi}))\cdot E[S_i] = 15\ min
+\end{equation}
+
+Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
+\begin{equation}
+X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace \cdot minuti\_lavoro}_{g} = \frac{1500000}{12812\cdot 480} = \frac{3125}{12812} \simeq 0.243912\ req/min
+\end{equation} 
+dove $minuti\_lavoro_{g}$ rappresenta l'ammontare medio di minuti che costituiscono la giornata lavorativa e viene computato\footnote{In assenza di dati ufficiali si è assunta una giornata tipo di lavoro per un'attività.} come segue:
+\begin{equation}
+\label{eqn:modello-specifiche-15}
+minuti\_lavoro_{g} = 8\ h/gg = (60 \cdot 8)\ min/gg = 480\ min/gg
+\end{equation}
+
+È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
 
 \begin{table}[ht]
 \centering
@@ -225,15 +243,3 @@ N$^o$ di uffici postali & 12 812 \\
 \caption{Estratto dei dati di interesse a partire dalla fonte citata}
 \label{table:modello-specifiche-2}
 \end{table}
-
-Per ricavare il throughput del sistema $X$ si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
-\begin{equation}
-X = \frac{\# \lbrace \text{clienti al giorno} \rbrace}{\# \lbrace \text{uffici postali} \rbrace \cdot minuti\_lavoro}_{g} = \frac{1500000}{12812\cdot 480} = \frac{3125}{12812} \simeq 0.243912\ req/min
-\end{equation} 
-dove $minuti\_lavoro_{g}$ rappresenta l'ammontare medio di minuti che costituiscono la giornata lavorativa e viene computato\footnote{In assenza di dati ufficiali si è assunta una giornata tipo di lavoro per un'attività.} come segue:
-\begin{equation}
-\label{eqn:modello-specifiche-15}
-minuti\_lavoro_{g} = 8\ h/gg = (60 \cdot 8)\ min/gg = 480\ min/gg
-\end{equation}
-
-È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
