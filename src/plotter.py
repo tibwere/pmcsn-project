@@ -73,7 +73,41 @@ def plot_line(ticket, filename):
     plt.savefig(f"{curdir}/../doc/figs/plots/{filename}-{ticket}.png")
     plt.show()
 
+def plot_stat(type):
+    type_str = [
+        "Delay of 'Unica Operazione' e 'Pagamenti & Prelievi'",
+        "Delay of 'Spedizioni & Ritiri'"        
+    ]
+    x_ticks = np.array([1,8,16,32,64,128,256])
+    index = 0 if type == 'G' else 1
+
+    plt.figure(figsize=(16,9))
+
+    curdir = os.path.dirname(os.path.abspath(__file__))
+    df = pd.read_csv(f"{curdir}/../doc/figs/plots/data/d-staz.csv")
+    df = df[ df["type"] == type ]
+
+    x = df["nbatch"]
+    y = df["stat"]
+    w = df["width"]
+
+    plt.xticks(x_ticks)
+    #plt.ylim(4.5,6.5)
+    plt.ylabel(f"Delay of {type_str[index]} (min)")
+    plt.xlabel("Number of batches (K)")
+
+    plt.plot(x, y, "ko")
+    plt.plot(x, y)
+    #plt.plot([x, x], [y - w, y + w], color='k', linestyle='-', linewidth=2)
+    #plt.axhline(y=get_mean(ticket), color='r', linestyle='--', label="mean")
+    #plt.legend()
+
+    plt.savefig(f"{curdir}/../doc/figs/plots/d-staz-{type}.png")
+    plt.show()   
+
 if __name__ == "__main__":
 
-    for i in range(6):
-        plot_line(i, "day-from-mean-values")
+    plot_stat('G')
+    plot_stat('D')
+    # for i in range(6):
+    #     plot_line(i, "day-from-mean-values")
