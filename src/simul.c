@@ -20,17 +20,20 @@
 /* Uncomment the following line to enable debug prints to verify the system */
 //#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
-#define STATIONARY
+//#define STATIONARY
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
-    #define B 960.0                     /* Length of a single batch */
-    #define K 64                        /* Number of batches */
+    #define B (960.0)                     /* Length of a single batch */
+    #define K (64)                        /* Number of batches */
     #define STOP (B * K)                /* Conceptual infinity time for the end of the simulation */
 #else
     #define STOP (480.0)                /* Terminal ("close the door") time */
     #define ENSEMBLE_SIZE 300           /* Number of simulation replies */                       
 #endif
+
+#define TERM_INIT_SEED 9
+#define STAT_INIT_SEED 12345
 
 #define FLUSH                           /* Flush the system after close the door */
 
@@ -368,7 +371,9 @@ void init_event_list(void)
 
     memset(events, 0x0, sizeof(event_list_t));
 
-    /* Comment these lines if you want to start with a non-empty center */
+    /* Uncomment these lines if you want to start with an empty center 
+     * (Standard behaviuour - should be uncommented)
+     */
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
         GetArrival(i);
 
@@ -377,8 +382,8 @@ void init_event_list(void)
     //     events->arrivals[i] = INFTY;
 
     /* Uncomment these lines in validation phase (sec. 7.3) */
-    for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
-        events->arrivals[i] = INFTY;
+    // for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
+    //     events->arrivals[i] = INFTY;
 
     for (i = 0; i < M - 1; ++i) 
         events->gen_completions[i] = INFTY;
@@ -716,8 +721,8 @@ statistics_t *simulation_run(void)
     //     continue_simul[i] = 0;
 
     /* Uncomment these lines in validation phase (sec. 7.3) */
-    for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
-        continue_simul[i] = 0;
+    // for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
+    //     continue_simul[i] = 0;
 
 #ifdef STATIONARY   
     while (has_to_continue(continue_simul)) { 
@@ -734,13 +739,20 @@ statistics_t *simulation_run(void)
             //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
             //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
             //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-            //printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
-            printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
+            printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
+
+            if (STOP_BATCH == 1) 
+                //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
+                printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
+
             free(stat);
             memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
             free(area);
             area = init_tip();
             update_tip(area);
+
+            if (batch_index == STOP_BATCH)
+                break;            
         }
 #else
 	while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
@@ -800,12 +812,12 @@ statistics_t *simulation_run(void)
 int main(void) 
 {
 #ifdef STATIONARY
-    PlantSeeds(12345);
+    PlantSeeds(STAT_INIT_SEED);
     simulation_run();
 #else
     statistics_t *stat;
     
-    PlantSeeds(9);
+    PlantSeeds(TERM_INIT_SEED);
 
     double p0 = (P_BP * P_UO)/(P_UO + P_PP);
     double p1 = (P_BP * P_PP)/(P_UO + P_PP);
@@ -815,9 +827,9 @@ int main(void)
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         stat = simulation_run(); 
         //printf("%lf\n", stat->n[4] + stat->n[5]);
-        printf("%lf\n", stat->d[INDEX]);
+        //printf("%lf\n", stat->d[INDEX]);
         //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-        //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
+        printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
         //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
         free(stat);
     }
