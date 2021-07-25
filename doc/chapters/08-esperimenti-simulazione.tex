@@ -2,9 +2,9 @@
 In accordo agli obiettivi dello studio, per la progettazione degli esperimenti di simulazione, è stata considerata unicamente l'analisi dello stato transiente del sistema. Infatti, perderebbe di significato considerare lo stato stazionario per determinare il numero minimo di serventi necessari affinché vengano soddisfatti i QoS descritti nel capitolo \ref{chp:obiettivi}. Questo perché in una giornata lavorativa, assunta pari ad otto ore, il sistema non riesce a raggiungere lo stato stazionario prima che si verifichi la condizione di scarico (\textit{"close the door"}) ed inoltre rimane forte l'influenza delle condizioni iniziali.
 
 \section{Progetto degli esperimenti}
-Per realizzare l'analisi transiente del sistema è stata adottata la tecnica \textit{replication} utilizzando i seguenti parametri:
+Per realizzare l'analisi transiente del sistema è stata adottata la tecnica \textit{replication}, utilizzando i seguenti parametri:
 \begin{itemize}
-\item \texttt{TERM\_INIT\_SEED = 9}, settato unicamente a inizio simulazione al fine di rendere le repliche tra loro indipendenti 
+\item \texttt{TERM\_INIT\_SEED = 9}, settato unicamente a inizio simulazione al fine di rendere le repliche indipendenti tra loro.
 \item \texttt{ENSEMBLE\_SIZE = 300}, al fine di perdere la dipendenza dal seme iniziale pur mantenendo la variabilità naturale del fenomeno osservato.
 \item \texttt{START = 0} e \texttt{STOP = 480} come descritto in sezione \ref{sec:modello-computazionale-clock}.
 \end{itemize}
@@ -12,8 +12,10 @@ Per realizzare l'analisi transiente del sistema è stata adottata la tecnica \te
 Inoltre:
 \begin{itemize}
 \item È stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza.
-\item È stato utilizzato il programma \texttt{uvs} per il calcolo di media, deviazione standard, massimo e minimo.
+\item È stato utilizzato il programma \texttt{uvs} per il calcolo di media e deviazione standard.
 \end{itemize}
+
+Di seguito sono riportate le descrizioni degli esperimenti di simulazione compiuti.
 
 \subsection*{Numero minimo di sportelli}
 Per individuare il numero minimo $M^*$ di sportelli da mantenere operativi in una giornata lavorativa, al fine di soddisfare i QoS (cap. \ref{chp:obiettivi}), un primo esperimento condotto è stato quello di analizzare l'attesa media di ciascun flusso d'arrivo al variare di $M$.
@@ -32,7 +34,7 @@ Per realizzare quest'esperimento, la simulazione è stata arrestata ogni:
 per le seguenti motivazioni:
 \begin{itemize}
 \item È stato scelto di partire da $45\ min$ per consentire la formazione delle code (poiché il sistema parte da scarico).
-\item La crescita esponenziale per potenze di 2 successive permette di avere una visione a grana fine negli intervalli iniziali, dove per via della carica del sistema, è più probabile vi sia una maggiore variabilità dell'andamento del tempo di coda. 
+\item La crescita esponenziale per potenze di 2 successive permette di avere una visione a grana fine negli intervalli iniziali dove, essendo il sistema in fase di caricamento, è più probabile vi sia una maggiore variabilità dell'andamento del tempo di coda. 
 \end{itemize}
 
 \subsection*{Attesa nell'arco della giornata a partire da condizioni iniziali non nulle}
@@ -43,6 +45,14 @@ Per ciascuna tipologia di flusso, il numero iniziale di clienti è stato imposta
 Customers_i(0) = \lceil\ \bar{l}_i\ \rceil
 \end{equation}
 in riferimento alla definizione nella \ref{eqn:modello-specifiche-2}.
+
+Da cui:
+\begin{equation}
+\begin{array}{l l l}
+Customers_0(0) = 1, & Customers_1(0) = 1, & Customers_2(0) = 2, \\
+Customers_3(0) = 3, & Customers_4(0) = 1, & Customers_5(0) = 2
+\end{array}
+\end{equation}
 	
 \section{Esecuzione degli esperimenti ed analisi degli output}
 \subsection*{Numero minimo di sportelli}
@@ -121,7 +131,6 @@ $i$ & Mean & Std. Dev. \\
 \label{table:esperimenti-simulazione-1}
 \end{table}
 
-
 \begin{figure}[ht]
 \centering
 \begin{subfigure}[b]{0.475\textwidth}
@@ -168,9 +177,9 @@ $i$ & Mean & Std. Dev. \\
 \label{fig:esperimenti-simulazione-1}
 \end{figure}
 
-È immediato osservare che per rispettare i requisiti di qualità stabiliti nel capitolo \ref{chp:obiettivi}, mostrati nei grafici tramite linee rosse tratteggiate, il numero minimo di serventi è $M^* = 4$. Infatti, dalla figura \ref{fig:esperimenti-simulazione-1d} si evince che con $M = 3$ non è possibile rispettare il QoS (evidenziato in {\color{red}rosso} in tabella \ref{table:esperimenti-simulazione-1a}).
+È immediato osservare che per rispettare i requisiti di qualità stabiliti nel capitolo \ref{chp:obiettivi}, mostrati nei grafici tramite linee rosse tratteggiate, il numero minimo di serventi è $M^* = 4$. Infatti, dalla figura \ref{fig:esperimenti-simulazione-1d} si evince che con $M = 3$ non è possibile rispettare il QoS (in tabella \ref{table:esperimenti-simulazione-1a} è evidenziato in {\color{red}rosso} il valore di  attesa che lo supera).
 
-È opportuno notare che le ampiezze delle realizzazioni degli intervalli di confidenza nel caso di \sr{} sono inevitabilmente maggiori rispetto ai casi di \uo{} e \pp{} per via dell'inferiore frequenza di arrivo e quindi ridotta quantità di dati utilizzati per il calcolo delle stime.
+È opportuno notare che le ampiezze delle realizzazioni degli intervalli di confidenza nel caso di \sr{} sono maggiori rispetto ai casi di \uo{} e \pp{}. Ciò è dovuto all'inferiore frequenza di arrivo e quindi alla ridotta quantità di dati utilizzati per il calcolo delle stime.
 
 \subsection*{Attesa nell'arco della giornata a partire dal sistema scarico}
 I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-2}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-2}).
@@ -412,20 +421,21 @@ $t$ & Mean & Std. Dev. \\
 \label{fig:esperimenti-simulazione-2}
 \end{figure}
 
-Per la realizzazione dei grafici è stato attivato il meccanismo di svuotamento del sistema solamente nell'ultima run di simulazione perché, solo al superamento del tempo di simulazione $\tau$, si verifica la condizione di blocco degli arrivi (\textit{"close the door"}) e quindi il sistema deve essere riportato alle condizioni iniziali.
-
+Per la realizzazione dei grafici è stato attivato il meccanismo di svuotamento del sistema esclusivamente nell'ultima run perché, solo al superamento del tempo di simulazione $\tau$, si verifica la condizione di blocco degli arrivi (\textit{"close the door"}) e quindi il sistema deve essere riportato alle condizioni iniziali. Questo perché, nel momento in cui viene arrestata la simulazione ad un istante $t$, si è interessati ai soli eventi che occorrono in $(0, t]$ e non a quelli appartenenti a $(t, t + \Delta]$ che rappresenta l'intervallo di tempo necessario a svuotare il sistema.
+\newpage
 Di seguito è riportata una serie di osservazioni relative ai risultati ottenuti:
 \begin{itemize}
-\item Il fatto che le curve, in corrispondenza $t = \tau = 480\ min$, intersechino i rispetti valori medi (mostrati tramite linee rosse tratteggiate) rappresenta un consistency check per il simulatore, perché tali sono stati computati su finestre di medesima ampiezza.
-\item Per quanto riguarda i ticket \uo{} e \pp{}, esiste una correlazione tra la pendenza delle curve e la priorità del flusso corrispondente. La spiegazione di questo fenomeno è data dal fatto che flussi prioritari impiegano meno tempo a stabilizzarsi perché vengono rallentati da un numero inferiore di richieste.
+\item Il fatto che le curve, in corrispondenza $t = \tau = 480\ min$, intersechino i rispettivi valori medi (mostrati tramite linee rosse tratteggiate) rappresenta un consistency check per il simulatore, perché tali sono stati computati su finestre di medesima ampiezza.
+\item Per quanto riguarda i ticket \uo{} e \pp{}, esiste una correlazione tra la pendenza delle curve e la priorità del flusso corrispondente. La spiegazione di questo fenomeno è data dal fatto che flussi prioritari impiegano meno tempo a stabilizzarsi poiché rallentati da un numero inferiore di richieste.
 
 Ad esempio, in figura \ref{fig:esperimenti-simulazione-2a} il valore medio giornaliero ricade nell'intervallo della misura effettuata a circa tre ore dall'apertura, mentre lo stesso si verifica in figura \ref{fig:esperimenti-simulazione-2d} dopo circa cinque.
-\item Poiché l'utilizzazione dei ticket \sr{} è bassa, mentre quella di \uo{} e \pp{} è alta, è molto probabile che inizialmente all'arrivo di un ticket del primo tipo, il server dedicato stia processando una richiesta degli altri due. Con l'avanzare del tempo e con lo stabilizzarsi dell'occupazione, è sempre meno probabile che ticket di tipo \uo{} oppure \pp{} rallentino quelli di \sr{}. 
+\item Poiché l'utilizzazione dei ticket \sr{} è bassa, mentre quella di \uo{} e \pp{} è alta, è molto probabile che inizialmente all'arrivo di un ticket del primo tipo, il server dedicato stia processando una richiesta degli altri due. Questo fenomeno è enfatizzato dal fatto che inizialmente non vi sono clienti nel sistema.
 
-Questo fenomeno è enfatizzato dal fatto che inizialmente non vi siano clienti nel sistema. 
+Con l'avanzare del tempo, invece, è sempre meno probabile che ticket di tipo \uo{} oppure \pp{} rallentino quelli di \sr{}, per via dello stabilizzarsi dell'occupazione. 
 \end{itemize}
 
 \subsection*{Attesa nell'arco della giornata a partire da condizioni iniziali non nulle}
+I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-3}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-3}).
 
 \begin{table}[ht]
 \centering
@@ -613,23 +623,21 @@ $t$ & Mean & Std. Dev. \\
 \caption{\sr{} STD}
 \end{subtable}
 \caption{Attesa in minuti in funzione di $t$ (sistema inizialmente \textbf{non} scarico)}
+\label{table:esperimenti-simulazione-3}
 \end{table}
-
 
 \begin{figure}[ht]
 \centering
 \begin{subfigure}[b]{0.475\textwidth}
 \centering
 \includegraphics[width=\textwidth]{plots/day-from-mean-values-0}
-\caption{\uo{} BP}    
-\label{fig:esperimenti-simulazione-a}
+\caption{\uo{} BP}
 \end{subfigure}
 \hfill    
 \begin{subfigure}[b]{0.475\textwidth}  
 \centering 
 \includegraphics[width=\textwidth]{plots/day-from-mean-values-1}
-\caption{\pp{} BP}    
-\label{fig:esperimenti-simulazione-b}
+\caption{\pp{} BP}
 \end{subfigure}
 
 \vskip\baselineskip
@@ -637,15 +645,13 @@ $t$ & Mean & Std. Dev. \\
 \begin{subfigure}[b]{0.475\textwidth}   
 \centering 
 \includegraphics[width=\textwidth]{plots/day-from-mean-values-2}
-\caption{\uo{} STD}    
-\label{fig:esperimenti-simulazione-c}
+\caption{\uo{} STD}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.475\textwidth}   
 \centering 
 \includegraphics[width=\textwidth]{plots/day-from-mean-values-3}
-\caption{\pp{} STD}    
-\label{fig:esperimenti-simulazione-d}
+\caption{\pp{} STD}
 \end{subfigure}
 
 \vskip\baselineskip
@@ -653,18 +659,21 @@ $t$ & Mean & Std. Dev. \\
 \begin{subfigure}[b]{0.475\textwidth}   
 \centering 
 \includegraphics[width=\textwidth]{plots/day-from-mean-values-4}
-\caption{\sr{} BP}    
-\label{fig:esperimenti-simulazione-e}
+\caption{\sr{} BP}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.475\textwidth}   
 \centering 
 \includegraphics[width=\textwidth]{plots/day-from-mean-values-5}
-\caption{\sr{} STD}    
-\label{fig:esperimenti-simulazione-f}
+\caption{\sr{} STD}
 \end{subfigure}
 \caption{Attesa in minuti in funzione di $t$ (sistema inizialmente \textbf{non} scarico)}
-\label{fig:esperimenti-simulazione}
+\label{fig:esperimenti-simulazione-3}
 \end{figure}
 
+Di seguito è riportata una serie di osservazioni relative ai risultati ottenuti:
+\begin{itemize}
+\item Rispetto all'esperimento precedente, le curve relative a ticket \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} mostrano una traslazione che anticipa l'istante di tempo in cui il valore medio ricade per la prima volta all'interno di un intervallo di confidenza stimato.
 
+Poiché le code considerate hanno la priorità maggiore, l'andamento delle corrispondenti curve non risente della presenza di condizioni iniziali non nulle, perché le richieste ad esse appartenenti non subiscono ritardi dovuti alla presenza di altre di diverso tipo.
+\end{itemize}
