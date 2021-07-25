@@ -1,5 +1,7 @@
 \chapter{Esperimenti di simulazione}\label{chp:esperimenti-simulazione}
-In accordo agli obiettivi dello studio, per la progettazione degli esperimenti di simulazione, è stata considerata unicamente l'analisi dello stato transiente del sistema. Infatti, perderebbe di significato considerare lo stato stazionario per determinare il numero minimo di serventi necessari affinché vengano soddisfatti i QoS descritti nel capitolo \ref{chp:obiettivi}. Questo perché in una giornata lavorativa, assunta pari ad otto ore, il sistema non riesce a raggiungere lo stato stazionario prima che si verifichi la condizione di scarico (\textit{"close the door"}) ed inoltre rimane forte l'influenza delle condizioni iniziali.
+In accordo agli obiettivi dello studio, per la progettazione degli esperimenti di simulazione, è stata considerata unicamente l'analisi dello stato transiente del sistema. Infatti, perderebbe di significato considerare lo stato stazionario per determinare il numero minimo di serventi necessari affinché vengano soddisfatti i QoS descritti nel capitolo \ref{chp:obiettivi}. Questo perché in una giornata lavorativa, assunta pari ad otto ore, il sistema non riesce a raggiungere lo stato stazionario prima che si verifichi la condizione di scarico (\textit{"close the door"}) ed inoltre rimane forte l'influenza delle condizioni iniziali. 
+
+Per completezza, nella sezione \ref{sec:esperimenti-simulazione-stazionario} è mostrato il raggiungimento della stazionarietà da parte del sistema. 
 
 \section{Progetto degli esperimenti}
 Per realizzare l'analisi transiente del sistema è stata adottata la tecnica \textit{replication}, utilizzando i seguenti parametri:
@@ -58,6 +60,64 @@ Customers_3(0) = 3, & Customers_4(0) = 1, & Customers_5(0) = 2
 \subsection*{Numero minimo di sportelli}
 I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-1}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-1}).
 
+È immediato osservare che per rispettare i requisiti di qualità stabiliti nel capitolo \ref{chp:obiettivi}, mostrati nei grafici tramite linee rosse tratteggiate, il numero minimo di serventi è $M^* = 4$. Infatti, dalla figura \ref{fig:esperimenti-simulazione-1d} si evince che con $M = 3$ non è possibile rispettare il QoS (in tabella \ref{table:esperimenti-simulazione-1a} è evidenziato in {\color{red}rosso} il valore di  attesa che lo supera).
+
+È opportuno notare che le ampiezze delle realizzazioni degli intervalli di confidenza nel caso di \sr{} sono maggiori rispetto ai casi di \uo{} e \pp{}. Ciò è dovuto all'inferiore frequenza di arrivo e quindi alla ridotta quantità di dati utilizzati per il calcolo delle stime.
+
+\subsection*{Attesa nell'arco della giornata a partire dal sistema scarico}
+I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-2}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-2}).
+
+Per la realizzazione dei grafici è stato attivato il meccanismo di svuotamento del sistema esclusivamente nell'ultima run perché, solo al superamento del tempo di simulazione $\tau$, si verifica la condizione di blocco degli arrivi (\textit{"close the door"}) e quindi il sistema deve essere riportato alle condizioni iniziali. Questo perché, nel momento in cui viene arrestata la simulazione ad un istante $t$, si è interessati ai soli eventi che occorrono in $(0, t]$ e non a quelli appartenenti a $(t, t + \Delta]$ che rappresenta l'intervallo di tempo necessario a svuotare il sistema.
+
+Di seguito è riportata una serie di osservazioni relative ai risultati ottenuti:
+\begin{itemize}
+\item Il fatto che le curve, in corrispondenza $t = \tau = 480\ min$, intersechino i rispettivi valori medi (mostrati tramite linee rosse tratteggiate) rappresenta un consistency check per il simulatore, perché tali sono stati computati su finestre di medesima ampiezza.
+\item Per quanto riguarda i ticket \uo{} e \pp{}, esiste una correlazione tra la pendenza delle curve e la priorità del flusso corrispondente. La spiegazione di questo fenomeno è data dal fatto che flussi prioritari impiegano meno tempo a stabilizzarsi poiché rallentati da un numero inferiore di richieste.
+
+Ad esempio, in figura \ref{fig:esperimenti-simulazione-2a} il valore medio giornaliero ricade nell'intervallo della misura effettuata a circa tre ore dall'apertura, mentre lo stesso si verifica in figura \ref{fig:esperimenti-simulazione-2d} dopo circa cinque.
+\item Poiché l'utilizzazione dei ticket \sr{} è bassa, mentre quella di \uo{} e \pp{} è alta, è molto probabile che inizialmente all'arrivo di un ticket del primo tipo, il server dedicato stia processando una richiesta degli altri due. Questo fenomeno è enfatizzato dal fatto che inizialmente non vi sono clienti nel sistema.
+
+Con l'avanzare del tempo, invece, è sempre meno probabile che ticket di tipo \uo{} oppure \pp{} rallentino quelli di \sr{}, per via dello stabilizzarsi dell'occupazione. 
+\end{itemize}
+
+\subsection*{Attesa nell'arco della giornata a partire da condizioni iniziali non nulle}
+I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-3}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-3}).
+
+Di seguito è riportata una serie di osservazioni relative ai risultati ottenuti:
+\begin{itemize}
+\item Rispetto all'esperimento precedente, le curve relative a ticket \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} mostrano una traslazione che anticipa l'istante di tempo in cui il valore medio ricade per la prima volta all'interno di un intervallo di confidenza stimato.
+
+Poiché le code considerate hanno la priorità maggiore, l'andamento delle corrispondenti curve non risente della presenza di condizioni iniziali non nulle, perché le richieste ad esse appartenenti non subiscono ritardi dovuti alla presenza di altre di diverso tipo.
+\item Le restanti quattro curve mostrano un andamento molto simile fra loro, caratterizzato da un primo periodo di crescita seguito da un successivo di decrescita verso il valore stazionario. Tale, però, potrebbe essere osservato soltanto simulando per un intervallo temporale più ampio.
+
+Presumibilmente, il picco presente in ogni grafico è associato all'istante temporale in cui l'impatto delle condizioni iniziali sulle prestazioni del sistema comincia ad affievolirsi. Il fatto che l'istante d'occorrenza del picco è inversamente proporzionale alla priorità del flusso avvalora ulteriormente questa congettura, infatti:
+\begin{itemize}
+\item Il picco dell'attesa sperimentato da \uo{} standard si verifica in anticipo rispetto a quello di \pp{} standard.
+\item Il picco dell'attesa sperimentato da \sr{} \textsl{BancoPosta} si verifica in anticipo rispetto a quello di \sr{} standard.
+\end{itemize}
+\end{itemize}
+
+\section{Raggiungimento dello stato stazionario}\label{sec:esperimenti-simulazione-stazionario}
+Per mostrare il raggiungimento dello stato stazionario da parte del sistema è stata adottata la tecnica \textit{batch means}, utilizzando i seguenti parametri:
+\begin{itemize}
+\item \texttt{STAT\_INIT\_SEED = 12345}.
+\item \texttt{B = 960}, è stato notato essere il giusto compromesso fra il mantenimento della variabilità naturale del fenomeno osservato e l'indipendenza tra batch successivi.
+\item \texttt{K = 64}, come da linee guida, al fine di rendere le statistiche campionate indipendenti dalle condizioni iniziali ed ottenere intervalli di confidenza significativi.
+\item \texttt{START = 0} e $\mathtt{STOP = B \cdot K = 61440}$.
+\end{itemize}
+
+Inoltre, è stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza.
+
+I risultati riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-4}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-4}) mostrano l'andamento dell'attesa media:
+\begin{itemize}
+\item Per ticket di tipo \uo{} e \pp{} (tab. \ref{} e fig. \ref{fig:esperimenti-simulazione-4a})
+\item Per ticket di tipo \sr{} (tab. \ref{} e fig. \ref{fig:esperimenti-simulazione-4b})
+\end{itemize}
+al variare del numero di batch considerati fino a raggiungere il valore di \texttt{K} sopra definito.
+
+I dati raccolti confermano quanto detto ad inizio capitolo, ovvero è possibile raggiungere lo stato stazionario soltanto prendendo in considerazione finestre temporali più ampie dei $480\ min$ giornalieri.
+
+\section{Grafici e tabelle}
 \begin{table}[ht]
 \centering
 \begin{subtable}{0.33\textwidth}
@@ -176,13 +236,6 @@ $i$ & Mean & Std. Dev. \\
 \caption{Attesa espressa in minuti, per ciascun flusso, al variare di $M$}
 \label{fig:esperimenti-simulazione-1}
 \end{figure}
-
-È immediato osservare che per rispettare i requisiti di qualità stabiliti nel capitolo \ref{chp:obiettivi}, mostrati nei grafici tramite linee rosse tratteggiate, il numero minimo di serventi è $M^* = 4$. Infatti, dalla figura \ref{fig:esperimenti-simulazione-1d} si evince che con $M = 3$ non è possibile rispettare il QoS (in tabella \ref{table:esperimenti-simulazione-1a} è evidenziato in {\color{red}rosso} il valore di  attesa che lo supera).
-
-È opportuno notare che le ampiezze delle realizzazioni degli intervalli di confidenza nel caso di \sr{} sono maggiori rispetto ai casi di \uo{} e \pp{}. Ciò è dovuto all'inferiore frequenza di arrivo e quindi alla ridotta quantità di dati utilizzati per il calcolo delle stime.
-
-\subsection*{Attesa nell'arco della giornata a partire dal sistema scarico}
-I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-2}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-2}).
 
 \begin{table}[ht]
 \centering
@@ -421,22 +474,6 @@ $t$ & Mean & Std. Dev. \\
 \label{fig:esperimenti-simulazione-2}
 \end{figure}
 
-Per la realizzazione dei grafici è stato attivato il meccanismo di svuotamento del sistema esclusivamente nell'ultima run perché, solo al superamento del tempo di simulazione $\tau$, si verifica la condizione di blocco degli arrivi (\textit{"close the door"}) e quindi il sistema deve essere riportato alle condizioni iniziali. Questo perché, nel momento in cui viene arrestata la simulazione ad un istante $t$, si è interessati ai soli eventi che occorrono in $(0, t]$ e non a quelli appartenenti a $(t, t + \Delta]$ che rappresenta l'intervallo di tempo necessario a svuotare il sistema.
-\newpage
-Di seguito è riportata una serie di osservazioni relative ai risultati ottenuti:
-\begin{itemize}
-\item Il fatto che le curve, in corrispondenza $t = \tau = 480\ min$, intersechino i rispettivi valori medi (mostrati tramite linee rosse tratteggiate) rappresenta un consistency check per il simulatore, perché tali sono stati computati su finestre di medesima ampiezza.
-\item Per quanto riguarda i ticket \uo{} e \pp{}, esiste una correlazione tra la pendenza delle curve e la priorità del flusso corrispondente. La spiegazione di questo fenomeno è data dal fatto che flussi prioritari impiegano meno tempo a stabilizzarsi poiché rallentati da un numero inferiore di richieste.
-
-Ad esempio, in figura \ref{fig:esperimenti-simulazione-2a} il valore medio giornaliero ricade nell'intervallo della misura effettuata a circa tre ore dall'apertura, mentre lo stesso si verifica in figura \ref{fig:esperimenti-simulazione-2d} dopo circa cinque.
-\item Poiché l'utilizzazione dei ticket \sr{} è bassa, mentre quella di \uo{} e \pp{} è alta, è molto probabile che inizialmente all'arrivo di un ticket del primo tipo, il server dedicato stia processando una richiesta degli altri due. Questo fenomeno è enfatizzato dal fatto che inizialmente non vi sono clienti nel sistema.
-
-Con l'avanzare del tempo, invece, è sempre meno probabile che ticket di tipo \uo{} oppure \pp{} rallentino quelli di \sr{}, per via dello stabilizzarsi dell'occupazione. 
-\end{itemize}
-
-\subsection*{Attesa nell'arco della giornata a partire da condizioni iniziali non nulle}
-I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-3}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-3}).
-
 \begin{table}[ht]
 \centering
 \begin{subtable}{0.33\textwidth}
@@ -671,9 +708,22 @@ $t$ & Mean & Std. Dev. \\
 \label{fig:esperimenti-simulazione-3}
 \end{figure}
 
-Di seguito è riportata una serie di osservazioni relative ai risultati ottenuti:
-\begin{itemize}
-\item Rispetto all'esperimento precedente, le curve relative a ticket \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} mostrano una traslazione che anticipa l'istante di tempo in cui il valore medio ricade per la prima volta all'interno di un intervallo di confidenza stimato.
 
-Poiché le code considerate hanno la priorità maggiore, l'andamento delle corrispondenti curve non risente della presenza di condizioni iniziali non nulle, perché le richieste ad esse appartenenti non subiscono ritardi dovuti alla presenza di altre di diverso tipo.
-\end{itemize}
+\begin{figure}[ht]
+\centering
+\begin{subfigure}[b]{0.8\textwidth}
+\centering
+\includegraphics[width=\textwidth]{plots/d-staz-G-ic}
+\caption{\uo{} e \pp{}}
+\label{fig:esperimenti-simulazione-4a}
+\end{subfigure}
+\vskip\baselineskip    
+\begin{subfigure}[b]{0.8\textwidth}  
+\centering 
+\includegraphics[width=\textwidth]{plots/d-staz-D-ic}
+\caption{\sr{}}
+\label{fig:esperimenti-simulazione-4b}
+\end{subfigure}
+\caption{Raggiungimento dello stato stazionario del sistema}
+\label{fig:esperimenti-simulazione-4}
+\end{figure}
