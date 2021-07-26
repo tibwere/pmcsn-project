@@ -1,3 +1,1 @@
-seed = 9 per 1c
-
-seed = 12 per gli altri
+seed = TERM_INIT_SEED = 9
