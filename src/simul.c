@@ -21,6 +21,7 @@
 //#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
 //#define STATIONARY
+//#define STOP_BATCH (256)
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
@@ -736,14 +737,15 @@ statistics_t *simulation_run(void)
             batch_index++;
             stat = load_statistics(area, number_of_completions);
             //printf("%d,%lf\n", batch_index, stat->d[3]);
-            //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
+            printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
             //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
             //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-            printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
+            //printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
 
-            if (STOP_BATCH == 1) 
-                //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
-                printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
+            /* Uncomment these lines to plot stationary delay */
+            // if (STOP_BATCH == 1) 
+            //     printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
+            //     //printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
 
             free(stat);
             memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
