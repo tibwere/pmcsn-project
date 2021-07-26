@@ -16,7 +16,7 @@ tickets_str = [
 
 
 def plot_delay_M(ticket):
-    qos = [15,20,30,120,20,45]
+    qos = [15,20,45,120,20,45]
 
     curdir = os.path.dirname(os.path.abspath(__file__))
     df = pd.read_csv(curdir + "/../doc/figs/plots/data/d-trans.csv")
