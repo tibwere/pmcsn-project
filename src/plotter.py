@@ -138,8 +138,8 @@ def plot_delay_t_stationary(type, show_interval=False):
 
 if __name__ == "__main__":
 
-    for i in range(6):
-        plot_delay_M(i)
+    # for i in range(6):
+    #     plot_delay_M(i)
 
     # for i in range(6):
     #     plot_delay_t_terminating(i, "day-from-empty", 60)
@@ -150,5 +150,5 @@ if __name__ == "__main__":
     # plot_delay_t_stationary('G')
     # plot_delay_t_stationary('D')
 
-    # plot_delay_t_stationary('G', show_interval=True)
-    # plot_delay_t_stationary('D', show_interval=True)
+    plot_delay_t_stationary('G', show_interval=True)
+    plot_delay_t_stationary('D', show_interval=True)
