@@ -16,7 +16,7 @@ tickets_str = [
 
 
 def plot_delay_M(ticket):
-    qos = [15,20,45,120,20,45]
+    qos = [10,15,45,120,20,45]
 
     curdir = os.path.dirname(os.path.abspath(__file__))
     df = pd.read_csv(curdir + "/../doc/figs/plots/data/d-trans.csv")
@@ -141,14 +141,14 @@ if __name__ == "__main__":
     for i in range(6):
         plot_delay_M(i)
 
-    for i in range(6):
-        plot_delay_t_terminating(i, "day-from-empty", 60)
+    # for i in range(6):
+    #     plot_delay_t_terminating(i, "day-from-empty", 60)
 
-    for i in range(6):
-        plot_delay_t_terminating(i, "day-from-mean-values", 460)
+    # for i in range(6):
+    #     plot_delay_t_terminating(i, "day-from-mean-values", 460)
 
-    plot_delay_t_stationary('G')
-    plot_delay_t_stationary('D')
+    # plot_delay_t_stationary('G')
+    # plot_delay_t_stationary('D')
 
-    plot_delay_t_stationary('G', show_interval=True)
-    plot_delay_t_stationary('D', show_interval=True)
+    # plot_delay_t_stationary('G', show_interval=True)
+    # plot_delay_t_stationary('D', show_interval=True)
