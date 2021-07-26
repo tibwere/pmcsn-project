@@ -1,11 +1,22 @@
+#!/usr/bin/python3
 import os
+from matplotlib.transforms import Transform
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 
+tickets_str = [
+    "'Unica Operazione' (BancoPosta)",
+    "'Pagamenti & Prelievi' (BancoPosta)",
+    "'Unica Operazione' (Standard)",
+    "'Pagamenti & Prelievi' (Standard)",
+    "'Spedizioni & Ritiri' (BancoPosta)",
+    "'Spedizioni & Ritiri' (Standard)"        
+]
 
-def plotter(ticket):
-    qos = [15,20,30,90,20,45]
+
+def plot_delay_M(ticket):
+    qos = [15,20,30,120,20,45]
 
     curdir = os.path.dirname(os.path.abspath(__file__))
     df = pd.read_csv(curdir + "/../doc/figs/plots/data/d-trans.csv")
@@ -16,11 +27,21 @@ def plotter(ticket):
     w = df["width"]
 
     plt.xticks(np.arange(2, 6, step=1))
-    #plt.ylim(4.5,6.5)
-    plt.ylabel("Interval estimate of d[" + str(ticket) +"]")
-    plt.xlabel("Number of servers")
+    plt.title(f"Intervallo di confidenza per l'attesa media di:\n{tickets_str[ticket]}")
+    plt.ylabel(f"Attesa media (min)")
+    plt.xlabel("Numero di server (M)")
 
     plt.axhline(y=qos[ticket], color='r', linestyle='--', label='QoS')
+    plt.text(
+        4.8,
+        qos[ticket],
+        str(qos[ticket]),
+        fontsize=10,
+        va="center",
+        ha="center",
+        color="red",
+        backgroundcolor="white"
+    )
 
     plt.plot(x, y, "ko")
     plt.plot([x, x], [y - w, y + w], color='k', linestyle='-', linewidth=2)
@@ -39,15 +60,8 @@ def get_mean(ticket):
     return df["stat"].iloc[0]
 
 
-def plot_line(ticket, filename):
-    tickets_str = [
-        "'Unica Operazione' (BancoPosta)",
-        "'Pagamenti & Prelievi' (BancoPosta)",
-        "'Unica Operazione' (Standard)",
-        "'Pagamenti & Prelievi' (Standard)",
-        "'Spedizioni & Ritiri' (BancoPosta)",
-        "'Spedizioni & Ritiri' (Standard)"        
-    ]
+def plot_delay_t_terminating(ticket, filename, xtext):
+
     curdir = os.path.dirname(os.path.abspath(__file__))
     df = pd.read_csv(f"{curdir}/../doc/figs/plots/data/{filename}.csv")
     df = df[ df["ticket"] == ticket ]
@@ -57,26 +71,38 @@ def plot_line(ticket, filename):
     x = df["t"]
     y = df["stat"]
     w = df["width"]
+    mean = get_mean(ticket)
 
     plt.xticks(np.arange(0, 500, step=60))
-    #plt.ylim(4.5,6.5)
-    plt.ylabel(f"Delay of {tickets_str[ticket]} (min)")
-    plt.xlabel("Time (min)")
+
+    plt.title(f"Attesa media di {tickets_str[ticket]}\nal variare dell'ampiezza dell'intervallo temporale considerato")
+    plt.ylabel(f"Attesa media (min)")
+    plt.xlabel("Tempo (min)")
 
     plt.plot(x, y, "k.")
     plt.plot(x, y)
     plt.plot([x, x], [y - w, y + w], color='k', linestyle='-', linewidth=2)
-    plt.axhline(y=get_mean(ticket), color='r', linestyle='--', label="mean")
-
+    plt.axhline(y=mean, color='r', linestyle='--', label="mean")
+    plt.text(
+        xtext,
+        mean,
+        str(mean),
+        fontsize=10,
+        va="center",
+        ha="center",
+        color="red",
+        backgroundcolor="white"
+    )
+    
     plt.legend()
 
     plt.savefig(f"{curdir}/../doc/figs/plots/{filename}-{ticket}.png")
     plt.show()
 
-def plot_stat(type):
+def plot_delay_t_stationary(type, show_interval=False):
     type_str = [
-        "Delay of 'Unica Operazione' e 'Pagamenti & Prelievi'",
-        "Delay of 'Spedizioni & Ritiri'"        
+        "'Unica Operazione' e 'Pagamenti & Prelievi'",
+        "'Spedizioni & Ritiri'"        
     ]
     x_ticks = np.array([1,8,16,32,64,128,256])
     index = 0 if type == 'G' else 1
@@ -92,22 +118,37 @@ def plot_stat(type):
     w = df["width"]
 
     plt.xticks(x_ticks)
-    #plt.ylim(4.5,6.5)
-    plt.ylabel(f"Delay of {type_str[index]} (min)")
-    plt.xlabel("Number of batches (K)")
+
+    plt.title(f"Raggiungimento della stazionarietà dell'attesa media di:\n{type_str[index]}")
+    plt.ylabel(f"Attesa media (min)")
+    plt.xlabel("Numero di batches (K)")
 
     plt.plot(x, y, "ko")
     plt.plot(x, y)
-    #plt.plot([x, x], [y - w, y + w], color='k', linestyle='-', linewidth=2)
-    #plt.axhline(y=get_mean(ticket), color='r', linestyle='--', label="mean")
-    #plt.legend()
 
-    plt.savefig(f"{curdir}/../doc/figs/plots/d-staz-{type}.png")
+    if show_interval:
+        plt.plot([x, x], [y - w, y + w], color='k', linestyle='-', linewidth=2)
+
+    if show_interval:
+        plt.savefig(f"{curdir}/../doc/figs/plots/d-staz-{type}-ic.png")
+    else:
+        plt.savefig(f"{curdir}/../doc/figs/plots/d-staz-{type}.png")
+
     plt.show()   
 
 if __name__ == "__main__":
 
-    plot_stat('G')
-    plot_stat('D')
-    # for i in range(6):
-    #     plot_line(i, "day-from-mean-values")
+    for i in range(6):
+        plot_delay_M(i)
+
+    for i in range(6):
+        plot_delay_t_terminating(i, "day-from-empty", 60)
+
+    for i in range(6):
+        plot_delay_t_terminating(i, "day-from-mean-values", 460)
+
+    plot_delay_t_stationary('G')
+    plot_delay_t_stationary('D')
+
+    plot_delay_t_stationary('G', show_interval=True)
+    plot_delay_t_stationary('D', show_interval=True)
