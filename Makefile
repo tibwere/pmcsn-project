@@ -8,9 +8,11 @@ LIBS 			= -lm
 DEPS 			= $(INCLUDE_DIR)/rngs.h $(INCLUDE_DIR)/rvgs.h $(INCLUDE_DIR)/rvms.h
 BIN_OBJ 		= $(OBJ_DIR)/simul.o
 DEPS_OBJ 		= $(OBJ_DIR)/rngs.o $(OBJ_DIR)/rvgs.o $(OBJ_DIR)/rvms.o
+IMP_OBJ		= $(OBJ_DIR)/improved_simul.o
 EST_OBJ		= $(OBJ_DIR)/estimate.o
 UVS_OBJ		= $(OBJ_DIR)/uvs.o
 BIN			= simul
+IMP			= improved_simul
 EST			= estimate
 UVS			= uvs
 
@@ -23,13 +25,16 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS) create-directories
 simulator: $(BIN_OBJ) $(DEPS_OBJ)
 	$(CC) -o $(BIN_DIR)/$(BIN) $^ $(CFLAGS) $(LIBS)
 	
+improved_simulator: $(IMP_OBJ) $(DEPS_OBJ)
+	$(CC) -o $(BIN_DIR)/$(IMP) $^ $(CFLAGS) $(LIBS)
+	
 estimate: $(EST_OBJ) $(DEPS_OBJ)
 	$(CC) -o $(BIN_DIR)/$(EST) $^ $(CFLAGS) $(LIBS)
 
 uvs: $(UVS_OBJ) $(DEPS_OBJ)
 	$(CC) -o $(BIN_DIR)/$(UVS) $^ $(CFLAGS) $(LIBS)
 
-all: simulator estimate uvs
+all: simulator improved_simulator estimate uvs
 
 .PHONY: create-directories clean clean-all
 
