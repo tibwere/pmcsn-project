@@ -1,0 +1,89 @@
+\chapter{Miglioria dell'algoritmo di schedulazione}
+Nelle sezioni che seguono vengono ripercorsi i passi dell'algoritmo seguito nei capitoli precedenti, al fine di presentare le differenze introdotte a seguito dell'adozione del nuovo meccanismo di schedulazione.
+\section{Presentazione del caso di studio}
+La descrizione del caso di studio rimane pressoché inalterata, ad eccezione della presenza di alcune regole addizionali per la scelta dei ticket da servire.
+
+Definiti:
+\begin{itemize}
+\item $A$ un cliente titolare di un conto \textsl{BancoPosta}, possessore di un ticket di tipo \uo{} o \pp{}.
+\item $B$ un cliente \textbf{non} titolare di un conto \textsl{BancoPosta}, possessore di un ticket di tipo \uo{} o \pp{}.
+\item $C$ un cliente possessore di un ticket di tipo \sr{}.
+\end{itemize}
+Di seguito, sono riportate le regole aggiuntive:
+\begin{itemize}
+\item Dopo un certo numero di clienti di tipo $A$ serviti, gli sportelli non dedicati devono necessariamente servire, se presenti, altri di tipo $B$, privilegiando la fila più lunga. 
+\item Dopo un certo numero di clienti di tipo $C$ serviti, lo sportello dedicato deve necessariamente servire, se presenti, altri di tipo $B$, privilegiando la fila più lunga.
+\item Nel caso in cui non vi siano clienti di tipo $C$ da servire, lo sportello dedicato dà priorità a quelli di tipo $B$, privilegiando la fila più lunga.
+\end{itemize}
+\section{Obiettivi dello studio}
+L'obiettivo di questo studio migliorativo è quello di diminuire, rispetto ai risultati precedentemente ottenuti, il numero degli sportelli da mantenere operativi in un'intera giornata lavorativa, continuando a garantire il rispetto dei requisiti di qualità stabiliti nel capitolo \ref{chp:obiettivi}.
+\section{Modello concettuale}
+Il modello concettuale proposto nel capitolo \ref{chp:modello-concettuale} continua ad essere rappresentativo anche a seguito dell'introduzione della miglioria. 
+
+Pertanto:
+\begin{itemize}
+\item Le variabili che descrivono univocamente, ad ogni istante di tempo, lo stato del sistema
+\item Le assunzioni alla base del modello concettuale
+\end{itemize}
+sono le medesime introdotte in tale capitolo.
+\section{Modello delle specifiche}
+Dal modello delle speficiche descritto nel capitolo \ref{chp:modello-specifiche}:
+\begin{itemize}
+\item Le variabili matematiche e le equazioni che le legano
+\item Le assunzioni di base
+\item I parametri di input del sistema
+\end{itemize}
+rimangono validi per il sistema, anche a seguito dell'introduzione della miglioria.
+
+Di seguito, sono riportate le versioni rivisitate degli algoritmi di schedulazione \ref{alg:miglioria-modello-specifiche-1} e \ref{alg:miglioria-modello-specifiche-2}.
+
+\begin{algorithm}[ht]
+\SetAlgoLined
+\While{true}{
+\textcolor{blue}{\uIf{reached threshold}{
+		\textit{pick the longest queue between \texttt{UNICA\_OP\_STD} and \texttt{PAGAM\_PREL\_STD}}\;
+		\textit{processes the first ticket inside that queue}\;
+	}}
+	\uElseIf{\texttt{UNICA\_OP\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{PAGAM\_PREL\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{UNICA\_OP\_STD} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{PAGAM\_PREL\_STD} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+}
+\caption{Algoritmo di schedulazione del servente generico (con {\color{blue}patch})}
+\label{alg:miglioria-modello-specifiche-1}
+\end{algorithm}
+
+\begin{algorithm}
+\While{true}{
+	\textcolor{blue}{\uIf{reached threshold and there are tickets \texttt{UNICA\_OP\_STD} or \texttt{PAGAM\_PREL\_STD}}{
+		\textit{pick the longest queue between \texttt{UNICA\_OP\_STD} and \texttt{PAGAM\_PREL\_STD}}\;
+		\textit{processes the first ticket inside that queue}\;
+	}}
+	\uElseIf{\texttt{SPED\_RIT\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{SPED\_RIT\_STD} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\textcolor{blue}{\uElseIf{there are tickets \texttt{UNICA\_OP\_STD} or \texttt{PAGAM\_PREL\_STD}}{
+		\textit{pick the longest queue between them}\;
+		\textit{processes the first ticket inside that queue}\;
+	}}
+	\uElseIf{\texttt{UNICA\_OP\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{PAGAM\_PREL\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+}
+\caption{Algoritmo di schedulazione del servente dedicato (con {\color{blue}patch})}
+\label{alg:miglioria-modello-specifiche-2}
+\end{algorithm}
