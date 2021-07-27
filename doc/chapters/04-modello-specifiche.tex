@@ -99,69 +99,51 @@ La politica di scheduling del sistema assume caratteristiche tipiche sia dello s
 
 Al fine di agevolare la comprensione del funzionamento dello scheduler di sistema, di seguito sono riportati gli pseudocodici \ref{alg:modello-specifiche-1} e \ref{alg:modello-specifiche-2} che descrivono, rispettivamente, il comportamento del servente generico e di quello dedicato.
 
-\begin{algorithm}
+\begin{algorithm}[ht]
+\SetAlgoLined
+\While{true}{
+	\uIf{\texttt{UNICA\_OP\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{PAGAM\_PREL\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{UNICA\_OP\_STD} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{PAGAM\_PREL\_STD} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+}
 \caption{Algoritmo di schedulazione del servente generico}
 \label{alg:modello-specifiche-1}
-\begin{algorithmic}[1]
-\Procedure{GeneralPurposeServer}{}
-\While{true}
-	\If{customer owns \textsl{BancoPosta}}
-		\If{\textsl{UnicaOperazioneBP} queue not empty}
-			\State \textit{processes the first ticket of that type}
-		\Else
-			\If{\textsl{PagamentiPrelieviBP} queue not empty}
-				\State \textit{processes the first ticket of that type}
-			\EndIf
-		\EndIf
-	\Else
-		\If{\textsl{UnicaOperazione} queue not empty}
-			\State \textit{processes the first ticket of that type}
-		\Else
-			\If{\textsl{PagamentiPrelievi} queue not empty}
-				\State \textit{processes the first ticket of that type}
-			\EndIf
-		\EndIf
-	\EndIf
-\EndWhile
-\EndProcedure
-\end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
-\caption{Algoritmo di schedulazione del servente dedicato a ticket \sr{}}
+\While{true}{
+	\uIf{\texttt{SPED\_RIT\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{SPED\_RIT\_STD} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{UNICA\_OP\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{PAGAM\_PREL\_BP} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{UNICA\_OP\_STD} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+	\uElseIf{\texttt{PAGAM\_PREL\_STD} queue not empty}{
+		\textit{processes the first ticket of that type}\;
+	}
+}
+\caption{Algoritmo di schedulazione del servente dedicato}
 \label{alg:modello-specifiche-2}
-\begin{algorithmic}[1]
-\Procedure{DedicatedServer}{}
-\While{true}
-	\If{customer owns \textsl{BancoPosta}}
-		\If{\textsl{SpedizioneRitiriBP} queue not empty}
-			\State \textit{processes the first ticket of that type}
-		\Else
-			\If{\textsl{UnicaOperazioneBP} queue not empty}
-				\State \textit{processes the first ticket of that type}
-			\Else
-				\If{\textsl{PagamentiPrelieviBP} queue not empty}
-					\State \textit{processes the first ticket of that type}
-				\EndIf
-			\EndIf
-		\EndIf
-	\Else
-		\If{\textsl{SpedizioneRitiri} queue not empty}
-			\State \textit{processes the first ticket of that type}
-		\Else
-			\If{\textsl{UnicaOperazione} queue not empty}
-				\State \textit{processes the first ticket of that type}
-			\Else
-				\If{\textsl{PagamentiPrelievi} queue not empty}
-					\State \textit{processes the first ticket of that type}
-				\EndIf
-			\EndIf
-		\EndIf
-	\EndIf
-\EndWhile
-\EndProcedure
-\end{algorithmic}
 \end{algorithm}
+
 
 Per ciascun servente generale, ovvero $\forall\ i \neq \ded$, il tempo medio di servizio è pari a:
 \begin{equation}
