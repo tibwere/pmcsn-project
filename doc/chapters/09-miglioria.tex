@@ -107,7 +107,7 @@ Per la realizzazione della miglioria, a livello di codice, sono state definite d
 \item \texttt{{\color{code_purple}int} counter\_served\_gen\_bp}: valore intero utilizzato per mantenere il numero di richieste di tipo \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} processate dai server generali.
 \item \texttt{{\color{code_purple}int} counter\_served\_sr}: valore intero utilizzato per mantenere il numero di richieste di tipo \sr{} processate dal server dedicato.
 \end{itemize}
-Al fine di rendere efficace l'implementazione della miglioria, sono stati selezionati, tramite un approccio euristico, i seguenti valori-soglia:
+Al fine di rendere efficace l'implementazione della miglioria, sono stati selezionati, tramite un approccio euristico, i seguenti valori soglia:
 \begin{itemize}
 \item \texttt{MAX\_CONT\_SERVED\_GEN\_BP = 7}, per la variabile \texttt{counter\_served\_gen\_bp}.
 \item \texttt{MAX\_CONT\_SERVED\_SR = 3}, per la variabile \texttt{counter\_served\_sr}.
@@ -152,7 +152,7 @@ Di seguito, è riportato l'algoritmo di simulazione con le opportune modifiche (
 \end{center}
 \item {\color{purple}Se $\mathtt{i \in \lbrace 0, 1 \rbrace}$, \texttt{counter\_served\_gen\_bp} viene settato a:
 \begin{center}
-\texttt{(counter\_served\_gen\_bp + 1) mod(MAX\_CONT\_SERVED\_GEN\_BP + 1)}\footnote{\label{note:miglioria-modello-computazionale-1}L'incremento modulare consente di resettare il contatore una volta superato il valore-soglia. Ciò avviene solo quando le code relative a ticket di tipo \uo{} standard e \pp{} standard sono vuote e quindi non hanno bisogno di essere agevolate dal meccanismo introdotto dalla miglioria.}
+\texttt{(counter\_served\_gen\_bp + 1) mod(MAX\_CONT\_SERVED\_GEN\_BP + 1)}\footnote{\label{note:miglioria-modello-computazionale-1}L'incremento modulare consente di resettare il contatore una volta superato il valore soglia. Ciò avviene solo quando le code relative a ticket di tipo \uo{} standard e \pp{} standard sono vuote e quindi non hanno bisogno di essere agevolate dal meccanismo introdotto dalla miglioria.}
 \end{center}}
 \end{itemize}
 
@@ -172,7 +172,7 @@ Di seguito, è riportato l'algoritmo di simulazione con le opportune modifiche (
 \texttt{customers[i] = customers[i] - 1}
 \end{center}
 \begin{itemize}
-\item {\color{purple}Se la variabile \texttt{counter\_served\_gen\_bp} ha raggiunto il suo valore-soglia ed esiste una richiesta pendente di tipo \uo{} standard o \pp{} standard:
+\item {\color{purple}Se la variabile \texttt{counter\_served\_gen\_bp} ha raggiunto il suo valore soglia ed esiste una richiesta pendente di tipo \uo{} standard o \pp{} standard:
 \begin{center}
 \begin{tabular}{l l l}
 \texttt{q} & \texttt{=} & $\mathtt{\argmax_{j \in \lbrace 2, 3 \rbrace}{\left(queue[j]\right)}}$ \\
@@ -205,7 +205,7 @@ Di seguito, è riportato l'algoritmo di simulazione con le opportune modifiche (
 \texttt{customers[i] = customers[i] - 1}
 \end{center}
 \begin{itemize}
-\item {\color{purple}Se la variabile \texttt{counter\_served\_sr} ha raggiunto il suo valore-soglia ed esiste una richiesta pendente di tipo \uo{} standard o \pp{} standard:
+\item {\color{purple}Se la variabile \texttt{counter\_served\_sr} ha raggiunto il suo valore soglia ed esiste una richiesta pendente di tipo \uo{} standard o \pp{} standard:
 \begin{center}
 \begin{tabular}{l l l}
 \texttt{q} & \texttt{=} & $\mathtt{\argmax_{j \in \lbrace 2, 3 \rbrace}{\left(queue[j]\right)}}$ \\
@@ -262,3 +262,20 @@ La variabile \texttt{counter\_served\_gen\_bp} viene settata a:
 \end{itemize}
 \end{itemize}
 \end{enumerate}
+
+\section{Verifica}
+Da fare alle isole Tremiti
+
+\section{Validazione}
+Per la fase di validazione, è stato seguito lo stesso approccio mostrato nel capitolo \ref{chp:validazione}. Per semplicità, di seguito è riportata la configurazione dei parametri utilizzati per la simulazione:
+\begin{itemize}
+\item \texttt{B = 960}
+\item \texttt{K = 64}
+\item \texttt{STOP = 61440}
+\item \texttt{STAT\_INIT\_SEED = 12345}
+\end{itemize}
+Inoltre, è stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza.
+
+\subsection{Blocco del flusso degli arrivi di tipo \sr{} e innalzamento valore soglia}
+
+\subsection{Blocco del flusso degli arrivi di tipo \uo{} e \pp{} e innalzamento valore soglia}
