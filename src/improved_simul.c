@@ -183,7 +183,7 @@ void print_update(int event_type, int event_index, int service_completed)
     printf("Dedicated server:\n\tStatus          = %s \n", tmp);
     printf("\tNext completion = %lf\n\n", events->ded_completion);
 
-    printf("===========================================================\n");
+    printf("=============================================================\n");
 }
 
 /*
