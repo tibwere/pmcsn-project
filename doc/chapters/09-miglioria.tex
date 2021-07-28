@@ -15,7 +15,7 @@ Di seguito, sono riportate le regole aggiuntive:
 \item Dopo un certo numero di clienti di tipo $C$ serviti, lo sportello dedicato deve necessariamente servire, se presenti, altri di tipo $B$, privilegiando la fila più lunga.
 \item Nel caso in cui non vi siano clienti di tipo $C$ da servire, lo sportello dedicato dà priorità a quelli di tipo $B$, privilegiando la fila più lunga.
 \end{itemize}
-\section{Obiettivi dello studio}
+\section{Obiettivi dello studio}\label{sec:miglioria-obiettivi}
 L'obiettivo di questo studio migliorativo è quello di diminuire, rispetto ai risultati precedentemente ottenuti, il numero degli sportelli da mantenere operativi in un'intera giornata lavorativa, continuando a garantire il rispetto dei requisiti di qualità stabiliti nel capitolo \ref{chp:obiettivi}.
 \section{Modello concettuale}
 Il modello concettuale proposto nel capitolo \ref{chp:modello-concettuale} continua ad essere rappresentativo anche a seguito dell'introduzione della miglioria. 
@@ -350,3 +350,151 @@ in accordo rispettivamente alle equazioni \ref{eqn:validazione-24} e \ref{eqn:va
 La congruenza dei risultati ottenuti con quelli della sezione \ref{sec:validazione-blocco-uo-pp} è una naturale conseguenza del fatto che il blocco di questi flussi fa in modo che il meccanismo introdotto dalla miglioria non venga mai attivato, motivo per cui non è stato necessario innalzare i valori soglia.
 
 Per cui, poiché i valori teorici ricadono all'interno dei rispettivi intervalli con un livello di confidenza del 95\%, il comportamento del simulatore è, anche in questo caso, conforme al modello analitico \ref{fig:validazione-modello-analitico-1b}.
+
+\section{Esperimenti di simulazione}
+In accordo agli obiettivi dello studio (sez. \ref{sec:miglioria-obiettivi}), è stata considerata unicamente l'analisi dello stato transiente del sistema, per gli stessi motivi discussi nel capitolo \ref{chp:esperimenti-simulazione}.
+
+\subsection{Progetto degli esperimenti}
+Per realizzare l'esperimento di simulazione è stata adottata, anche in questo caso, la tecnica \textit{replication}. Per semplicità, di seguito è riportata la configurazione dei parametri utilizzati:
+\begin{itemize}
+\item \texttt{TERM\_INIT\_SEED = 9}
+\item \texttt{ENSEMBLE\_SIZE = 300}
+\item \texttt{START = 0}
+\item \texttt{STOP = 480}
+\end{itemize}
+
+Inoltre:
+\begin{itemize}
+\item È stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza.
+\item È stato utilizzato il programma \texttt{uvs} per il calcolo di media e deviazione standard.
+\end{itemize}
+
+Dal capitolo \ref{chp:esperimenti-simulazione}, è stato individuato $M^* = 4$ come numero minimo di sportelli da mantenere operativi in una giornata lavorativa. Al fine di determinare un risultato più soddisfacente di quello precedentemente ottenuto, ovvero trovare $\accentset{\sim}{M} < M^*$ continuando a garantire gli stessi QoS (cap. \ref{chp:obiettivi}), è stata analizzata l'attesa media di ciascun flusso d'arrivo al variare di $M$, seguendo lo stesso approccio utilizzato in \ref{sec:esperimenti-simulazione-1}.
+
+\subsection{Esecuzione degli esperimenti ed analisi degli output}
+I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:miglioria-esperimenti-simulazione-1}) che in forma grafica (fig. \ref{fig:miglioria-esperimenti-simulazione-1}).
+
+È immediato osservare che, per raggiungere gli obiettivi precedentemente descritti, il numero minimo di serventi è $\accentset{\sim}{M} = 3$. Infatti, dalle figure \ref{fig:esperimenti-simulazione-1a}, \ref{fig:esperimenti-simulazione-1b}, \ref{fig:esperimenti-simulazione-1c} e \ref{fig:esperimenti-simulazione-1d}, si evince che con $M = 2$ non è possibile rispettare i corrispondenti QoS (in tabella \ref{table:miglioria-esperimenti-simulazione-1a} sono evidenziati in {\color{red}rosso} i valori di attesa che li superano).
+
+\subsection{Grafici e tabelle}
+\begin{table}[ht]
+\centering
+\begin{subtable}{0.33\textwidth}
+\centering
+{\tablecolors
+\begin{tabular}{|c|c|c|}
+\hline
+$i$ & Media & Dev. std. \\
+\hline
+0 & {\color{red}25.377} & 12.256 \\
+\hline
+1 & {\color{red}79.039} & 61.215 \\
+\hline
+2 & {\color{red}216.057} & 78.006 \\
+\hline
+3 & {\color{red}358.342} & 110.317 \\
+\hline
+4 & 19.265 & 14.421 \\
+\hline
+5 & 48.454 & 34.731 \\
+\hline
+\end{tabular}}
+\caption{$M = 2$}
+\label{table:miglioria-esperimenti-simulazione-1a}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+\centering
+{\tablecolors
+\begin{tabular}{|c|c|c|}
+\hline
+$i$ & Media & Dev. std. \\
+\hline
+0 & 8.690 & 4.086 \\
+\hline
+1 & 13.984 & 9.231 \\
+\hline
+2 & 48.015 & 33.204 \\
+\hline
+3 & 126.800 & 72.557 \\
+\hline
+4 & 18.161 & 11.651 \\
+\hline
+5 & 47.876 & 36.553 \\
+\hline
+\end{tabular}}
+\caption{$M = 3$}
+\end{subtable}%
+\begin{subtable}{0.33\textwidth}
+\centering
+{\tablecolors
+\begin{tabular}{|c|c|c|}
+\hline
+$i$ & Media & Dev. std. \\
+\hline
+0 & 3.830 & 2.359 \\
+\hline
+1 & 5.015 & 4.178 \\
+\hline
+2 & 10.169 & 8.748 \\
+\hline
+3 & 28.515 & 29.343 \\
+\hline
+4 & 15.978 & 12.133 \\
+\hline
+5 & 38.608 & 33.608 \\
+\hline
+\end{tabular}}
+\caption{$M = 4$}
+\end{subtable}
+\caption{Attesa espressa in minuti, per ciascun flusso $i$, al variare di $M$}
+\label{table:miglioria-esperimenti-simulazione-1}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{subfigure}[b]{0.475\textwidth}
+\centering
+\includegraphics[width=\textwidth]{plots/d0-trans-imp}
+\caption{\uo{} BP}
+\label{fig:esperimenti-simulazione-1a}
+\end{subfigure}
+\hfill    
+\begin{subfigure}[b]{0.475\textwidth}  
+\centering 
+\includegraphics[width=\textwidth]{plots/d1-trans-imp}
+\caption{\pp{} BP}
+\label{fig:esperimenti-simulazione-1b} 
+\end{subfigure}
+
+\vskip\baselineskip
+
+\begin{subfigure}[b]{0.475\textwidth}   
+\centering 
+\includegraphics[width=\textwidth]{plots/d2-trans-imp}
+\caption{\uo{} STD}
+\label{fig:esperimenti-simulazione-1c}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.475\textwidth}   
+\centering 
+\includegraphics[width=\textwidth]{plots/d3-trans-imp}
+\caption{\pp{} STD}
+\label{fig:esperimenti-simulazione-1d}
+\end{subfigure}
+
+\vskip\baselineskip
+
+\begin{subfigure}[b]{0.475\textwidth}   
+\centering 
+\includegraphics[width=\textwidth]{plots/d4-trans-imp}
+\caption{\sr{} BP}    
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.475\textwidth}   
+\centering 
+\includegraphics[width=\textwidth]{plots/d5-trans-imp}
+\caption{\sr{} STD}    
+\end{subfigure}
+\caption{Attesa espressa in minuti, per ciascun flusso, al variare di $M$}
+\label{fig:miglioria-esperimenti-simulazione-1}
+\end{figure}
