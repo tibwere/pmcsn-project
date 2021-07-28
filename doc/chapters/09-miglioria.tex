@@ -264,7 +264,64 @@ La variabile \texttt{counter\_served\_gen\_bp} viene settata a:
 \end{enumerate}
 
 \section{Verifica}
-Da fare alle isole Tremiti
+Per la verifica, come effettuato anche nel capitolo \ref{chp:verifica}, è stata adottata la funzione \texttt{print\_update()}, modificata al fine di stampare a video anche il numero di ticket \textsl{BancoPosta}/\sr{} serviti consecutivamente, per poter controllare che tutte le modifiche introdotte con la miglioria operassero come atteso.
+
+\begin{figure}[ht]
+\centering
+\begin{subfigure}[b]{0.475\textwidth}
+\centering
+\includegraphics[width=\textwidth]{screenshots/improved/inc_counter_gen_BP}
+\caption{Incremento del counter di ticket \textsl{BancoPosta} serviti consecutivamente}    
+\label{fig:miglioria-verifica-1a}
+\end{subfigure}
+\hfill    
+\begin{subfigure}[b]{0.475\textwidth} 
+\centering 
+\includegraphics[width=\textwidth]{screenshots/improved/inc_counter_ded_SR}
+\caption{Incremento del counter di ticket \sr{} serviti consecutivamente}    
+\label{fig:miglioria-verifica-1b}
+\end{subfigure}
+\caption{Verifica del corretto incremento del counter}
+\label{fig:miglioria-verifica-1}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{subfigure}[b]{0.475\textwidth}
+\centering 
+\includegraphics[width=\textwidth]{screenshots/improved/exception_gen}
+\caption{Il servente generale processa un ticket non \textsl{BancoPosta}}   
+\label{fig:miglioria-verifica-2a}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.475\textwidth}   
+\centering 
+\includegraphics[width=\textwidth]{screenshots/improved/exception_ded}
+\caption{Il servente dedicato processa un ticket \uo{} o \pp{} \textbf{non} \textsl{BancoPosta}}    
+\label{fig:miglioria-verifica-2b}
+\end{subfigure}
+\caption{Verifica del corretto cambiamento della priorità a seguito del superamento della soglia}
+\label{fig:miglioria-verifica-2}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{subfigure}[b]{0.475\textwidth}  
+\centering 
+\includegraphics[width=\textwidth]{screenshots/improved/longest_queue_ded_no_SR}
+\caption{In assenza di \sr{}, il servente dedicato processa ticket della coda più lunga}   
+\label{fig:miglioria-verifica-3a}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.475\textwidth}  
+\centering 
+\includegraphics[width=\textwidth]{screenshots/improved/ded_sched_BP_if_no_STD}
+\caption{Il servente dedicato processa un ticket \uo{} o \pp{} \textbf{non} \textsl{BancoPosta}}    
+\label{fig:miglioria-verifica-3b}
+\end{subfigure}
+\caption{Verifica del corretto scheduling da parte del servente dedicato in assenza di ticket \sr{}}
+\label{fig:miglioria-verifica-3}
+\end{figure}
 
 \section{Validazione}
 Per la fase di validazione, è stato seguito lo stesso approccio mostrato nel capitolo \ref{chp:validazione}. Per semplicità, di seguito è riportata la configurazione dei parametri utilizzati per la simulazione:
@@ -374,7 +431,7 @@ Dal capitolo \ref{chp:esperimenti-simulazione}, è stato individuato $M^* = 4$ c
 \subsection{Esecuzione degli esperimenti ed analisi degli output}
 I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:miglioria-esperimenti-simulazione-1}) che in forma grafica (fig. \ref{fig:miglioria-esperimenti-simulazione-1}).
 
-È immediato osservare che, per raggiungere gli obiettivi precedentemente descritti, il numero minimo di serventi è $\accentset{\sim}{M} = 3$. Infatti, dalle figure \ref{fig:esperimenti-simulazione-1a}, \ref{fig:esperimenti-simulazione-1b}, \ref{fig:esperimenti-simulazione-1c} e \ref{fig:esperimenti-simulazione-1d}, si evince che con $M = 2$ non è possibile rispettare i corrispondenti QoS (in tabella \ref{table:miglioria-esperimenti-simulazione-1a} sono evidenziati in {\color{red}rosso} i valori di attesa che li superano).
+È immediato osservare che, per raggiungere gli obiettivi precedentemente descritti, il numero minimo di serventi è $\accentset{\sim}{M} = 3$. Infatti, dalle figure \ref{fig:miglioria-esperimenti-simulazione-1a}, \ref{fig:miglioria-esperimenti-simulazione-1b}, \ref{fig:miglioria-esperimenti-simulazione-1c} e \ref{fig:miglioria-esperimenti-simulazione-1d}, si evince che con $M = 2$ non è possibile rispettare i corrispondenti QoS (in tabella \ref{table:miglioria-esperimenti-simulazione-1a} sono evidenziati in {\color{red}rosso} i valori di attesa che li superano).
 
 \subsection{Grafici e tabelle}
 \begin{table}[ht]
@@ -456,14 +513,14 @@ $i$ & Media & Dev. std. \\
 \centering
 \includegraphics[width=\textwidth]{plots/d0-trans-imp}
 \caption{\uo{} BP}
-\label{fig:esperimenti-simulazione-1a}
+\label{fig:miglioria-esperimenti-simulazione-1a}
 \end{subfigure}
 \hfill    
 \begin{subfigure}[b]{0.475\textwidth}  
 \centering 
 \includegraphics[width=\textwidth]{plots/d1-trans-imp}
 \caption{\pp{} BP}
-\label{fig:esperimenti-simulazione-1b} 
+\label{fig:miglioria-esperimenti-simulazione-1b} 
 \end{subfigure}
 
 \vskip\baselineskip
@@ -472,14 +529,14 @@ $i$ & Media & Dev. std. \\
 \centering 
 \includegraphics[width=\textwidth]{plots/d2-trans-imp}
 \caption{\uo{} STD}
-\label{fig:esperimenti-simulazione-1c}
+\label{fig:miglioria-esperimenti-simulazione-1c}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.475\textwidth}   
 \centering 
 \includegraphics[width=\textwidth]{plots/d3-trans-imp}
 \caption{\pp{} STD}
-\label{fig:esperimenti-simulazione-1d}
+\label{fig:miglioria-esperimenti-simulazione-1d}
 \end{subfigure}
 
 \vskip\baselineskip
