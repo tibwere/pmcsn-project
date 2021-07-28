@@ -277,5 +277,76 @@ Per la fase di validazione, è stato seguito lo stesso approccio mostrato nel ca
 Inoltre, è stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza.
 
 \subsection{Blocco del flusso degli arrivi di tipo \sr{} e innalzamento valore soglia}
+Privando il sistema della generazione di arrivi di tipo \sr{}, come mostrato in figura \ref{fig:validazione-semplificazione-1}, e inoltre:
+\begin{itemize}
+\item Fissando $M = 4$
+\item Innalzando il valore soglia \texttt{MAX\_CONT\_SERVED\_GEN\_BP} a \texttt{1000}, per far sì che il meccanismo introdotto dalla miglioria non venga mai attivato
+\end{itemize}
+si ottengono i seguenti risultati:
+\begin{itemize}
+\item Mediante la simulazione:
+\begin{itemize}
+\item Il tempo medio d'attesa globale ottenuto è pari a:
+\begin{equation} 
+\bar{d}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{d}_{g,i} = (7.81 \pm 1.11)\ min
+\end{equation}
+\item Il tempo medio di risposta globale ottenuto è pari a:
+\begin{equation}
+\bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (22.90 \pm 1.32)\ min
+\end{equation}
+\end{itemize}
 
-\subsection{Blocco del flusso degli arrivi di tipo \uo{} e \pp{} e innalzamento valore soglia}
+\item Mediante l'analisi effettuata in riferimento al modello a code riportato in figura \ref{fig:validazione-modello-analitico-1a}:
+\begin{itemize}
+\item Il tempo medio d'attesa globale ottenuto è pari a:
+\begin{equation}
+E[T_{Q_g}]^{KP} = 13.101566\ min 
+\end{equation}
+\item Il tempo medio di risposta globale ottenuto è pari a:
+\begin{equation}
+E[T_{S_g}] = 16.851566\ min 
+\end{equation}
+\end{itemize}
+in accordo rispettivamente alle equazioni \ref{eqn:validazione-11} e \ref{eqn:validazione-13}.
+\end{itemize}
+
+I risultati ottenuti sono molto vicini a quelli della sezione \ref{sec:validazione-blocco-sr}, il che è ragionevole in quanto l'unica variazione tra il sistema privo di miglioria e quello in questione è dovuta al comportamento del server dedicato: la priorità maggiore è data alle richieste appartenenti alla coda più lunga tra quelle relative ai ticket di tipo \uo{} standard e \pp{} standard, piuttosto che assegnarla in modo inversamente proporzionale all'indice numerico della coda.
+
+Poiché, anche in questo caso, l'occupazione media ottenuta tramite la simulazione è pari a:
+\begin{equation}
+\bar{x}_g = 0.77 \pm 0.02
+\end{equation}
+si ritengono ragionevoli i risultati ottenuti per i motivi descritti nella sezione \ref{sec:validazione-blocco-sr}.
+
+\subsection{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}
+Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come mostrato in figura \ref{fig:validazione-semplificazione-2} e fissando $M = 4$, si ottengono i seguenti risultati:
+\begin{itemize}
+\item Mediante la simulazione:
+\begin{itemize}
+\item Il tempo medio d'attesa globale ottenuto è pari a:
+\begin{equation} 
+\bar{d}_d = p_{d,1}\cdot \bar{d}_{d,1} + p_{d,2}\cdot \bar{d}_{d,2} = (17.61 \pm 3.77)\ min
+\end{equation}
+\item Il tempo medio di risposta globale ottenuto è pari a:
+\begin{equation}
+\bar{w}_d = p_{d,1}\cdot \bar{w}_{d,1} + p_{d,2}\cdot \bar{w}_{d,2} = (32.79 \pm 4.06)\ min
+\end{equation}
+\end{itemize}
+
+\item Mediante l'analisi effettuata in riferimento al modello a code riportato in figura \ref{fig:validazione-modello-analitico-1b}:
+\begin{itemize}
+\item Il tempo medio d'attesa globale ottenuto è pari a:
+\begin{equation}
+E[T_{Q_d}]^{KP} = 18.245049\ min 
+\end{equation}
+\item Il tempo medio di risposta globale ottenuto è pari a:
+\begin{equation}
+E[T_{S_d}] = 33.245049\ min 
+\end{equation}
+\end{itemize}
+in accordo rispettivamente alle equazioni \ref{eqn:validazione-24} e \ref{eqn:validazione-26}.
+\end{itemize}
+
+La congruenza dei risultati ottenuti con quelli della sezione \ref{sec:validazione-blocco-uo-pp} è una naturale conseguenza del fatto che il blocco di questi flussi fa in modo che il meccanismo introdotto dalla miglioria non venga mai attivato, motivo per cui non è stato necessario innalzare i valori soglia.
+
+Per cui, poiché i valori teorici ricadono all'interno dei rispettivi intervalli con un livello di confidenza del 95\%, il comportamento del simulatore è, anche in questo caso, conforme al modello analitico \ref{fig:validazione-modello-analitico-1b}.
