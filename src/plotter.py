@@ -19,7 +19,8 @@ def plot_delay_M(ticket):
     qos = [10,15,45,120,20,45]
 
     curdir = os.path.dirname(os.path.abspath(__file__))
-    df = pd.read_csv(curdir + "/../doc/figs/plots/data/d-trans.csv")
+    # df = pd.read_csv(curdir + "/../doc/figs/plots/data/d-trans.csv")
+    df = pd.read_csv(curdir + "/../doc/figs/plots/data/d-trans-imp.csv")
     df = df[ df["ticket"] == ticket ]
 
     x = df["M"]
@@ -33,7 +34,8 @@ def plot_delay_M(ticket):
 
     plt.axhline(y=qos[ticket], color='r', linestyle='--', label='QoS')
     plt.text(
-        4.8,
+        # 4.8,
+        3.8,
         qos[ticket],
         str(qos[ticket]),
         fontsize=10,
@@ -48,7 +50,8 @@ def plot_delay_M(ticket):
 
     plt.legend()
 
-    plt.savefig(curdir + "/../doc/figs/plots/d" + str(ticket) + "-trans.png")
+    # plt.savefig(curdir + "/../doc/figs/plots/d" + str(ticket) + "-trans.png")
+    plt.savefig(curdir + "/../doc/figs/plots/d" + str(ticket) + "-trans-imp.png")
     plt.show()
 
 
@@ -138,8 +141,8 @@ def plot_delay_t_stationary(type, show_interval=False):
 
 if __name__ == "__main__":
 
-    # for i in range(6):
-    #     plot_delay_M(i)
+    for i in range(6):
+        plot_delay_M(i)
 
     # for i in range(6):
     #     plot_delay_t_terminating(i, "day-from-empty", 60)
@@ -150,5 +153,5 @@ if __name__ == "__main__":
     # plot_delay_t_stationary('G')
     # plot_delay_t_stationary('D')
 
-    plot_delay_t_stationary('G', show_interval=True)
-    plot_delay_t_stationary('D', show_interval=True)
+    # plot_delay_t_stationary('G', show_interval=True)
+    # plot_delay_t_stationary('D', show_interval=True)
