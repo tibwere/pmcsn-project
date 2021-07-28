@@ -5,14 +5,14 @@ In fase di verifica si è fatto uso della funzione \texttt{print\_update(\dots)}
 \centering
 \begin{subfigure}[b]{0.475\textwidth}
 \centering
-\includegraphics[width=\textwidth]{screenshots/ded_server_changes_behaviour}
+\includegraphics[width=\textwidth]{screenshots/original/ded_server_changes_behaviour}
 \caption{Cambio del comportamento del server dedicato}    
 \label{fig:verifica-1a}
 \end{subfigure}
 \hfill    
 \begin{subfigure}[b]{0.475\textwidth}  
 \centering 
-\includegraphics[width=\textwidth]{screenshots/ded_server_priority_sched}
+\includegraphics[width=\textwidth]{screenshots/original/ded_server_priority_sched}
 \caption{Schedulazione sul server dedicato}    
 \label{fig:verifica-1b}
 \end{subfigure}
@@ -22,14 +22,14 @@ In fase di verifica si è fatto uso della funzione \texttt{print\_update(\dots)}
 
 \begin{subfigure}[b]{0.475\textwidth}   
 \centering 
-\includegraphics[width=\textwidth]{screenshots/gen_servers_no_SR}
+\includegraphics[width=\textwidth]{screenshots/original/gen_servers_no_SR}
 \caption{I server generali non processano \sr{}}   
 \label{fig:verifica-1c}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.475\textwidth}   
 \centering 
-\includegraphics[width=\textwidth]{screenshots/gen_servers_priority_sched}
+\includegraphics[width=\textwidth]{screenshots/original/gen_servers_priority_sched}
 \caption{Schedulazione su un server generale}    
 \label{fig:verifica-1d}
 \end{subfigure}
@@ -45,3 +45,5 @@ I controlli di consistenza effettuati sono di seguito analizzati:
 \item Un server è \texttt{IDLE} se e solo se non sono presenti richieste pendenti che è in grado di processare (fig. \ref{fig:verifica-1c}).
 \item In fase di schedulazione, i server generali processano le richieste secondo l'ordine di priorità specificato nei modelli precedenti (fig. \ref{fig:verifica-1d}).
 \end{itemize}
+
+In particolare, gli screenshot riportati in figura \ref{fig:verifica-1} e sopra più volte referenziati sono stati tutti quanti realizzati fissando come seed iniziale \texttt{9}.
