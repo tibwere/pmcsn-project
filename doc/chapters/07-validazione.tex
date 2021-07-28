@@ -202,22 +202,22 @@ E[T_{S_d}] = \frac{1}{\mu_d - \lambda_d} = 33.245049\ min
 \end{itemize}
 
 
-\section{Blocco del flusso degli arrivi di tipo \sr{}}
+\section{Blocco del flusso degli arrivi di tipo \sr{}}\label{sec:validazione-blocco-sr}
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.5\linewidth]{modello-concettuale-sempl-1}
 \caption{Blocco del flusso degli arrivi di tipo \sr{}}
-\label{fig:modello-concettuale-semp-1}
+\label{fig:validazione-semplificazione-1}
 \end{figure}
-Privando il sistema della generazione di arrivi di tipo \sr{}, come mostrato in figura \ref{fig:modello-concettuale-semp-1} e fissando $M=4$, si ottengono i seguenti risultati:
+Privando il sistema della generazione di arrivi di tipo \sr{}, come mostrato in figura \ref{fig:validazione-semplificazione-1} e fissando $M=4$, si ottengono i seguenti risultati:
 \begin{itemize}
 \item Mediante la simulazione:
 \begin{itemize}
-\item Il tempo d'attesa globale ottenuto è pari a:
+\item Il tempo medio d'attesa globale ottenuto è pari a:
 \begin{equation} 
 \bar{d}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{d}_{g,i} = (7.69 \pm 0.76)\ min
 \end{equation}
-\item Il tempo di risposta globale ottenuto è pari a:
+\item Il tempo medio di risposta globale ottenuto è pari a:
 \begin{equation}
 \bar{w}_g = \sum_{i = 1}^4 p_{g,i}\cdot \bar{w}_{g,i} = (22.79 \pm 1.31)\ min
 \end{equation}
@@ -225,11 +225,11 @@ Privando il sistema della generazione di arrivi di tipo \sr{}, come mostrato in 
 
 \item Mediante l'analisi effettuata in riferimento al modello a code riportato in figura \ref{fig:validazione-modello-analitico-1a}:
 \begin{itemize}
-\item Il tempo d'attesa globale ottenuto è pari a:
+\item Il tempo medio d'attesa globale ottenuto è pari a:
 \begin{equation}
 E[T_{Q_g}]^{KP} = 13.101566\ min 
 \end{equation}
-\item Il tempo di risposta globale ottenuto è pari a:
+\item Il tempo medio di risposta globale ottenuto è pari a:
 \begin{equation}
 E[T_{S_g}] = 16.851566\ min 
 \end{equation}
@@ -257,16 +257,16 @@ le prestazioni del multiserver, in termini di risposta, sono inferiori al sistem
 È opportuno osservare che i risultati ottenuti in fase di simulazione sono stati computati mantenendo i tassi di servizio delle differenti tipologie di ticket, così come definiti nel modello delle specifiche (cap. \ref{chp:modello-specifiche}). Questo è ragionevole perché la media pesata dei differenti tassi di servizio è pari a quello definito nella \ref{eqn:validazione-6}.
 
 
-\section{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}
-Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come mostrato in figura \ref{fig:modello-concettuale-semp-2}, si ottengono i seguenti risultati:
+\section{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}\label{sec:validazione-blocco-uo-pp}
+Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come mostrato in figura \ref{fig:validazione-semplificazione-2}, si ottengono i seguenti risultati:
 \begin{itemize}
 \item Mediante la simulazione:
 \begin{itemize}
-\item Il tempo d'attesa globale ottenuto è pari a:
+\item Il tempo medio d'attesa globale ottenuto è pari a:
 \begin{equation} 
 \bar{d}_d = p_{d,1}\cdot \bar{d}_{d,1} + p_{d,2}\cdot \bar{d}_{d,2} = (17.61 \pm 3.77)\ min
 \end{equation}
-\item Il tempo di risposta globale ottenuto è pari a:
+\item Il tempo medio di risposta globale ottenuto è pari a:
 \begin{equation}
 \bar{w}_d = p_{d,1}\cdot \bar{w}_{d,1} + p_{d,2}\cdot \bar{w}_{d,2} = (32.79 \pm 4.06)\ min
 \end{equation}
@@ -274,11 +274,11 @@ Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come most
 
 \item Mediante l'analisi effettuata in riferimento al modello a code riportato in figura \ref{fig:validazione-modello-analitico-1b}:
 \begin{itemize}
-\item Il tempo d'attesa globale ottenuto è pari a:
+\item Il tempo medio d'attesa globale ottenuto è pari a:
 \begin{equation}
 E[T_{Q_d}]^{KP} = 18.245049\ min 
 \end{equation}
-\item Il tempo di risposta globale ottenuto è pari a:
+\item Il tempo medio di risposta globale ottenuto è pari a:
 \begin{equation}
 E[T_{S_d}] = 33.245049\ min 
 \end{equation}
@@ -292,5 +292,5 @@ Poiché i valori teorici ricadono all'interno dei rispettivi intervalli, con un 
 \centering
 \includegraphics[width=0.5\linewidth]{modello-concettuale-sempl-2}
 \caption{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}
-\label{fig:modello-concettuale-semp-2}
+\label{fig:validazione-semplificazione-2}
 \end{figure}
