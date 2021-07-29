@@ -1,4 +1,4 @@
-\chapter{Miglioria dell'algoritmo di schedulazione}
+\chapter{Miglioria dell'algoritmo di schedulazione}\label{chp:miglioria}
 Nelle sezioni che seguono vengono ripercorsi i passi dell'algoritmo seguito nei capitoli precedenti, al fine di presentare le differenze introdotte a seguito dell'adozione del nuovo meccanismo di schedulazione.
 \section{Presentazione del caso di studio}\label{sec:miglioria-presentazione}
 La descrizione del caso di studio rimane pressoché inalterata, ad eccezione della presenza di alcune regole addizionali per la scelta dei ticket da servire.
@@ -454,6 +454,8 @@ Dal capitolo \ref{chp:esperimenti-simulazione}, è stato individuato $M^* = 4$ c
 I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:miglioria-esperimenti-simulazione-1}) che in forma grafica (fig. \ref{fig:miglioria-esperimenti-simulazione-1}).
 
 È immediato osservare che, per raggiungere gli obiettivi precedentemente descritti, il numero minimo di serventi è $\accentset{\sim}{M} = 3$. Infatti, dalle figure \ref{fig:miglioria-esperimenti-simulazione-1a}, \ref{fig:miglioria-esperimenti-simulazione-1b}, \ref{fig:miglioria-esperimenti-simulazione-1c} e \ref{fig:miglioria-esperimenti-simulazione-1d}, si evince che con $M = 2$ non è possibile rispettare i corrispondenti QoS (in tabella \ref{table:miglioria-esperimenti-simulazione-1a} sono evidenziati in {\color{red}rosso} i valori di attesa che li superano).
+
+\newpage
 
 \subsection{Grafici e tabelle}
 \begin{table}[ht]
