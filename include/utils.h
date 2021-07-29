@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef _UTILS_H_
+#define _UTILS_H_
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -130,3 +135,4 @@ int                             has_to_continue(int *);
 int                             get_max_prio_queue_not_empty(void);
 void                            toggle_server_status(int);
 void                            next_assignment_ded_server(void);
+#endif
