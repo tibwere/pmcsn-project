@@ -7,12 +7,13 @@
 //#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
 //#define STATIONARY
-//#define STOP_BATCH (256)
+/* Uncomment the following line to analyze growing stats */
+//#define STOP_BATCH (64)
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
-    #define B (960.0)                     /* Length of a single batch */
-    #define K (64)                        /* Number of batches */
+    #define B (960.0)                   /* Length of a single batch */
+    #define K (64)                      /* Number of batches */
     #define STOP (B * K)                /* Conceptual infinity time for the end of the simulation */
 #else
     #define STOP (480.0)                /* Terminal ("close the door") time */
@@ -107,9 +108,8 @@ event_list_t *events;
 times_t *t;
 
 #ifdef STATIONARY
-int batch_index = 0;                    /* Current number of batch */
+int batch_index;                    /* Current number of batch */
 #endif
-
 
 /* Prototypes */
 int                             integers_sum(int *, int);

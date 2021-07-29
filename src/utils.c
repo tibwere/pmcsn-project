@@ -221,12 +221,11 @@ void init_status(void)
  */
 void init_event_list(void)
 {
-
     int i;
+    
     events = malloc(sizeof(event_list_t));
     if (events == NULL)
         abort();
-
     memset(events, 0x0, sizeof(event_list_t));
 
     /* Uncomment these lines if you want to start with an empty center 
@@ -317,6 +316,8 @@ void update_tip(time_integrated_populations_t *area)
             area->service[i] += (t->next - t->current) * in_service_per_type[i];
         }
     }
+
+    free(in_service_per_type);
 }
 
 /*

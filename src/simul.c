@@ -14,11 +14,11 @@
 #include "utils.h"                      /* Simulator utilities */
 
 /* Prototypes */
-void            print_update(int, int, int);
-int             get_max_prio_queue_not_empty(void);
-void            toggle_server_status(int);
-void            next_assignment_ded_server(void);
-statistics_t *  simulation_run(void);
+void    print_update(int, int, int);
+int     get_max_prio_queue_not_empty(void);
+void    toggle_server_status(int);
+void    next_assignment_ded_server(void);
+void    simulation_run(statistics_t**);
 
 /*
  * Index of a priority queue not empty in the system
@@ -36,6 +36,8 @@ int get_max_prio_queue_not_empty(void)
             break;
         ++prio_queue;
     }
+
+    free(in_service_per_type);
 
     return ((prio_queue == NUMBER_OF_GP_QUEUES) ? -1 : prio_queue);
 }
@@ -83,6 +85,8 @@ void next_assignment_ded_server(void)
     } else {
         toggle_server_status(-1);
     }
+
+    free(in_service);
 }
 
 /*
@@ -156,7 +160,7 @@ void print_update(int event_type, int event_index, int service_completed)
  * @return:
  *      Pointer to statistics collected 
  */
-statistics_t *simulation_run(void) 
+void simulation_run(statistics_t **stat) 
 {
     int number_of_completions[NUMBER_OF_QUEUES];
     time_integrated_populations_t *area;
@@ -166,7 +170,7 @@ statistics_t *simulation_run(void)
     int next_event_index;
     int current_state;
 #ifdef STATIONARY
-    statistics_t *stat;
+    statistics_t *stationary_stat;
 #endif
         
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
@@ -184,6 +188,8 @@ statistics_t *simulation_run(void)
     //     continue_simul[i] = 0;
 
 #ifdef STATIONARY   
+    batch_index = 0;
+
     while (has_to_continue(continue_simul)) { 
 
         double p0 = (P_BP * P_UO)/(P_UO + P_PP);
@@ -193,26 +199,27 @@ statistics_t *simulation_run(void)
 
         if (t->current > B * (batch_index + 1)) {
             batch_index++;
-            stat = load_statistics(area, number_of_completions);
-            //printf("%d,%lf\n", batch_index, stat->d[3]);
-            printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
-            //printf("%lf\n", (p0*stat->w[0] + p1*stat->w[1] + p2*stat->w[2] + p3*stat->w[3]));
-            //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-            //printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
+            stationary_stat = load_statistics(area, number_of_completions);
+            //printf("%d,%lf\n", batch_index, stationary_stat->d[3]);
+            //printf("%lf\n", (p0*stationary_stat->d[0] + p1*stationary_stat->d[1] + p2*stationary_stat->d[2] + p3*stationary_stat->d[3]));
+            //printf("%lf\n", (p0*stationary_stat->w[0] + p1*stationary_stat->w[1] + p2*stationary_stat->w[2] + p3*stationary_stat->w[3]));
+            //printf("%lf\n", (stationary_stat->n[0] + stationary_stat->n[1] + stationary_stat->n[2] + stationary_stat->n[3]) / M);
+            printf("%lf\n", P_BP*stationary_stat->d[4] + (1-P_BP)*stationary_stat->d[5]);
 
             /* Uncomment these lines to plot stationary delay */
             // if (STOP_BATCH == 1) 
-            //     printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
-            //     //printf("%lf\n", P_BP*stat->d[4] + (1-P_BP)*stat->d[5]);
+            //     printf("%lf\n", (p0*stationary_stat->d[0] + p1*stationary_stat->d[1] + p2*stationary_stat->d[2] + p3*stationary_stat->d[3]));
+            //     //printf("%lf\n", P_BP*stationary_stat->d[4] + (1-P_BP)*stationary_stat->d[5]);
 
-            free(stat);
+            free(stationary_stat);
             memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
             free(area);
             area = init_tip();
             update_tip(area);
 
-            if (batch_index == STOP_BATCH)
-                break;            
+            /* Uncomment these lines to analyze growing stats */
+            // if (batch_index == STOP_BATCH)
+            //     break;            
         }
 #else
 	while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
@@ -226,7 +233,7 @@ statistics_t *simulation_run(void)
         update_tip(area);
         t->current = t->next;
 
-        if (next_event_type == ARR_EVENT_TYPE) {                       /* ARRIVO */
+        if (next_event_type == ARR_EVENT_TYPE) {                    /* Arrival event occurrence */
             customers[next_event_index]++;
 
             GetArrival(next_event_index);
@@ -247,13 +254,13 @@ statistics_t *simulation_run(void)
                 }
             }            
 
-        } else if (next_event_type == GEN_COMPL_EVENT_TYPE) {       /* COMPLETAMENTO SERVER GP */
+        } else if (next_event_type == GEN_COMPL_EVENT_TYPE) {       /* Event occurrence of completion of general server */
             current_state = gen_status[next_event_index];
             number_of_completions[current_state]++;
             toggle_server_status(next_event_index);
             customers[current_state]--;
 
-        } else {                                                    /* COMPLETAMENTO SERVER DEDICATO */
+        } else {                                                    /* Event occurrence of completion of dedicated server */
             current_state = ded_status;
             number_of_completions[current_state]++;
             next_assignment_ded_server();
@@ -265,28 +272,34 @@ statistics_t *simulation_run(void)
 #endif
     }
 
-    return (load_statistics(area, number_of_completions));
+    if (stat != NULL)
+        *stat = load_statistics(area, number_of_completions);
+
+    /* Free allocated dynamic memory */
+    free(t);
+    free(events);
+    free(area);
 }
 
 int main(void) 
 {
 #ifdef STATIONARY
     PlantSeeds(STAT_INIT_SEED);
-    simulation_run();
+    simulation_run(NULL);
 #else
     statistics_t *stat;
     
     PlantSeeds(TERM_INIT_SEED);
 
-    double p0 = (P_BP * P_UO)/(P_UO + P_PP);
-    double p1 = (P_BP * P_PP)/(P_UO + P_PP);
-    double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
-    double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP); 
+    // double p0 = (P_BP * P_UO)/(P_UO + P_PP);
+    // double p1 = (P_BP * P_PP)/(P_UO + P_PP);
+    // double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
+    // double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP); 
 
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
-        stat = simulation_run(); 
+        simulation_run(&stat); 
         //printf("%lf\n", stat->n[4] + stat->n[5]);
-        printf("%lf\n", stat->d[0]);
+        printf("%lf\n", stat->d[3]);
         //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
         //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
         //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
