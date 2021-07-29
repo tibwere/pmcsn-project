@@ -17,7 +17,7 @@ Di seguito, sono riportate le regole aggiuntive:
 \end{itemize}
 \section{Obiettivi dello studio}\label{sec:miglioria-obiettivi}
 L'obiettivo di questo studio migliorativo è quello di diminuire, rispetto ai risultati precedentemente ottenuti, il numero degli sportelli da mantenere operativi in un'intera giornata lavorativa, continuando a garantire il rispetto dei requisiti di qualità stabiliti nel capitolo \ref{chp:obiettivi}.
-\section{Modello concettuale}
+\section{Modello concettuale}\label{sec:miglioria-modello-concettuale}
 Il modello concettuale proposto nel capitolo \ref{chp:modello-concettuale} continua ad essere rappresentativo anche a seguito dell'introduzione della miglioria. 
 
 Pertanto:
@@ -26,7 +26,7 @@ Pertanto:
 \item Le assunzioni alla base del modello concettuale
 \end{itemize}
 sono le medesime introdotte in tale capitolo.
-\section{Modello delle specifiche}
+\section{Modello delle specifiche}\label{sec:miglioria-modello-specifiche}
 Dal modello delle speficiche descritto nel capitolo \ref{chp:modello-specifiche}:
 \begin{itemize}
 \item Le variabili matematiche e le equazioni che le legano
@@ -61,8 +61,6 @@ Considerando le regole di schedulazione addizionali espresse nella sezione \ref{
 \label{alg:miglioria-modello-specifiche-1}
 \end{algorithm}
 
-\newpage
-
 \begin{algorithm}
 \While{true}{
 	\textcolor{purple}{\uIf{reached threshold and there are tickets \texttt{UNICA\_OP\_STD} or \texttt{PAGAM\_PREL\_STD}}{
@@ -90,7 +88,7 @@ Considerando le regole di schedulazione addizionali espresse nella sezione \ref{
 \label{alg:miglioria-modello-specifiche-2}
 \end{algorithm}
 
-\section{Modello computazionale}
+\section{Modello computazionale}\label{sec:miglioria-modello-computazionale}
 Dal modello computazionale descritto nel capitolo \ref{chp:modello-computazionale}:
 \begin{itemize}
 \item Le variabili di programma (sez. \ref{sec:modello-computazionale-stato})
@@ -104,8 +102,8 @@ rimangono validi anche a seguito dell'introduzione della miglioria.
 \subsection{Algoritmo next-event}
 Per la realizzazione della miglioria, a livello di codice, sono state definite due ulteriori variabili:
 \begin{itemize}
-\item \texttt{{\color{code_purple}int} counter\_served\_gen\_bp}: valore intero utilizzato per mantenere il numero di richieste di tipo \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} processate dai server generali.
-\item \texttt{{\color{code_purple}int} counter\_served\_sr}: valore intero utilizzato per mantenere il numero di richieste di tipo \sr{} processate dal server dedicato.
+\item \texttt{{\color{code_purple}int} counter\_served\_gen\_bp}: valore intero modulare rispetto alla soglia, utilizzato per mantenere il numero di richieste di tipo \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} processate dai server generali.
+\item \texttt{{\color{code_purple}int} counter\_served\_sr}: valore intero modulare rispetto alla soglia, utilizzato per mantenere il numero di richieste di tipo \sr{} processate dal server dedicato.
 \end{itemize}
 Al fine di rendere efficace l'implementazione della miglioria, sono stati selezionati, tramite un approccio euristico, i seguenti valori soglia:
 \begin{itemize}
@@ -263,30 +261,53 @@ La variabile \texttt{counter\_served\_gen\_bp} viene settata a:
 \end{itemize}
 \end{enumerate}
 
-\section{Verifica}
-Per la verifica, come effettuato anche nel capitolo \ref{chp:verifica}, è stata adottata la funzione \texttt{print\_update()}, modificata al fine di stampare a video anche il numero di ticket \textsl{BancoPosta}/\sr{} serviti consecutivamente, per poter controllare che tutte le modifiche introdotte con la miglioria operassero come atteso.
+\section{Verifica}\label{sec:miglioria-verifica}
+Per poter controllare che tutte le modifiche introdotte con la miglioria operassero come atteso, seguendo lo stesso approccio adottato nel capitolo \ref{chp:verifica}, è stata utilizzata la funzione \texttt{print\_update()}, modificata al fine di mostrare:
+\begin{itemize}
+\item Il numero intero modulo \texttt{(MAX\_CONT\_SERVED\_GEN\_BP + 1)} di ticket \uo{}	\textsl{BancoPosta} e \pp{} \textsl{BancoPosta} serviti.
+\item Il numero intero modulo \texttt{(MAX\_CONT\_SERVED\_SR + 1)} di ticket \sr{} serviti.
+\end{itemize}
+
+I controlli di consistenza effettuati, che fanno riferimento alle porzioni in {\color{purple} viola} dei modelli delle specifiche (sez. \ref{sec:miglioria-modello-specifiche}) e computazionale (sez. \ref{sec:miglioria-modello-computazionale}), sono di seguito analizzati:
+\begin{itemize}
+\item Il contatore di ticket \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} viene incrementato ad ogni servizio corrispondente (fig. \ref{fig:miglioria-verifica-1a}).
+\item Il contatore di ticket \sr{} viene incrementato ad ogni servizio corrispondente (fig. \ref{fig:miglioria-verifica-1b}).
+\item Quando \texttt{counter\_served\_gen\_bp} raggiunge la soglia \texttt{MAX\_CONT\_SERVED\_GEN\_BP}, il primo sportello \texttt{IDLE} serve un cliente \textbf{non} titolare di conto \textsl{BancoPosta} dando priorità alla coda più lunga (fig. \ref{fig:miglioria-verifica-2a}). Inoltre, è possibile osservare come il contatore venga correttamente azzerato.
+\item Quando \texttt{counter\_served\_sr} raggiunge la soglia \texttt{MAX\_CONT\_SERVED\_SR}, non appena \texttt{IDLE}, lo sportello dedicato serve un cliente \textbf{non} titolare di conto \textsl{BancoPosta} e non in possesso di un ticket \sr{}, dando priorità alla coda più lunga (fig. \ref{fig:miglioria-verifica-2b}). Inoltre, è possibile osservare come il contatore venga correttamente azzerato.
+\item In assenza di ticket \sr{} da servire, lo sportello dedicato ne processa uno di tipo \uo{} o \pp{} appartenente ad un cliente \textbf{non} titolare di conto \textsl{BancoPosta}, dando priorità alla coda più lunga (fig. \ref{fig:miglioria-verifica-3a}).
+\item In assenza di ticket:
+\begin{itemize}
+\item \sr{}
+\item \uo{} o \pp{} appartenenti a clienti \textbf{non} titolari di conto \textsl{BancoPosta}
+\end{itemize}
+da servire, lo sportello dedicato, così come accadeva prima dell'introduzione della miglioria, processa un ticket appartenente a clienti titolari di conto \textsl{BancoPosta} (fig. \ref{fig:miglioria-verifica-3b}). 
+\end{itemize}
+
+In particolare, gli screenshot riportati nelle figure \ref{fig:miglioria-verifica-1}, \ref{fig:miglioria-verifica-2} e \ref{fig:miglioria-verifica-3}, e sopra più volte referenziati, sono stati tutti quanti realizzati fissando come seed iniziale \texttt{10}.
 
 \begin{figure}[ht]
 \centering
+\captionsetup[subfigure]{justification=centering}
 \begin{subfigure}[b]{0.475\textwidth}
 \centering
 \includegraphics[width=\textwidth]{screenshots/improved/inc_counter_gen_BP}
-\caption{Incremento del counter di ticket \textsl{BancoPosta} serviti consecutivamente}    
+\caption{Incremento del contatore di ticket \textsl{BancoPosta} serviti}    
 \label{fig:miglioria-verifica-1a}
 \end{subfigure}
 \hfill    
 \begin{subfigure}[b]{0.475\textwidth} 
 \centering 
 \includegraphics[width=\textwidth]{screenshots/improved/inc_counter_ded_SR}
-\caption{Incremento del counter di ticket \sr{} serviti consecutivamente}    
+\caption{Incremento del contatore di ticket \sr{} serviti}    
 \label{fig:miglioria-verifica-1b}
 \end{subfigure}
-\caption{Verifica del corretto incremento del counter}
+\caption{Verifica del corretto incremento dei contatori}
 \label{fig:miglioria-verifica-1}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
+\captionsetup[subfigure]{justification=centering}
 \begin{subfigure}[b]{0.475\textwidth}
 \centering 
 \includegraphics[width=\textwidth]{screenshots/improved/exception_gen}
@@ -306,6 +327,7 @@ Per la verifica, come effettuato anche nel capitolo \ref{chp:verifica}, è stata
 
 \begin{figure}[ht]
 \centering
+\captionsetup[subfigure]{justification=centering}
 \begin{subfigure}[b]{0.475\textwidth}  
 \centering 
 \includegraphics[width=\textwidth]{screenshots/improved/longest_queue_ded_no_SR}
@@ -319,11 +341,11 @@ Per la verifica, come effettuato anche nel capitolo \ref{chp:verifica}, è stata
 \caption{Il servente dedicato processa un ticket \uo{} o \pp{} \textbf{non} \textsl{BancoPosta}}    
 \label{fig:miglioria-verifica-3b}
 \end{subfigure}
-\caption{Verifica del corretto scheduling da parte del servente dedicato in assenza di ticket \sr{}}
+\caption{Verifica del corretto scheduling in assenza di ticket \sr{}}
 \label{fig:miglioria-verifica-3}
 \end{figure}
 
-\section{Validazione}
+\section{Validazione}\label{sec:miglioria-validazione}
 Per la fase di validazione, è stato seguito lo stesso approccio mostrato nel capitolo \ref{chp:validazione}. Per semplicità, di seguito è riportata la configurazione dei parametri utilizzati per la simulazione:
 \begin{itemize}
 \item \texttt{B = 960}
@@ -408,7 +430,7 @@ La congruenza dei risultati ottenuti con quelli della sezione \ref{sec:validazio
 
 Per cui, poiché i valori teorici ricadono all'interno dei rispettivi intervalli con un livello di confidenza del 95\%, il comportamento del simulatore è, anche in questo caso, conforme al modello analitico \ref{fig:validazione-modello-analitico-1b}.
 
-\section{Esperimenti di simulazione}
+\section{Esperimenti di simulazione}\label{sec:miglioria-esperimenti}
 In accordo agli obiettivi dello studio (sez. \ref{sec:miglioria-obiettivi}), è stata considerata unicamente l'analisi dello stato transiente del sistema, per gli stessi motivi discussi nel capitolo \ref{chp:esperimenti-simulazione}.
 
 \subsection{Progetto degli esperimenti}
