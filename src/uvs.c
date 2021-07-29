@@ -74,12 +74,11 @@
 
   if (index > 0) {
     stdev = sqrt(sum / index);
-    printf("%.3f & %.3f \\\\\n\\hline\n",mean,stdev);
-    // printf("\nfor a sample of size %ld\n", index);
-    // printf("mean ................. = %7.3f\n", mean);
-    // printf("standard deviation ... = %7.3f\n", stdev);
-    // printf("minimum .............. = %7.3f\n", min);
-    // printf("maximum .............. = %7.3f\n", max);
+    printf("\nfor a sample of size %ld\n", index);
+    printf("mean ................. = %7.3f\n", mean);
+    printf("standard deviation ... = %7.3f\n", stdev);
+    printf("minimum .............. = %7.3f\n", min);
+    printf("maximum .............. = %7.3f\n", max);
   }
 
   return (0);
