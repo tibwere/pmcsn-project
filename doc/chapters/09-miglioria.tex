@@ -56,12 +56,16 @@ Considerando le regole di schedulazione addizionali espresse nella sezione \ref{
 	\uElseIf{\texttt{PAGAM\_PREL\_STD} queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
+	\uElse {
+		\textit{do nothing}\;	
+	}	
 }
 \caption{Algoritmo di schedulazione del servente generico (con {\color{purple}patch})}
 \label{alg:miglioria-modello-specifiche-1}
 \end{algorithm}
 
 \begin{algorithm}
+\SetAlgoLined
 \While{true}{
 	\textcolor{purple}{\uIf{reached threshold and there are tickets \texttt{UNICA\_OP\_STD} or \texttt{PAGAM\_PREL\_STD}}{
 		\textit{pick the longest queue between \texttt{UNICA\_OP\_STD} and \texttt{PAGAM\_PREL\_STD}}\;
@@ -82,6 +86,9 @@ Considerando le regole di schedulazione addizionali espresse nella sezione \ref{
 	}
 	\uElseIf{\texttt{PAGAM\_PREL\_BP} queue not empty}{
 		\textit{processes the first ticket of that type}\;
+	}
+	\uElse {
+		\textit{do nothing}\;	
 	}
 }
 \caption{Algoritmo di schedulazione del servente dedicato (con {\color{purple}patch})}
@@ -115,14 +122,14 @@ Di seguito, è riportato l'algoritmo di simulazione con le opportune modifiche (
 \item \textbf{Inizializzazione}
 \begin{itemize}
 \item L'orologio di simulazione è inizializzato come descritto nella sezione \ref{sec:modello-computazionale-clock}.
-\item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare:
+\item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare, per ogni $\mathtt{i \in \lbrace 0, 1, \dots, 5\rbrace}$:
 \begin{center}
 \begin{tabular}{l l l}
 \texttt{events->arrivals[i]} & \texttt{=} & \texttt{GetArrival(i)} \\
-\texttt{events->gen\_completions[i]} & \texttt{=} & \texttt{INFTY} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{INFTY}
+\texttt{events->gen\_completions[i]} & \texttt{=} & \texttt{INFTY}
 \end{tabular}
 \end{center}
+ed inoltre \texttt{events->ded\_completion = INFTY}
 \end{itemize}
 \item \textbf{Processamento evento corrente}
 \begin{enumerate}
@@ -391,7 +398,7 @@ in accordo rispettivamente alle equazioni \ref{eqn:validazione-11} e \ref{eqn:va
 
 I risultati ottenuti sono molto vicini a quelli della sezione \ref{sec:validazione-blocco-sr}, il che è ragionevole in quanto l'unica variazione tra il sistema privo di miglioria e quello in questione è dovuta al comportamento del server dedicato: la priorità maggiore è data alle richieste appartenenti alla coda più lunga tra quelle relative ai ticket di tipo \uo{} standard e \pp{} standard, piuttosto che assegnarla in modo inversamente proporzionale all'indice numerico della coda.
 
-Poiché, anche in questo caso, l'occupazione media ottenuta tramite la simulazione è pari a:
+Poiché, anche in questo caso, l'occupazione media computata tramite la simulazione è pari a:
 \begin{equation}
 \bar{x}_g = 0.77 \pm 0.02
 \end{equation}

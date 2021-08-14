@@ -5,7 +5,7 @@ Le variabili di programma utilizzate per descrivere univocamente lo stato del si
 \begin{itemize}
 \item \texttt{{\color{code_purple} int} customers[NUMBER\_OF\_QUEUES]}: vettore di sei interi per la memorizzazione del numero di clienti per ciascuna tipologia di arrivo.
 \item \texttt{{\color{code_purple} int} gen\_status[M-1]}: vettore di $M-1$ interi, che assumono valori in accordo alla definizione \ref{eqn:modello-specifiche-3}, per la memorizzazione dello stato dei serventi generali.
-\item \texttt{{\color{code_purple} int} ded\_status}: valore intero, che assume valori in accordo alla definizione \ref{eqn:modello-specifiche-4}, per la memorizzazione dello stato del servente dedicato.
+\item \texttt{{\color{code_purple} int} ded\_status}: intero, che assume valori in accordo alla definizione \ref{eqn:modello-specifiche-4}, per la memorizzazione dello stato del servente dedicato.
 \end{itemize}
 
 Il mapping fra le variabili matematiche definite nel modello delle specifiche e quelle di programma a livello computazionale è riassunto nella tabella \ref{table:modello-computazionale-1}. 
@@ -41,7 +41,7 @@ per ogni $\mathtt{i\in \lbrace 0, 1, \dots, 5 \rbrace}$ e per ogni $\mathtt{j\in
 \section{Eventi}\label{sec:modello-computazionale-eventi}
 Siano:
 \begin{itemize}
-\item \texttt{i} l'indice che assume valori appartenenti alla terza colonna della tabella \ref{table:modello-specifiche-1} ($\mathtt{i} \neq -1$).
+\item \texttt{i} l'indice che assume valori appartenenti alla terza colonna della tabella \ref{table:modello-specifiche-1a}.
 \item \texttt{r} l'indice che assume valori appartenenti all'insieme $\mathtt{\lbrace 0, 1, \dots, M - 2 \rbrace}$, utilizzato per accedere ai record dell'array \texttt{gen\_status}.
 \end{itemize}
 Lo stato del sistema può cambiare all'occorrenza delle seguenti tipologie di eventi propri:
@@ -55,7 +55,7 @@ Lo stato del sistema può cambiare all'occorrenza delle seguenti tipologie di ev
 \item \texttt{gen\_status[r]} passa da un certo valore \texttt{i} ad \texttt{IDLE}
 \item \texttt{customers[i] = customers[i] - 1}
 \end{itemize}
-\item Tre tipologie di completamenti per il server dedicato che comportano:
+\item Tre tipologie di completamenti per il server dedicato, per via dei quali:
 \begin{itemize}
 \item \texttt{ded\_status} passa da un certo valore \texttt{i} ad \texttt{IDLE}
 \item \texttt{customers[i] = customers[i] - 1}
@@ -82,7 +82,7 @@ Di seguito sono riportate alcune osservazioni relative al tempo di simulazione:
 \item L'unità di misura di riferimento è il minuto.
 \item L'orologio di sistema (\texttt{t->current}) viene inizializzato a \texttt{START}.
 \item Il tempo di simulazione $\tau$ è pari a \texttt{STOP}.
-\item Nel caso in cui un'istante di arrivo $t^*$ sia postumo al termine della simulazione ($t^* > \tau$), il suo tempo di occorrenza viene impostato pari a \texttt{INFTY} per denotare il blocco di quel flusso di arrivi (\textit{"close the door"}).
+\item Nel caso in cui l'istante $t^*$ d'occorrenza di un arrivo sia postumo al termine della simulazione ($t^* > \tau$), il successivo della medesima tipologia viene impostato pari a \texttt{INFTY} per denotare il blocco di tale flusso di arrivi (\textit{"close the door"}).
 \end{itemize}
 Per il caso di studio in analisi è stata adottata la seguente configurazione di parametri:
 \begin{center}
@@ -105,7 +105,7 @@ fintantoché è verificata almeno una delle seguenti due condizioni:
 
 \section{Lista degli eventi}\label{sec:modello-computazionale-lista-eventi}
 La lista degli eventi, a livello implementativo, è gestita mediante la struttura dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}event\_list\_t} events}.} riportata nello snippet \ref{lst:modello-computazionale-2}.
-Ciascun campo della struttura mantiene gli istanti di tempo di occorrenza di una categoria di eventi. In particolare:
+Ciascun campo della struttura mantiene gli istanti di tempo d'occorrenza per una categoria di eventi. In particolare:
 \begin{itemize}
 \item \texttt{{\color{code_purple}double} arrivals[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{i} rappresenta l'istante del successivo arrivo di tipo \texttt{i}.
 \item \texttt{{\color{code_purple}double} gen\_completions[M-1]}: ciascuna entry \texttt{r} rappresenta l'istante del successivo completamento del server \texttt{r}.
@@ -126,14 +126,14 @@ L'algoritmo di simulazione implementato consiste nei seguenti quattro passi:
 \item \textbf{Inizializzazione}
 \begin{itemize}
 \item L'orologio di simulazione è inizializzato come descritto nella sezione \ref{sec:modello-computazionale-clock}.
-\item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare:
+\item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare, per ogni $\mathtt{i \in \lbrace 0, 1, \dots, 5\rbrace}$:
 \begin{center}
 \begin{tabular}{l l l}
 \texttt{events->arrivals[i]} & \texttt{=} & \texttt{GetArrival(i)} \\
-\texttt{events->gen\_completions[i]} & \texttt{=} & \texttt{INFTY} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{INFTY}
+\texttt{events->gen\_completions[i]} & \texttt{=} & \texttt{INFTY}
 \end{tabular}
 \end{center}
+ed inoltre \texttt{events->ded\_completion = INFTY}
 \end{itemize}
 \item \textbf{Processamento evento corrente}
 \begin{enumerate}

@@ -27,7 +27,7 @@ A tal proposito, è stato simulato il sistema per un'intera giornata di lavoro, 
 \subsection*{Attesa nell'arco della giornata a partire dal sistema scarico}
 Una volta individuato il valore $M^*$, è stata studiata l'evoluzione dell'attesa media per ciascun flusso d'arrivo all'avanzare del tempo di simulazione.
 
-Per realizzare quest'esperimento, la simulazione è stata arrestata ogni:
+Per realizzare quest'esperimento, la simulazione è stata arrestata all'occorrenza dei seguenti istanti temporali:
 \begin{equation}
 \begin{array}{l l l l l l}
 45\ min, & 45 + 2\ min, & 45 + 2^2\ min, & \dots, & 45 + 2^8\ min, & 480\ min
@@ -71,7 +71,7 @@ Per la realizzazione dei grafici è stato attivato il meccanismo di svuotamento 
 
 Di seguito è riportata una serie di osservazioni relative ai risultati ottenuti:
 \begin{itemize}
-\item Il fatto che le curve, in corrispondenza $t = \tau = 480\ min$, intersechino i rispettivi valori medi (mostrati tramite linee rosse tratteggiate) rappresenta un consistency check per il simulatore, perché tali sono stati computati su finestre di medesima ampiezza.
+\item Il fatto che le curve, in corrispondenza di $t = \tau = 480\ min$, intersechino i rispettivi valori medi (mostrati tramite linee rosse tratteggiate) rappresenta un consistency check per il simulatore, perché tali sono stati computati su finestre di medesima ampiezza.
 \item Per quanto riguarda i ticket \uo{} e \pp{}, esiste una correlazione tra la pendenza delle curve e la priorità del flusso corrispondente. La spiegazione di questo fenomeno è data dal fatto che flussi prioritari impiegano meno tempo a stabilizzarsi poiché rallentati da un numero inferiore di richieste.
 
 Ad esempio, in figura \ref{fig:esperimenti-simulazione-2a} il valore medio giornaliero ricade nell'intervallo della misura effettuata a circa tre ore dall'apertura, mentre lo stesso si verifica in figura \ref{fig:esperimenti-simulazione-2d} dopo circa cinque.
