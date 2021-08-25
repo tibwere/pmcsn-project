@@ -25,8 +25,8 @@
     #define ENSEMBLE_SIZE 300           /* Number of simulation replies */                       
 #endif
 
-#define TERM_INIT_SEED 9
-#define STAT_INIT_SEED 12345
+#define TERM_INIT_SEED 9				/* Initial seed for terminating simulation */
+#define STAT_INIT_SEED 12345			/* Initial seed for steady-state simulation */
 
 #define FLUSH                           /* Flush the system after close the door */
 
@@ -45,7 +45,7 @@
 
 #define M 3
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
-#define NUMBER_OF_GP_QUEUES 4           /* Number of queues (only SPED_RIT) */
+#define NUMBER_OF_GP_QUEUES 4           /* Number of queues (without SPED_RIT) */
 
 #define P_BP 0.25                       /* Probability of taking a ticket "BancoPosta" */
 
@@ -113,7 +113,7 @@ event_list_t *events;
 times_t *t;
 
 #ifdef STATIONARY
-int batch_index;                    /* Current number of batch */
+int batch_index;                        /* Current number of batch */
 #endif
 
 /* Prototypes */

@@ -1,4 +1,13 @@
-/* Simulation libraries */
+/*
+ * Simulation libraries
+ * 
+ * authors: A. Chillotti    (M. 0299824)
+ *          C. Cuffaro      (M. 0299838)      
+ *          S. Tiberi       (M. 0299908)
+ * 
+ * A.Y. 2020/2021
+ */
+ 
 #include "rngs.h"                       /* Multi-stream generator */
 #include "rvgs.h"                       /* Random variate generators */
 #include "utils.h"                      /* Simulator utilities */
