@@ -16,34 +16,30 @@ Il funzionamento del sistema è illustrato dal diagramma in figura \ref{fig:mode
 \end{itemize}
 \end{itemize}
 
-Ad ogni istante di tempo, lo stato del sistema è univocamente determinato dai valori assunti dalle seguenti variabili di stato:
+Ad ogni istante di tempo, lo stato del sistema è univocamente determinato dai valori assunti dalle seguenti $M + 12$ variabili di stato:
 \begin{itemize}
-\item Per ciascuno sportello $i$ (con $i \in \lbrace 1, 2, \dots, \ded-1, \ded+1, \dots, M \rbrace$) si ha:
+\item Per ciascuno degli $M$ sportelli si ha:
 \begin{equation}
-Server_i \in
-\left\lbrace
-\begin{array}{l l l}
-\mathtt{IDLE}, & \mathtt{UNICA\_OP\_BP}, & \mathtt{PAGAM\_PREL\_BP},\\ 
-\mathtt{UNICA\_OP\_STD}, & \mathtt{PAGAM\_PREL\_STD}
-\end{array}
-\right\rbrace
+Server_r \in
+\left\lbrace \mathtt{IDLE},\ \mathtt{BUSY} \right\rbrace
 \end{equation}
-\item Per lo sportello dedicato, ovvero il $\ded$-esimo in figura \ref{fig:modello-concettuale-1}, si ha:
-\begin{equation}
-Server_\ded \in 
-\left\lbrace
-\begin{array}{l l l}
-\mathtt{IDLE}, & \mathtt{UNICA\_OP\_BP}, & \mathtt{PAGAM\_PREL\_BP},\\ 
-\mathtt{UNICA\_OP\_STD}, & \mathtt{PAGAM\_PREL\_STD}, & \mathtt{SPED\_RIT\_BP},\\\mathtt{SPED\_RIT\_STD}
-\end{array}
-\right\rbrace
-\end{equation}
-\item Per ciascuna tipologia di ticket $(h, j)$ con:
+con $r \in \lbrace 1, 2, \dots, M \rbrace$.
+\item Per ciascuna delle 6 classi di utenza:
 \begin{itemize}
-\item $h \in \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace$
-\item $j \in \lbrace \mathtt{UNICA\_OP},\ \mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace$
+\item Il numero di clienti in coda della $c-$esima è modellato dalla variabile $Queue_{c}$
+\item Il numero di clienti in servizio della $c-$esima è modellato dalla variabile $InService_{c}$
 \end{itemize}
-il livello di occupazione dei clienti è modellato dalla variabile $Customers_{h,j}$.
+con $c$ appartenente a:
+\begin{multicols}{2}
+\begin{itemize}
+\item \uo{} \textsl{BancoPosta}
+\item \pp{} \textsl{BancoPosta}
+\item \sr{} \textsl{BancoPosta}
+\item \uo{} \textsl{Standard}
+\item \pp{} \textsl{Standard}
+\item \sr{} \textsl{Standard}
+\end{itemize}
+\end{multicols}
 \end{itemize}
 
 Infine, si assume che:
@@ -53,11 +49,9 @@ Infine, si assume che:
 \item All'inizio ed alla fine del periodo d'osservazione lo stato del sistema è il seguente:
 \begin{equation}
 \begin{cases}
-Server_i =\mathtt{IDLE} & \forall\ i \in \lbrace 1, 2, \dots, M \rbrace \\[1em]
-Customers_{h,j} = \mathtt{EMPTY} & \forall\ h \in \lbrace \mathtt{BANCO\_POSTA},\ \mathtt{STANDARD}\rbrace\ \wedge \\
-& \forall\ j \in \lbrace \mathtt{UNICA\_OP},\ \mathtt{PAGAM\_PREL},\ \mathtt{SPED\_RIT} \rbrace
+Server_r =\mathtt{IDLE} & \forall\ r \\[1em]
+Queue_{c} = \mathtt{EMPTY} & \forall\ c \\[1em]
+InService_{c} = \mathtt{NONE} & \forall\ c
 \end{cases}
 \end{equation}
 \end{itemize}
-
-
