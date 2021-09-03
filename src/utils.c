@@ -53,7 +53,7 @@ double doubles_sum(double *items, int len)
 }
 
 /*
- * Minimum element from an array of doubles
+ * Next arrival event
  * 
  * @param items:
  *      Array of doubles
@@ -64,7 +64,7 @@ double doubles_sum(double *items, int len)
  * @return:
  *      The minimum element of the array
  */
-double min_from_array(double *items, int len, int *index)
+double next_arr_event(double *items, int len, int *index)
 {
     int min_index = 0;
     double min_val = items[0];
@@ -72,6 +72,34 @@ double min_from_array(double *items, int len, int *index)
     for (int i = 1; i < len; ++i) {
         if (items[i] < min_val) {
             min_val = items[i];
+            min_index = i;
+        }
+    }
+
+    *index = min_index;
+    return (min_val);
+}
+
+/*
+ * Next completion event
+ * 
+ * @param items:
+ *      Array of completion structs
+ * @param len: 
+ *      Array length
+ * @param *index:
+ *      Pointer to save index of the minimum
+ * @return:
+ *      The minimum element of the array
+ */
+double next_compl_event(compl_event_t **items, int len, int *index)
+{
+    int min_index = 0;
+    double min_val = items[0]->time;
+
+    for (int i = 1; i < len; ++i) {
+        if (items[i]->time < min_val) {
+            min_val = items[i]->time;
             min_index = i;
         }
     }
@@ -95,28 +123,28 @@ double next_event(int *min_event_type, int *min_index)
     int min_arrival_index, min_gen_compl_index;
     double min_arrival, min_gen_compl;
 
-    min_arrival = min_from_array(events->arrivals, NUMBER_OF_QUEUES, &min_arrival_index);
-    min_gen_compl = min_from_array(events->gen_completions, M-1, &min_gen_compl_index);
+    min_arrival = next_arr_event(events->arrivals, NUMBER_OF_QUEUES, &min_arrival_index);
+    min_gen_compl = next_compl_event(events->gen_completions, M-1, &min_gen_compl_index);
 
     if (min_arrival < min_gen_compl) {                  
-        if (min_arrival < events->ded_completion) {     /* Next event is an arrival */
+        if (min_arrival < events->ded_completion->time) {     /* Next event is an arrival */
             *min_event_type = ARR_EVENT_TYPE;
             *min_index = min_arrival_index;
             return min_arrival;
         } else {                                        /* Next event is an completion of the dedicated server */
             *min_event_type = DED_COMPL_EVENT_TYPE;
             *min_index = 0;
-            return events->ded_completion;
+            return events->ded_completion->time;
         }
     } else {
-        if (min_gen_compl < events->ded_completion) {   /* Next event is an completion of a general server */
+        if (min_gen_compl < events->ded_completion->time) {   /* Next event is an completion of a general server */
             *min_event_type = GEN_COMPL_EVENT_TYPE;
             *min_index = min_gen_compl_index;
             return min_gen_compl;
         } else {                                        /* Next event is an completion of the dedicated server */
             *min_event_type = DED_COMPL_EVENT_TYPE;     
             *min_index = 0;
-            return events->ded_completion;
+            return events->ded_completion->time;
         }        
     }
 }
@@ -212,11 +240,13 @@ void init_status(void)
 {
     int i;
 
-    for(i = 0; i < NUMBER_OF_QUEUES; ++i)
+    for(i = 0; i < NUMBER_OF_QUEUES; ++i) {
         customers[i] = 0;
+        in_service[i] = 0;
+    }
     for (i = 0; i < (M - 1); ++i)
         gen_status[i] = IDLE;
-        
+    
     ded_status = IDLE;
 
     /* Uncomment these lines to start with not empty center */
@@ -251,10 +281,21 @@ void init_event_list(void)
     // for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
     //     events->arrivals[i] = INFTY;
 
-    for (i = 0; i < M - 1; ++i) 
-        events->gen_completions[i] = INFTY;
-    
-    events->ded_completion = INFTY;
+    for (i = 0; i < M - 1; ++i) {
+        events->gen_completions[i] = malloc(sizeof(compl_event_t));
+        if (events->gen_completions[i] == NULL)
+            abort();
+        memset(events->gen_completions[i], 0x0, sizeof(compl_event_t));
+        events->gen_completions[i]->time = INFTY;
+        events->gen_completions[i]->type_of_ticket = NONE;
+    }
+
+    events->ded_completion = malloc(sizeof(compl_event_t));
+    if (events->ded_completion == NULL)
+        abort();
+    memset(events->ded_completion, 0x0, sizeof(compl_event_t));
+    events->ded_completion->time = INFTY;
+    events->ded_completion->type_of_ticket = NONE;
 }
 
 /*
@@ -268,29 +309,6 @@ void init_times(void)
     memset(t, 0x0, sizeof(times_t));
 
     t->current = START;
-}
-
-/*
- * Number of ticket in service for each flow
- *
- * @return:
- *      Array of integer that contains those numbers
- */
-int *get_in_service_per_type(void)
-{
-    int *in_service_per_type;
-    in_service_per_type = calloc(NUMBER_OF_QUEUES, sizeof(int));
-    if (in_service_per_type == NULL)
-        abort();
-
-    for (int i = 0; i < M-1; ++i) {
-        if(gen_status[i] != IDLE)
-            in_service_per_type[gen_status[i]]++;
-    }
-    if (ded_status != IDLE)
-        in_service_per_type[ded_status]++;
-
-    return (in_service_per_type);
 }
 
 /*
@@ -316,17 +334,13 @@ int get_idle_server_gp(void)
  */
 void update_tip(time_integrated_populations_t *area)
 {
-    int *in_service_per_type = get_in_service_per_type();
-
     for(int i = 0; i < NUMBER_OF_QUEUES; ++i) {
         if (customers[i] > 0) {
             area->customers[i] += (t->next - t->current) * customers[i];
-            area->queue[i]   += (t->next - t->current) * (customers[i] - in_service_per_type[i]);
-            area->service[i] += (t->next - t->current) * in_service_per_type[i];
+            area->queue[i]   += (t->next - t->current) * (customers[i] - in_service[i]);
+            area->service[i] += (t->next - t->current) * in_service[i];
         }
     }
-
-    free(in_service_per_type);
 }
 
 /*

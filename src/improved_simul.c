@@ -13,7 +13,7 @@
 #include "rvgs.h"                       /* Random variate generators */
 #include "utils.h"                      /* Simulator utilities */
 
-#define MAX_CONT_SERVED_GEN_BP 7        /* Maximum number of continuous UO_BP and PP_BP tickets served */
+#define MAX_CONT_SERVED_GEN_BP 2        /* Maximum number of continuous UO_BP and PP_BP tickets served */
 #define MAX_CONT_SERVED_SR 3            /* Maximum number of continuous SR tickets served */
 
 /* Counter of continuous served tickets */
@@ -36,11 +36,10 @@ void    simulation_run(statistics_t**);
 int get_max_prio_queue_not_empty(void)
 {
     int prio_queue = 0;
-    int *in_service_per_type = get_in_service_per_type();
 
     if (counter_served_gen_bp == MAX_CONT_SERVED_GEN_BP) {
-        int uo_std_queue = customers[UO_STD] - in_service_per_type[UO_STD];
-        int pp_std_queue = customers[PP_STD] - in_service_per_type[PP_STD];
+        int uo_std_queue = customers[UO_STD] - in_service[UO_STD];
+        int pp_std_queue = customers[PP_STD] - in_service[PP_STD];
         int max_queue_len = (pp_std_queue > uo_std_queue) ? pp_std_queue : uo_std_queue;
         if (max_queue_len > 0) {
             prio_queue = (max_queue_len == uo_std_queue) ? UO_STD : PP_STD;
@@ -49,12 +48,10 @@ int get_max_prio_queue_not_empty(void)
     }
 
     while (prio_queue < NUMBER_OF_GP_QUEUES) {
-        if (customers[prio_queue] > in_service_per_type[prio_queue])
+        if (customers[prio_queue] > in_service[prio_queue])
             break;
         ++prio_queue;
     }
-
-    free(in_service_per_type);
 
     return ((prio_queue == NUMBER_OF_GP_QUEUES) ? -1 : prio_queue);
 }
@@ -70,21 +67,26 @@ void toggle_server_status(int index)
     int max_prio_queue_not_empty = get_max_prio_queue_not_empty();
     if (max_prio_queue_not_empty != -1) {                                                           /* There is a queue not empty */
         if (index != -1) {                                                                          /* The server is general */
-            gen_status[index] = max_prio_queue_not_empty;
-            events->gen_completions[index] = t->current + GetService(max_prio_queue_not_empty);
+            gen_status[index] = BUSY;
+            events->gen_completions[index]->time = t->current + GetService(max_prio_queue_not_empty);
+            events->gen_completions[index]->type_of_ticket = max_prio_queue_not_empty;
         } else {                                                                                    /* The server is dedicated */
-            ded_status = max_prio_queue_not_empty;
-            events->ded_completion = t->current + GetService(max_prio_queue_not_empty);
+            ded_status = BUSY;
+            events->ded_completion->time = t->current + GetService(max_prio_queue_not_empty);
+            events->ded_completion->type_of_ticket = max_prio_queue_not_empty;
         }
+        in_service[max_prio_queue_not_empty]++;
         if (max_prio_queue_not_empty <= PP_BP)                                                      /* A UO_BP or PP_BP ticket has been assigned */
             counter_served_gen_bp = (counter_served_gen_bp + 1) % (MAX_CONT_SERVED_GEN_BP + 1);
     } else {                                                                                        /* There isn't a queue not empty */
         if (index != -1) {                                                                          /* The server is general */
             gen_status[index] = IDLE;
-            events->gen_completions[index] = INFTY;
+            events->gen_completions[index]->time = INFTY;
+            events->gen_completions[index]->type_of_ticket = NONE;
         } else {                                                                                    /* The server is dedicated */
             ded_status = IDLE;
-            events->ded_completion = INFTY;
+            events->ded_completion->time = INFTY;
+            events->ded_completion->type_of_ticket = NONE;
         }
     }
 }
@@ -94,33 +96,38 @@ void toggle_server_status(int index)
  */
 void next_assignment_ded_server(void)
 {
-    int *in_service = get_in_service_per_type();
     int uo_std_queue = customers[UO_STD] - in_service[UO_STD];
     int pp_std_queue = customers[PP_STD] - in_service[PP_STD];
     int max_queue_len = (pp_std_queue > uo_std_queue) ? pp_std_queue : uo_std_queue;
 
     if (counter_served_sr == MAX_CONT_SERVED_SR && max_queue_len > 0) {
         int prio_queue = (max_queue_len == uo_std_queue) ? UO_STD : PP_STD;
-        ded_status = prio_queue;
-        events->ded_completion = t->current + GetService(prio_queue);
+        in_service[prio_queue]++;
+        ded_status = BUSY;
+        events->ded_completion->time = t->current + GetService(prio_queue);
+        events->ded_completion->type_of_ticket = prio_queue;
         counter_served_sr = 0;
     } else if (customers[SR_BP] > in_service[SR_BP]) {
-        ded_status = SR_BP;
-        events->ded_completion = t->current + GetService(SR_BP);
+        in_service[SR_BP]++;
+        ded_status = BUSY;
+        events->ded_completion->time = t->current + GetService(SR_BP);
+        events->ded_completion->type_of_ticket = SR_BP;
         counter_served_sr = (counter_served_sr + 1) % (MAX_CONT_SERVED_SR + 1);
     } else if (customers[SR_STD] > in_service[SR_STD]) {
-        ded_status = SR_STD;
-        events->ded_completion = t->current + GetService(SR_STD);
+        in_service[SR_STD]++;
+        ded_status = BUSY;
+        events->ded_completion->time = t->current + GetService(SR_STD);
+        events->ded_completion->type_of_ticket = SR_STD;
         counter_served_sr = (counter_served_sr + 1) % (MAX_CONT_SERVED_SR + 1);
     } else if (max_queue_len > 0) {
         int prio_queue = (max_queue_len == uo_std_queue) ? UO_STD : PP_STD;
-        ded_status = prio_queue;
-        events->ded_completion = t->current + GetService(prio_queue);
+        in_service[prio_queue]++;
+        ded_status = BUSY;
+        events->ded_completion->time = t->current + GetService(prio_queue);
+        events->ded_completion->type_of_ticket = prio_queue;
     } else {
         toggle_server_status(-1);
     }
-
-    free(in_service);
 }
 
 /*
@@ -137,6 +144,7 @@ void print_update(int event_type, int event_index, int service_completed)
 {
     int dummy;
     int j;
+    int ticket;
     char *tmp;
 
     char *types_of_tickets[NUMBER_OF_QUEUES] = {
@@ -144,8 +152,8 @@ void print_update(int event_type, int event_index, int service_completed)
         "\'Pagamenti & Prelievi Standard\'", "\'Spedizioni & Ritiri BancoPosta\'", "\'Spedizioni & Ritiri Standard\'"
     };
 
-    double min_arrival = min_from_array(events->arrivals, NUMBER_OF_QUEUES, &dummy);
-    double min_completion = min_from_array(events->gen_completions, M-1, &dummy);
+    double min_arrival = next_arr_event(events->arrivals, NUMBER_OF_QUEUES, &dummy);
+    double min_completion = next_compl_event(events->gen_completions, M-1, &dummy);
 
     if (event_type == ARR_EVENT_TYPE) {
         printf("Current event: ARRIVAL %s\n\n\n", types_of_tickets[event_index]);
@@ -166,8 +174,8 @@ void print_update(int event_type, int event_index, int service_completed)
         ((min_completion == INFTY) ? " (INFTY)"  : "")
     );
     printf("Next completion of dedicated server = %12.6lf%s\n\n",
-        events->ded_completion,
-        ((events->ded_completion == INFTY) ? " (INFTY)" : "")
+        events->ded_completion->time,
+        ((events->ded_completion->time == INFTY) ? " (INFTY)" : "")
     );
 
     printf("Continuous general BancoPosta customers served    = %3d\n", counter_served_gen_bp);
@@ -178,14 +186,16 @@ void print_update(int event_type, int event_index, int service_completed)
     printf("\nTotal customers                                = %3d\n\n", integers_sum(customers, NUMBER_OF_QUEUES));
 
     for (j = 0; j < M-1; j++) {
-        tmp = (gen_status[j] == -1) ? "IDLE" : types_of_tickets[gen_status[j]];
+        ticket = events->gen_completions[j]->type_of_ticket;
+        tmp = (ticket == NONE) ? "IDLE" : types_of_tickets[ticket];
         printf("General server %d:\n\tStatus          = %s \n", j, tmp);
-        printf("\tNext completion = %lf\n\n", events->gen_completions[j]);
+        printf("\tNext completion = %lf\n\n", events->gen_completions[j]->time);
     }
 
-    tmp = (ded_status == -1) ? "IDLE" : types_of_tickets[ded_status];
+    ticket = events->ded_completion->type_of_ticket;
+    tmp = (ticket == NONE) ? "IDLE" : types_of_tickets[ticket];
     printf("Dedicated server:\n\tStatus          = %s \n", tmp);
-    printf("\tNext completion = %lf\n\n", events->ded_completion);
+    printf("\tNext completion = %lf\n\n", events->ded_completion->time);
 
     printf("=============================================================\n");
 }
@@ -287,22 +297,25 @@ void simulation_run(statistics_t **stat)
                     toggle_server_status(idle_server_index);
             } else {
                 if (ded_status == IDLE) {
-                    ded_status = next_event_index;
-                    events->ded_completion = t->current + GetService(next_event_index);
+                    ded_status = BUSY;
+                    in_service[next_event_index] ++;
+                    events->ded_completion->time = t->current + GetService(next_event_index);
+                    events->ded_completion->type_of_ticket = next_event_index;
                 }
-            }            
+            }
 
         } else if (next_event_type == GEN_COMPL_EVENT_TYPE) {       /* Event occurrence of completion of general server */
-            current_state = gen_status[next_event_index];
+            current_state = events->gen_completions[next_event_index]->type_of_ticket;
             number_of_completions[current_state]++;
             toggle_server_status(next_event_index);
             customers[current_state]--;
-
+            in_service[current_state]--;
         } else {                                                    /* Event occurrence of completion of dedicated server */
-            current_state = ded_status;
+            current_state = events->ded_completion->type_of_ticket;
             number_of_completions[current_state]++;
             next_assignment_ded_server();
             customers[current_state]--;
+            in_service[current_state]--;
         }
 
 #ifdef VERIFY
@@ -315,6 +328,9 @@ void simulation_run(statistics_t **stat)
 
     /* Free allocated dynamic memory */
     free(t);
+    for (int i = 0; i < M-1; ++i)
+        free(events->gen_completions[i]);
+    free(events->ded_completion);
     free(events);
     free(area);
 }

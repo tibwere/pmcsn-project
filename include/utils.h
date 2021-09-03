@@ -55,11 +55,14 @@
 
 #define LAMBDA (3125.0 / 12812)         /* Average arrival rate */
 
-#define MU_UO (41.0 / 510)              /* Average service rate for "Unica Operazione" */
-#define MU_PP (41.0 / 765)              /* Average service rate for "Pagamenti & Prelievi" */
-#define MU_SR (1.0 / 15)                /* Average service rate for "Spedizioni & Ritiri" */
+#define MU_UO (1.0 / 7)              /* Average service rate for "Unica Operazione" */
+#define MU_PP (1.0 / 14)              /* Average service rate for "Pagamenti & Prelievi" */
+#define MU_SR (1.0 / 10)                /* Average service rate for "Spedizioni & Ritiri" */
 
-#define IDLE -1                         /* The server is idle */
+#define IDLE 0                          /* The server is idle */
+#define BUSY 1                          /* The server is busy */
+
+#define NONE -1                         /* The server is not processing a ticket */
 #define UO_BP 0                         /* The server is processing a ticket "Unica Operazione BancoPosta" */
 #define PP_BP 1                         /* The server is processing a ticket "Pagamenti & Prelievi BancoPosta" */
 #define UO_STD 2                        /* The server is processing a ticket "Unica Operazione Standard" */
@@ -71,11 +74,15 @@
 #define GEN_COMPL_EVENT_TYPE 1          /* Next event is a completion of a general server */
 #define DED_COMPL_EVENT_TYPE 2          /* Next event is a completion of a dedicated server */
 
+typedef struct compl_event {
+    double time;
+    int type_of_ticket;
+} compl_event_t;
 
 typedef struct event_list {
     double arrivals[NUMBER_OF_QUEUES];  /* Next occurrence of an arrival for each flow */
-    double gen_completions[M-1];        /* Next occurrence of a completion for each server */       
-    double ded_completion;              /* Next occurrence of a completion for the dedicated server */            
+    compl_event_t *gen_completions[M-1];/* Next occurrence of a completion for each server */       
+    compl_event_t *ded_completion;      /* Next occurrence of a completion for the dedicated server */            
 } event_list_t; 
 
 typedef struct times {
@@ -103,6 +110,7 @@ typedef struct statistics {
 
 /* System Status */
 int customers[NUMBER_OF_QUEUES];
+int in_service[NUMBER_OF_QUEUES];
 int gen_status[M-1];
 int ded_status;
 
@@ -119,7 +127,8 @@ int batch_index;                        /* Current number of batch */
 /* Prototypes */
 int                             integers_sum(int *, int);
 double                          doubles_sum(double *, int);
-double                          min_from_array(double *, int, int *);
+double                          next_arr_event(double *, int, int *);
+double                          next_compl_event(compl_event_t **, int, int *);
 double                          next_event(int *, int *);
 void                            GetArrival(int);
 double                          GetService(int);
@@ -127,7 +136,6 @@ time_integrated_populations_t * init_tip(void);
 void                            init_event_list(void);
 void                            init_times(void);
 void                            init_status(void);
-int *                           get_in_service_per_type(void);
 void                            update_tip(time_integrated_populations_t *);
 int                             get_idle_server_gp(void);
 statistics_t *                  load_statistics(time_integrated_populations_t *, int *);
