@@ -5,23 +5,31 @@ Le seguenti variabili matematiche, definite per ogni istante di tempo $t$, ident
 \item Lo stato dello sportello $r$-esimo è dato da:
 \begin{equation}
 \label{eqn:modello-specifiche-3}
-Server_r(t) \in \lbrace 0,\ 1 \rbrace
+Server_r(t) \in \lbrace 0, 1 \rbrace
 \end{equation}
-\item Per ciascuna classe $c$ il numero di clienti in coda è definito come:
+\item Per ciascuna classe $c$ il numero totale di clienti è definito come:
 \begin{equation}
 \label{eqn:modello-specifiche-2}
-Queue_c(t) \in \mathbb{N}
+Customers_c(t) \in \mathbb{N}
 \end{equation}
-\item Per ciascuna classe $c$ il numero di clienti in servizio è definito come:
+\item Per ciascuna classe $c$ il numero di clienti in servizio è definito come segue:
+\begin{itemize}
+\item Per $c$ diversa da \sr{} \textsl{BancoPosta} e \sr{} \textsl{Standard}:
 \begin{equation}
 \label{eqn:modello-specifiche-2}
-InService_c(t) \in \mathbb{N}
+InService_c(t) \in \lbrace 0, 1, \dots, M \rbrace
+\end{equation}
+\item Altrimenti:
+\begin{equation}
+\label{eqn:modello-specifiche-2}
+InService_c(t) \in \lbrace 0, 1 \rbrace
 \end{equation}
 \end{itemize}
+\end{itemize}
 
-Dalle variabili appena descritte, è immediato ricavare il numero totale di clienti nel sistema per ciascuna classe di utenza $c$:
+Dalle variabili appena descritte, è immediato ricavare il numero di clienti in coda per ciascuna classe di utenza $c$:
 \begin{equation}
-Customers_c(t) = Queue_c(t) + InService_c(t)
+Queue_c(t) = Customers_c(t) - InService_c(t)
 \end{equation}
 
 Di seguito sono riportate alcune assunzioni che saranno alla base di questa e delle successive fasi dello studio:
@@ -137,13 +145,9 @@ N$^o$ di uffici postali & 12 812 \\
 
 Per ricavare il throughput dell'intero sistema si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
 \begin{equation}
-X = \frac{\# \text{clienti al giorno}}{\#\text{uffici postali} \cdot minuti\_lavoro}_{g} = \frac{1500000}{12812\cdot 480} = \frac{3125}{12812} \simeq 0.243912\ req/min
+X = \frac{\# \text{clienti al giorno}}{\#\text{uffici postali}} = \frac{1500000}{12812}\ req/wd = \frac{1500000}{12812\cdot 480} \simeq 0.243912\ req/min
 \end{equation} 
-dove $minuti\_lavoro_{g}$ rappresenta l'ammontare medio di minuti che costituiscono la giornata lavorativa e viene computato\footnote{In assenza di dati ufficiali si è assunta una giornata tipo di lavoro per un'attività commericiale.} come segue:
-\begin{equation}
-\label{eqn:modello-specifiche-15}
-minuti\_lavoro_{g} = 8\ h/gg = (60 \cdot 8)\ min/gg = 480\ min/gg
-\end{equation}
+dove la conversione da giornata lavorativa (\textsl{wd}) a minuti effettivi di lavoro è stata realizzata in accordo a quanto specificato negli obiettivi (cap. \ref{chp:obiettivi}).
 
 È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
 

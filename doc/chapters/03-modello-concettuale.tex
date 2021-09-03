@@ -26,7 +26,7 @@ Server_r \in
 con $r \in \lbrace 1, 2, \dots, M \rbrace$.
 \item Per ciascuna delle 6 classi di utenza:
 \begin{itemize}
-\item Il numero di clienti in coda della $c-$esima è modellato dalla variabile $Queue_{c}$
+\item Il numero totale di clienti della $c-$esima è modellato dalla variabile $Customers_{c}$
 \item Il numero di clienti in servizio della $c-$esima è modellato dalla variabile $InService_{c}$
 \end{itemize}
 con $c$ appartenente a:
@@ -50,7 +50,7 @@ Infine, si assume che:
 \begin{equation}
 \begin{cases}
 Server_r =\mathtt{IDLE} & \forall\ r \\[1em]
-Queue_{c} = \mathtt{EMPTY} & \forall\ c \\[1em]
+Customers_{c} = \mathtt{NONE} & \forall\ c \\[1em]
 InService_{c} = \mathtt{NONE} & \forall\ c
 \end{cases}
 \end{equation}

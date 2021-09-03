@@ -3,9 +3,10 @@ L'approccio utilizzato per la realizzazione del modello computazionale è quello
 \section{Stato del sistema}\label{sec:modello-computazionale-stato}
 Le variabili di programma utilizzate per descrivere univocamente lo stato del sistema ad ogni istante di tempo sono:
 \begin{itemize}
-\item \texttt{{\color{code_purple} int} customers[NUMBER\_OF\_QUEUES]}: vettore di sei interi per la memorizzazione del numero di clienti per ciascuna tipologia di arrivo.
-\item \texttt{{\color{code_purple} int} gen\_status[M-1]}: vettore di $M-1$ interi, che assumono valori in accordo alla definizione \ref{eqn:modello-specifiche-3}, per la memorizzazione dello stato dei serventi generali.
-\item \texttt{{\color{code_purple} int} ded\_status}: intero, che assume valori in accordo alla definizione \ref{eqn:modello-specifiche-4}, per la memorizzazione dello stato del servente dedicato.
+\item \texttt{{\color{code_purple} int} customers[NUMBER\_OF\_QUEUES]}: vettore di sei interi per la memorizzazione del numero totale di clienti per ciascuna tipologia di arrivo.
+\item \texttt{{\color{code_purple} int} in\_service[NUMBER\_OF\_QUEUES]}: vettore di sei interi per la memorizzazione del numero di clienti in servizio per ciascuna tipologia di arrivo.
+\item \texttt{{\color{code_purple} int} gen\_status[M-1]}: vettore di $M-1$ interi, che assumono valori \texttt{0} e \texttt{1}, per la memorizzazione dello stato dei serventi generali.
+\item \texttt{{\color{code_purple} int} ded\_status}: intero, che assume valori \texttt{0} e \texttt{1}, per la memorizzazione dello stato del servente dedicato.
 \end{itemize}
 
 Il mapping fra le variabili matematiche definite nel modello delle specifiche e quelle di programma a livello computazionale è riassunto nella tabella \ref{table:modello-computazionale-1}. 
@@ -17,7 +18,9 @@ Il mapping fra le variabili matematiche definite nel modello delle specifiche e 
 \hline
 Variabile matematica & Variabile di programma \\
 \hline
-$Customers_i(t)$ & \texttt{{\color{code_purple}int} customers[i]} \\
+$Customers_c(t)$ & \texttt{{\color{code_purple}int} customers[c]} \\
+\hline
+$InService_c(t)$ & \texttt{{\color{code_purple}int} in\_service[c]} \\
 \hline
 $Server_r(t)$ & \texttt{{\color{code_purple}int} gen\_status[r]} \\
 \hline
@@ -28,37 +31,59 @@ $Server_\ded(t)$ & \texttt{{\color{code_purple}int} ded\_status} \\
 \label{table:modello-computazionale-1}
 \end{table}
 \newpage
+A livello computazionale le classi di utenza, finora descritte in linguaggio naturale, sono state mappate negli indici numerici riportati in tabella \ref{table:modello-computazionale-2}.
+\begin{table}[ht]
+\centering
+{\tablecolors
+\begin{tabular}{| l | r |}
+\hline
+Classe di utenza & Indice numerico \\
+\hline
+\uo{} \textsl{BancoPosta} & \texttt{0} \\
+\hline
+\pp{} \textsl{BancoPosta} & \texttt{1} \\
+\hline
+\uo{} \textsl{Standard} & \texttt{2} \\
+\hline
+\pp{} \textsl{Standard} & \texttt{3} \\
+\hline
+\sr{} \textsl{BancoPosta} & \texttt{4} \\
+\hline
+\sr{} \textsl{Standard} & \texttt{5} \\
+\hline
+\end{tabular}}
+\caption{Indici per gli array relativi alle classi di utenza}
+\label{table:modello-computazionale-2}
+\end{table}
+
 Ad inizio simulazione lo stato del sistema viene impostato come segue:
 \begin{center}
-\begin{tabular}{l l l}
-\texttt{customers[i]} & \texttt{=} & \texttt{0} \\
-\texttt{gen\_status[j]} & \texttt{=} & \texttt{IDLE} \\
-\texttt{ded\_status} & \texttt{=} & \texttt{IDLE}
+\begin{tabular}{l l l l l l}
+\texttt{customers[c]} & \texttt{=} & \texttt{0;} & \texttt{in\_service[c]} & \texttt{=} & \texttt{0;} \\
+\texttt{gen\_status[r]} & \texttt{=} & \texttt{0;} & \texttt{ded\_status} & \texttt{=} & \texttt{0;}
 \end{tabular}
 \end{center}
-per ogni $\mathtt{i\in \lbrace 0, 1, \dots, 5 \rbrace}$ e per ogni $\mathtt{j\in \lbrace 0, 1, \dots, M-2 \rbrace}$.
+per ogni $\mathtt{c\in \lbrace 0, 1, \dots, 5 \rbrace}$ e per ogni $\mathtt{r\in \lbrace 0, 1, \dots, M-2 \rbrace}$.
 
 \section{Eventi}\label{sec:modello-computazionale-eventi}
-Siano:
-\begin{itemize}
-\item $\mathtt{i \neq -1}$  l'indice che assume valori appartenenti alla terza colonna della tabella \ref{table:modello-specifiche-2}.
-\item \texttt{r} l'indice che assume valori appartenenti all'insieme $\mathtt{\lbrace 0, 1, \dots, M - 2 \rbrace}$, utilizzato per accedere ai record dell'array \texttt{gen\_status}.
-\end{itemize}
 Lo stato del sistema può cambiare all'occorrenza delle seguenti tipologie di eventi propri:
 \begin{itemize}
-\item Sei tipologie d'arrivi, all'occorrenza dei quali:
-\begin{center}
-\texttt{customers[i] = customers[i] + 1}
-\end{center}
-\item Due tipologie di completamenti per ciascun server generale, a seguito dei quali:
+\item Arrivo di un cliente afferente alla classe $c$, che comporta:
 \begin{itemize}
-\item \texttt{gen\_status[r]} passa da un certo valore \texttt{i} ad \texttt{IDLE}
-\item \texttt{customers[i] = customers[i] - 1}
+\item \texttt{customers[c] = customers[c] + 1}
 \end{itemize}
-\item Tre tipologie di completamenti per il server dedicato, per via dei quali:
+\newpage
+\item Completamento del servizio di un cliente della classe $c$ da parte di un server generale $r$, che comporta:
 \begin{itemize}
-\item \texttt{ded\_status} passa da un certo valore \texttt{i} ad \texttt{IDLE}
-\item \texttt{customers[i] = customers[i] - 1}
+\item Il passaggio di \texttt{gen\_status[r]} dal valore \texttt{1} a \texttt{0}
+\item \texttt{customers[c] = customers[c] - 1}
+\item \texttt{in\_service[c] = in\_service[c] - 1}
+\end{itemize}
+\item Completamento del servizio di un cliente della classe $c$ da parte del server dedicato, che comporta:
+\begin{itemize}
+\item Il passaggio di \texttt{ded\_status} dal valore \texttt{1} a \texttt{0}
+\item \texttt{customers[c] = customers[c] - 1}
+\item \texttt{in\_service[c] = in\_service[c] - 1}
 \end{itemize}
 \end{itemize} 
 \section{Clock di simulazione}\label{sec:modello-computazionale-clock}
@@ -89,7 +114,7 @@ Per il caso di studio in analisi è stata adottata la seguente configurazione di
 \begin{tabular}{l c r}
 \texttt{START = 0}, & \texttt{STOP = 480\footnotemark}, & \texttt{INFTY = 100 $\cdot$ STOP}
 \end{tabular}
-\footnotetext{Numero medio di minuti di una giornata lavorativa, calcolato a partire dalla \ref{eqn:modello-specifiche-15}.}
+\footnotetext{Numero medio di minuti di una giornata lavorativa, in accordo a quanto specificato negli obiettivi dello studio (cap. \ref{chp:obiettivi}).}
 \end{center}
 \section{Scheduler}\label{sec:modello-computazionale-scheduler}
 Il meccanismo di avanzamento del tempo, che garantisce l'occorrenza ordinata degli eventi temporali, ad ogni iterazione del loop di simulazione:
