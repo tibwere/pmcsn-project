@@ -90,7 +90,7 @@ Lo stato del sistema può cambiare all'occorrenza delle seguenti tipologie di ev
 L'orologio di sistema adottato nel simulatore è contenuto all'interno di una struttura dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}times\_t} t}.}, riportata nello snippet \ref{lst:modello-computazionale-1}, che memorizza informazioni relative al tempo di simulazione. In particolare:
 \begin{itemize}
 \item \texttt{{\color{code_purple}double} next}: istante di occorenza del successivo evento nel sistema.
-\item \texttt{{\color{code_purple}double} last[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{i} rappresenta l'istante dell'ultimo arrivo di tipo \texttt{i}.
+\item \texttt{{\color{code_purple}double} last[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{c} rappresenta l'istante dell'ultimo arrivo relativo alla classe di utenza $c$.
 \item \texttt{{\color{code_purple}double} current}: orologio di sistema.
 \end{itemize}
 
@@ -129,36 +129,123 @@ fintantoché è verificata almeno una delle seguenti due condizioni:
 \end{itemize}
 
 \section{Lista degli eventi}\label{sec:modello-computazionale-lista-eventi}
-La lista degli eventi, a livello implementativo, è gestita mediante la struttura dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}event\_list\_t} events}.} riportata nello snippet \ref{lst:modello-computazionale-2}.
+La lista degli eventi, a livello implementativo, è gestita mediante le strutture dati\footnote{Nel codice viene adottata la variabile globale \texttt{{\color{code_purple}event\_list\_t} events}.} riportata nello snippet \ref{lst:modello-computazionale-2}.
 Ciascun campo della struttura mantiene gli istanti di tempo d'occorrenza per una categoria di eventi. In particolare:
 \begin{itemize}
-\item \texttt{{\color{code_purple}double} arrivals[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{i} rappresenta l'istante del successivo arrivo di tipo \texttt{i}.
-\item \texttt{{\color{code_purple}double} gen\_completions[M-1]}: ciascuna entry \texttt{r} rappresenta l'istante del successivo completamento del server \texttt{r}.
-\item \texttt{{\color{code_purple}double} ded\_completion}: rappresenta l'istante del successivo completamento del server dedicato.
+\item \texttt{{\color{code_purple}double} arrivals[NUMBER\_OF\_QUEUES]}: ciascuna entry \texttt{c} rappresenta l'istante del successivo arrivo relativo alla classe d'utenza $c$.
+\item \texttt{{\color{code_purple}compl\_event\_t} gen\_completions[M-1]}: ciascuna entry \texttt{r} mantiene l'istante del prossimo completamento del server \texttt{r} e la classe dell'utente in servizio su esso.
+\item \texttt{{\color{code_purple}compl\_event\_t} ded\_completion}: mantiene l'istante del prossimo completamento del server dedicato e la classe dell'utente in servizio su esso.
 \end{itemize}
-
+\newpage
 \begin{lstlisting}[label={lst:modello-computazionale-2}, caption={Struttura dati per la lista degli eventi}]
+typedef struct compl_event {
+    double time;
+    int user_class;
+} compl_event_t;
+
 typedef struct event_list {
     double arrivals[NUMBER_OF_QUEUES];  
-    double gen_completions[M-1];               
-    double ded_completion;                         
+    compl_event_t *gen_completions[M-1];      
+    compl_event_t *ded_completion;      
 } event_list_t; 
 \end{lstlisting}
 
+\section{Generazione dei nuovi eventi}\label{sec:modello-computazionale-gen-nuovi-eventi}
+Di seguito è riportata un'analisi della metodologia adottata nella generazione degli istanti di tempo pseudocasuali. A tal proposito, è stata utilizzata la libreria \href{http://www.math.wm.edu/~leemis/}{qui} reperibile, distribuita durante il corso.
+
+In particolare:
+\begin{itemize}
+\item Una sola volta, all'avvio del simulatore, viene invocata la funzione \texttt{PlantSeeds()} per la generazione dei flussi. Dei 256 generati ne vengono utilizzati 9:
+\begin{itemize}
+\item 6 per generare gli istanti d'arrivo per ciascuna classe d'utenza.
+\item 3 per generare gli istanti di completamento per ciascuna tipologia di ticket.
+\end{itemize}
+
+\item Nella funzione \texttt{GetArrival} in base alla classe d'utenza passata come parametro:
+\begin{itemize}
+\item Viene selezionato lo stream mediante la funzione \texttt{SelectStream}.
+\item Viene generata una variata pseudocasuale di tipo esponenziale, la cui media è funzione della classe selezionata:
+\begin{center}
+\begin{tabular}{l l}
+\textsl{Unica Op. BancoPosta} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_UO*P\_BP))} \\
+\textsl{Pagam. \& Prel. BancoPosta} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_PP*P\_BP))} \\
+\textsl{Unica Op. Standard} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_UO*(1-P\_BP)))} \\
+\textsl{Pagam. \& Prel. Standard} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_PP*(1-P\_BP)))} \\
+\textsl{Sped. \& Rit. BancoPosta} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_SR*P\_BP))} \\
+\textsl{Sped. \& Rit. BancoPosta} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_SR*(1-P\_BP)))} \\
+\end{tabular}
+\end{center}
+\item Viene aggiornato l'istante del successivo arrivo di un cliente afferente a tale classe.
+\end{itemize}
+
+\item Nella funzione \texttt{GetService} in base alla classe d'utenza passata come parametro:
+\begin{itemize}
+\item Viene selezionato lo stream mediante la funzione \texttt{SelectStream}.
+\item Viene generata una variata pseudocasuale di tipo esponenziale, la cui media è funzione della classe selezionata:
+\begin{equation*}
+\begin{array}{l l l}
+\begin{rcases*}
+\textsl{Unica Op. BancoPosta} \\
+\textsl{Unica Op. Standard}
+\end{rcases*}
+& \to & \mathtt{Exponential(1.0/MU\_UO)} \\[2em]
+\begin{rcases*}
+\textsl{Pagam. \& Prel. BancoPosta} \\
+\textsl{Pagam. \& Prel. Standard}
+\end{rcases*}
+& \to & \mathtt{Exponential(1.0/MU\_PP)} \\[2em]
+\begin{rcases*}
+\textsl{Sped. \& Rit. BancoPosta} \\
+\textsl{Sped. \& Rit. Standard}
+\end{rcases*}
+& \to & \mathtt{Exponential(1.0/MU\_SR)}
+\end{array}
+\end{equation*}
+\item Viene aggiornato l'istante del successivo completamento di un cliente afferente a tale classe.
+\end{itemize}
+\end{itemize}
+È opportuno osservare che:
+\begin{itemize}
+\item Nelle funzioni \texttt{GetArrival} e \texttt{GetService} vengono generate variate esponenziali, in accordo a quanto assunto nel modello delle specifiche (cap. \ref{chp:modello-specifiche}).
+\item Per ciascuna tipologia di ticket, la titolarità di un conto \textsl{BancoPosta} non ha influenza sul tempo di servizio.
+\item Le macro:
+\begin{itemize}
+\item \texttt{MU\_UO}, \texttt{MU\_PP} e \texttt{MU\_SR}
+\item \texttt{P\_UO}, \texttt{P\_PP}, \texttt{P\_SR} e \texttt{P\_BP}
+\item \texttt{LAMBDA}
+\end{itemize}
+vengono utilizzate nel codice facendo riferimento ai valori fissati nel modello delle specifiche (cap. \ref{chp:modello-specifiche}). 
+\end{itemize}
+
 \section{Algoritmo next-event}\label{sec:modello-computazionale-algoritmo}
-L'algoritmo di simulazione implementato consiste nei seguenti quattro passi:
+Di seguito sono analizzati alcuni statement di codice per l'implementazione dell'algoritmo di simulazione:
 \begin{enumerate}[label=Step \arabic*), align=left, leftmargin=*]
 \item \textbf{Inizializzazione}
 \begin{itemize}
 \item L'orologio di simulazione è inizializzato come descritto nella sezione \ref{sec:modello-computazionale-clock}.
-\item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare, per ogni $\mathtt{i \in \lbrace 0, 1, \dots, 5\rbrace}$:
+\item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare:
+\begin{itemize}
+\item Per ogni classe d'utenza $c$:
 \begin{center}
-\begin{tabular}{l l l}
-\texttt{events->arrivals[i]} & \texttt{=} & \texttt{GetArrival(i)} \\
-\texttt{events->gen\_completions[i]} & \texttt{=} & \texttt{INFTY}
+\texttt{events->arrivals[c] = GetArrival(c)}
+\end{center}
+
+\item Per ogni servente generale $r$:
+\begin{center}
+\begin{tabular}{l}
+\texttt{events->gen\_completions[r]->time = INFTY} \\
+\texttt{events->gen\_completions[r]->user\_class = -1}
 \end{tabular}
 \end{center}
-ed inoltre \texttt{events->ded\_completion = INFTY}
+
+\item Per il servente dedicato:
+\begin{center}
+\begin{tabular}{l}
+\texttt{events->ded\_completion->time = INFTY} \\
+\texttt{events->ded\_completion->user\_class = -1}
+\end{tabular}
+\end{center}
+\end{itemize}
 \end{itemize}
 \item \textbf{Processamento evento corrente}
 \begin{enumerate}
@@ -168,78 +255,16 @@ ed inoltre \texttt{events->ded\_completion = INFTY}
 \end{enumerate}
 \item \textbf{Schedulazione nuovi eventi}
 \begin{itemize}
-\item Nel caso in cui l'evento corrente sia un arrivo di tipo $\mathtt{i \in \lbrace 0, 1, 2, 3 \rbrace}$:
-\begin{itemize}
-\item Se esiste almeno un servente generale \texttt{r} che è \texttt{IDLE}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{gen\_status[r]} & \texttt{=} & \texttt{i} \\
-\texttt{events->gen\_completions[r]} & \texttt{=} & \texttt{t->current + GetService(i)}
-\end{tabular}
-\end{center}
-\item Altrimenti, se il servente dedicato è \texttt{IDLE}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{i} \\
-\texttt{ded\_completion} & \texttt{=} & \texttt{t->current + GetService(i)}
-\end{tabular}
-\end{center}
+\item Nel caso in cui l'evento corrente sia un arrivo di un cliente afferente ad una classe $c$ ed esiste un servente libero in grado di servirlo:
+\begin{enumerate}
+\item Lo stato del servente viene posto pari ad \texttt{1} (\texttt{BUSY}).
+\item Il numero di clienti in servizio afferenti alla classe $c$ viene incrementato di una unità.
+\item Viene generato l'istante di completamento di tale servizio, come descritto nella sezione \ref{sec:modello-computazionale-gen-nuovi-eventi}.
+\end{enumerate}
+
+\item Nel caso in cui l'evento corrente sia un completamento di un cliente afferente ad una classe $c$, il servente che si è appena liberato processa, se presente, il primo cliente in coda seguendo l'ordine di priorità, replicando l'iter proposto nel bullet precedente.
 \end{itemize}
-\item Nel caso in cui l'evento corrente sia un arrivo di tipo $\mathtt{i \in \lbrace 4, 5 \rbrace}$, se il servente dedicato è \texttt{IDLE}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{i} \\
-\texttt{ded\_completion} & \texttt{=} & \texttt{t->current + GetService(i)}
-\end{tabular}
-\end{center}
-\item Nel caso in cui l'evento corrente sia un completamento di tipo $\mathtt{i \in \lbrace 0, 1, 2, 3 \rbrace}$ da parte di un server generale \texttt{r}:
-\begin{center}
-\texttt{customers[i] = customers[i] - 1}
-\end{center}
-\begin{itemize}
-\item Se esiste almeno una richiesta di tipo $\mathtt{j \in \lbrace 0, 1, 2, 3 \rbrace}$ in attesa di essere servita\footnote{\label{note:modello-computazionale-1}Nel caso in cui vi fossero più code non vuote, la priorità verrebbe data a quella con indice \texttt{j} minore.}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{gen\_status[r]} & \texttt{=} & \texttt{j} \\
-\texttt{events->gen\_completions[r]} & \texttt{=} & \texttt{t->current + GetService(j)}
-\end{tabular}
-\end{center}
-\item Altrimenti:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{gen\_status[r]} & \texttt{=} & \texttt{IDLE} \\
-\texttt{events->gen\_completions[r]} & \texttt{=} & \texttt{INFTY}
-\end{tabular}
-\end{center}
-\end{itemize}
-\item Nel caso in cui l'evento corrente sia un completamento di tipo $\mathtt{i \in \lbrace 0, \dots, 5 \rbrace}$ da parte del server dedicato:
-\begin{center}
-\texttt{customers[i] = customers[i] - 1}
-\end{center}
-\begin{itemize}
-\item Se esiste almeno una richiesta di tipo $\mathtt{j \in \lbrace 4, 5 \rbrace}$ in attesa di essere servita\textsuperscript{\ref{note:modello-computazionale-1}}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{j} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{t->current + GetService(j)}
-\end{tabular}
-\end{center}
-\item Altrimenti, se esiste almeno una richiesta di tipo $\mathtt{j \in \lbrace 0, 1, 2, 3 \rbrace}$ in attesa di essere servita\textsuperscript{\ref{note:modello-computazionale-1}}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{j} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{t->current + GetService(j)}
-\end{tabular}
-\end{center}
-\item Altrimenti:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{IDLE} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{INFTY}
-\end{tabular}
-\end{center}
-\end{itemize}
-\end{itemize}
+
 \item \textbf{Terminazione}
 \begin{itemize}
 \item L'evento artificiale che causa la terminazione della simulazione è l'intersezione dei seguenti:

@@ -155,33 +155,33 @@ double next_event(int *min_event_type, int *min_index)
  * @param type:
  *      i-th flow
  */
-void GetArrival(int type)
+void GetArrival(int class)
 {
-    switch (type)
+    switch (class)
     {
     case UO_BP:
         SelectStream(UNICA_OP_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_UO * P_BP * LAMBDA));
+        events->arrivals[class] += Exponential(1 / (P_UO * P_BP * LAMBDA));
         break;
     case UO_STD:
         SelectStream(UNICA_OP_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_UO * (1 - P_BP) * LAMBDA));
+        events->arrivals[class] += Exponential(1 / (P_UO * (1 - P_BP) * LAMBDA));
         break;
     case PP_BP:
         SelectStream(PAGAM_PREL_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_PP * P_BP * LAMBDA));
+        events->arrivals[class] += Exponential(1 / (P_PP * P_BP * LAMBDA));
         break;
     case PP_STD:
         SelectStream(PAGAM_PREL_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_PP * (1 - P_BP) * LAMBDA));
+        events->arrivals[class] += Exponential(1 / (P_PP * (1 - P_BP) * LAMBDA));
         break;
     case SR_BP:
         SelectStream(SPED_RIT_BP_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_SR * P_BP * LAMBDA));
+        events->arrivals[class] += Exponential(1 / (P_SR * P_BP * LAMBDA));
         break;
     case SR_STD:
         SelectStream(SPED_RIT_STD_ARR_STREAM);
-        events->arrivals[type] += Exponential(1 / (P_SR * (1 - P_BP) * LAMBDA));
+        events->arrivals[class] += Exponential(1 / (P_SR * (1 - P_BP) * LAMBDA));
         break;
     default:
         abort();
@@ -196,9 +196,9 @@ void GetArrival(int type)
  * @return:
  *      Service time for a ticket of type i
  */
-double GetService(int type) 
+double GetService(int class) 
 {
-    switch(type) {
+    switch(class) {
     case UO_BP:
     case UO_STD:
         SelectStream(UNICA_OP_SERV_STREAM);
@@ -287,7 +287,7 @@ void init_event_list(void)
             abort();
         memset(events->gen_completions[i], 0x0, sizeof(compl_event_t));
         events->gen_completions[i]->time = INFTY;
-        events->gen_completions[i]->type_of_ticket = NONE;
+        events->gen_completions[i]->user_class = NONE;
     }
 
     events->ded_completion = malloc(sizeof(compl_event_t));
@@ -295,7 +295,7 @@ void init_event_list(void)
         abort();
     memset(events->ded_completion, 0x0, sizeof(compl_event_t));
     events->ded_completion->time = INFTY;
-    events->ded_completion->type_of_ticket = NONE;
+    events->ded_completion->user_class = NONE;
 }
 
 /*

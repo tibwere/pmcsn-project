@@ -52,22 +52,22 @@ void toggle_server_status(int index)
         if (index != -1) {                                                                          /* The server is general */
             gen_status[index] = BUSY;
             events->gen_completions[index]->time = t->current + GetService(max_prio_queue_not_empty);
-            events->gen_completions[index]->type_of_ticket = max_prio_queue_not_empty;
+            events->gen_completions[index]->user_class = max_prio_queue_not_empty;
         } else {                                                                                    /* The server is dedicated */
             ded_status = BUSY;
             events->ded_completion->time = t->current + GetService(max_prio_queue_not_empty);
-            events->ded_completion->type_of_ticket = max_prio_queue_not_empty;
+            events->ded_completion->user_class = max_prio_queue_not_empty;
         }
         in_service[max_prio_queue_not_empty]++;
     } else {                                                                                        /* There isn't a queue not empty */
         if (index != -1) {                                                                          /* The server is general */
             gen_status[index] = IDLE;
             events->gen_completions[index]->time = INFTY;
-            events->gen_completions[index]->type_of_ticket = NONE;
+            events->gen_completions[index]->user_class = NONE;
         } else {                                                                                    /* The server is dedicated */
             ded_status = IDLE;
             events->ded_completion->time = INFTY;
-            events->ded_completion->type_of_ticket = NONE;
+            events->ded_completion->user_class = NONE;
         }
     }
 }
@@ -81,12 +81,12 @@ void next_assignment_ded_server(void)
         ded_status = BUSY;
         in_service[SR_BP]++;
         events->ded_completion->time = t->current + GetService(SR_BP);
-        events->ded_completion->type_of_ticket = SR_BP;
+        events->ded_completion->user_class = SR_BP;
     } else if (customers[SR_STD] > in_service[SR_STD]) {
         ded_status = BUSY;
         in_service[SR_STD]++;
         events->ded_completion->time = t->current + GetService(SR_STD);
-        events->ded_completion->type_of_ticket = SR_STD;
+        events->ded_completion->user_class = SR_STD;
     } else {
         toggle_server_status(-1);
     }
@@ -146,13 +146,13 @@ void print_update(int event_type, int event_index, int service_completed)
     printf("\nTotal customers                                = %3d\n\n", integers_sum(customers, NUMBER_OF_QUEUES));
 
     for (j = 0; j < M-1; j++) {
-        ticket = events->gen_completions[j]->type_of_ticket;
+        ticket = events->gen_completions[j]->user_class;
         tmp = (ticket == NONE) ? "IDLE" : types_of_tickets[ticket];
         printf("General server %d:\n\tStatus          = %s \n", j, tmp);
         printf("\tNext completion = %lf\n\n", events->gen_completions[j]->time);
     }
 
-    ticket = events->ded_completion->type_of_ticket;
+    ticket = events->ded_completion->user_class;
     tmp = (ticket == NONE) ? "IDLE" : types_of_tickets[ticket];
     printf("Dedicated server:\n\tStatus          = %s \n", tmp);
     printf("\tNext completion = %lf\n\n", events->ded_completion->time);
@@ -258,19 +258,19 @@ void simulation_run(statistics_t **stat)
                     ded_status = BUSY;
                     in_service[next_event_index] ++;
                     events->ded_completion->time = t->current + GetService(next_event_index);
-                    events->ded_completion->type_of_ticket = next_event_index;
+                    events->ded_completion->user_class = next_event_index;
                 }
             }            
 
         } else if (next_event_type == GEN_COMPL_EVENT_TYPE) {       /* Event occurrence of completion of general server */
-            current_state = events->gen_completions[next_event_index]->type_of_ticket;
+            current_state = events->gen_completions[next_event_index]->user_class;
             number_of_completions[current_state]++;
             toggle_server_status(next_event_index);
             customers[current_state]--;
             in_service[current_state]--;
 
         } else {                                                    /* Event occurrence of completion of dedicated server */
-            current_state = events->ded_completion->type_of_ticket;
+            current_state = events->ded_completion->user_class;
             number_of_completions[current_state]++;
             next_assignment_ded_server();
             customers[current_state]--;

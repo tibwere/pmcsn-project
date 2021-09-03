@@ -76,7 +76,7 @@
 
 typedef struct compl_event {
     double time;
-    int type_of_ticket;
+    int user_class;
 } compl_event_t;
 
 typedef struct event_list {
