@@ -186,12 +186,12 @@ void simulation_run(statistics_t **stat)
     area = init_tip();
 
     /* Uncomment these lines in validation phase (sec. 7.2) */
-    // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
-    //     continue_simul[i] = 0;
+    //for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
+    //   continue_simul[i] = 0;
 
     /* Uncomment these lines in validation phase (sec. 7.3) */
-    // for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
-    //     continue_simul[i] = 0;
+    //for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
+    //   continue_simul[i] = 0;
 
 #ifdef STATIONARY   
     batch_index = 0;
@@ -209,8 +209,9 @@ void simulation_run(statistics_t **stat)
             //printf("%d,%lf\n", batch_index, stationary_stat->d[3]);
             //printf("%lf\n", (p0*stationary_stat->d[0] + p1*stationary_stat->d[1] + p2*stationary_stat->d[2] + p3*stationary_stat->d[3]));
             //printf("%lf\n", (p0*stationary_stat->w[0] + p1*stationary_stat->w[1] + p2*stationary_stat->w[2] + p3*stationary_stat->w[3]));
-            //printf("%lf\n", (stationary_stat->n[0] + stationary_stat->n[1] + stationary_stat->n[2] + stationary_stat->n[3]) / M);
-            printf("%lf\n", P_BP*stationary_stat->d[4] + (1-P_BP)*stationary_stat->d[5]);
+            //printf("%lf\n", (stationary_stat->y[0] + stationary_stat->y[1] + stationary_stat->y[2] + stationary_stat->y[3]) / M);
+            //printf("%lf\n", P_BP*stationary_stat->d[4] + (1-P_BP)*stationary_stat->d[5]);
+            printf("%lf\n", P_BP*stationary_stat->w[4] + (1-P_BP)*stationary_stat->w[5]);
 
             /* Uncomment these lines to plot stationary delay */
             // if (STOP_BATCH == 1) 

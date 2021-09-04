@@ -9,7 +9,7 @@
 #include <math.h>
 
 /* Uncomment the following line to enable debug prints to verify the system */
-#define VERIFY
+//#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
 //#define STATIONARY
 /* Uncomment the following line to analyze growing stats */
@@ -17,7 +17,7 @@
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
-    #define B (960.0)                   /* Length of a single batch */
+    #define B (256.0)                   /* Length of a single batch */
     #define K (64)                      /* Number of batches */
     #define STOP (B * K)                /* Conceptual infinity time for the end of the simulation */
 #else

@@ -274,12 +274,12 @@ void init_event_list(void)
         GetArrival(i);
 
     /* Uncomment these lines in validation phase (sec. 7.2) */
-    // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
-    //     events->arrivals[i] = INFTY;
+    //for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
+    //   events->arrivals[i] = INFTY;
 
     /* Uncomment these lines in validation phase (sec. 7.3) */
-    // for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
-    //     events->arrivals[i] = INFTY;
+    //for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
+    //   events->arrivals[i] = INFTY;
 
     for (i = 0; i < M - 1; ++i) {
         events->gen_completions[i] = malloc(sizeof(compl_event_t));
