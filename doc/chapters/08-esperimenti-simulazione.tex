@@ -6,14 +6,14 @@ Per completezza, nella sezione \ref{sec:esperimenti-simulazione-stazionario} è 
 \section{Progetto degli esperimenti}\label{sec:esperimenti-simulazione-1}
 Per realizzare l'analisi transiente del sistema è stata adottata la tecnica \textit{replication}, utilizzando i seguenti parametri:
 \begin{itemize}
-\item \texttt{TERM\_INIT\_SEED = 9}, settato unicamente a inizio simulazione al fine di rendere le repliche indipendenti tra loro.
-\item \texttt{ENSEMBLE\_SIZE = 300}, al fine di perdere la dipendenza dal seme iniziale pur mantenendo la variabilità naturale del fenomeno osservato.
+\item Il numero di repliche adottato nella simulazione (\texttt{ENSEMBLE\_SIZE}) è pari a \texttt{1000}, scelto con l'obiettivo di perdere la dipendenza dal seme iniziale pur mantenendo la variabilità naturale del fenomeno osservato.
+\item Il seme iniziale della simulazione (\texttt{TERM\_INIT\_SEED}) è pari a \texttt{9}, settato unicamente a inizio simulazione al fine di rendere le repliche indipendenti tra loro.
 \item \texttt{START = 0} e \texttt{STOP = 480} come descritto in sezione \ref{sec:modello-computazionale-clock}.
 \end{itemize}
 
 Inoltre:
 \begin{itemize}
-\item È stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza.
+\item È stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza al 95\%.
 \item È stato utilizzato il programma \texttt{uvs} per il calcolo di media e deviazione standard.
 \end{itemize}
 
