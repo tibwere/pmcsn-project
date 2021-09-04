@@ -22,7 +22,7 @@
     #define STOP (B * K)                /* Conceptual infinity time for the end of the simulation */
 #else
     #define STOP (480.0)                /* Terminal ("close the door") time */
-    #define ENSEMBLE_SIZE 300           /* Number of simulation replies */                       
+    #define ENSEMBLE_SIZE 1000           /* Number of simulation replies */                       
 #endif
 
 #define TERM_INIT_SEED 9				/* Initial seed for terminating simulation */

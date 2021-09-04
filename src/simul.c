@@ -314,15 +314,15 @@ int main(void)
     // double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
     // double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP); 
 
-    // for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
-         simulation_run(&stat); 
-    //     //printf("%lf\n", stat->n[4] + stat->n[5]);
-    //     printf("%lf\n", stat->d[3]);
-    //     //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-    //     //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
-    //     //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
-         free(stat);
-    // }
+    for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
+        simulation_run(&stat); 
+        //printf("%lf\n", stat->n[4] + stat->n[5]);
+        printf("%lf\n", stat->d[3]);
+        //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
+        //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
+        //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
+        free(stat);
+    }
 #endif
     
     return (0);
