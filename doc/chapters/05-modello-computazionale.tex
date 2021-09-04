@@ -112,10 +112,10 @@ Di seguito sono riportate alcune osservazioni relative al tempo di simulazione:
 Per il caso di studio in analisi è stata adottata la seguente configurazione di parametri:
 \begin{center}
 \begin{tabular}{l c r}
-\texttt{START = 0}, & \texttt{STOP = 480\footnotemark}, & \texttt{INFTY = 100 $\cdot$ STOP}
+\texttt{START = 0}, & \texttt{STOP = 480}, & \texttt{INFTY = 100 $\cdot$ STOP}
 \end{tabular}
-\footnotetext{Numero medio di minuti di una giornata lavorativa, in accordo a quanto specificato negli obiettivi dello studio (cap. \ref{chp:obiettivi}).}
 \end{center}
+dove il valore di \texttt{STOP} è pari al periodo di erogazione dei ticket espresso in minuti, in accordo a quanto specificato nella presentazione del caso di studio (cap. \ref{chp:presentazione}).
 \section{Scheduler}\label{sec:modello-computazionale-scheduler}
 Il meccanismo di avanzamento del tempo, che garantisce l'occorrenza ordinata degli eventi temporali, ad ogni iterazione del loop di simulazione:
 \begin{enumerate}
@@ -225,26 +225,9 @@ Di seguito sono analizzati alcuni statement di codice per l'implementazione dell
 \item L'orologio di simulazione è inizializzato come descritto nella sezione \ref{sec:modello-computazionale-clock}.
 \item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare:
 \begin{itemize}
-\item Per ogni classe d'utenza $c$:
-\begin{center}
-\texttt{events->arrivals[c] = GetArrival(c)}
-\end{center}
+\item Per ogni classe d'utenza $c$ viene generato il primo istante di arrivo, come descritto nella sezione \ref{sec:modello-computazionale-gen-nuovi-eventi}.
 
-\item Per ogni servente generale $r$:
-\begin{center}
-\begin{tabular}{l}
-\texttt{events->gen\_completions[r]->time = INFTY} \\
-\texttt{events->gen\_completions[r]->user\_class = -1}
-\end{tabular}
-\end{center}
-
-\item Per il servente dedicato:
-\begin{center}
-\begin{tabular}{l}
-\texttt{events->ded\_completion->time = INFTY} \\
-\texttt{events->ded\_completion->user\_class = -1}
-\end{tabular}
-\end{center}
+\item Per ogni servente, sia esso generale o dedicato, viene settato a \texttt{INFTY} l'istante del prossimo completamento per denotare il fatto che esso non stia attualmente processando nessuna richiesta.
 \end{itemize}
 \end{itemize}
 \item \textbf{Processamento evento corrente}
@@ -269,8 +252,64 @@ Di seguito sono analizzati alcuni statement di codice per l'implementazione dell
 \begin{itemize}
 \item L'evento artificiale che causa la terminazione della simulazione è l'intersezione dei seguenti:
 \begin{itemize}
-\item La prossima occorrenza di una qualsiasi tipologia di arrivo è postuma a $\tau$ (\texttt{events->arrivals[i] > STOP} per ogni \texttt{i}).
-\item Non sono presenti richieste da processare (\texttt{customers[i] = 0} per ogni \texttt{i}).
+\item La prossima occorrenza di una qualsiasi tipologia di arrivo è postuma a $\tau$.
+\item Non sono presenti richieste da processare.
 \end{itemize}
+Questo perché si è interessati allo studio delle prestazioni di un ufficio postale nell'arco della giornata lavorativa (capp. \ref{chp:presentazione} e \ref{chp:obiettivi}).
+
 \end{itemize}
 \end{enumerate}
+
+\section{Campionamento delle statistiche}
+Per ogni classe d'utenza $c$, le statistiche calcolate durante la simulazione sono:
+\begin{itemize}
+\item \textbf{Time-averaged}
+\begin{itemize}
+\item La popolazione media nel centro
+\begin{equation}
+\bar{l}_c=\frac{1}{t_{end}}\int_0^{t_{end}} l_c(t) dt
+\end{equation}
+\item La popolazione media nella coda
+\begin{equation}
+\bar{q}_c=\frac{1}{t_{end}}\int_0^{t_{end}} q_c(t) dt
+\end{equation}
+\item La popolazione media in servizio 
+\begin{equation}
+\bar{y}_c=\frac{1}{t_{end}}\int_0^{t_{end}} y_c(t) dt
+\end{equation}
+\end{itemize}
+\item \textbf{Job-averaged}
+\begin{itemize}
+\item Il tempo medio di interarrivo
+\begin{equation}
+\bar{r}_c = \frac{1}{n_c} \sum_{i=1}^{n_c} r_{c,i} = \frac{a_{n_c}}{n}
+\end{equation}
+\item Il tempo medio di risposta
+\begin{equation}
+\bar{w}_c = \frac{1}{n_c} \sum_{i=1}^{n_c} w_{c,i}
+\end{equation}
+\item Il tempo medio d'attesa
+\begin{equation}
+\bar{d}_c = \frac{1}{n_c} \sum_{i=1}^{n_c} d_{c,i}
+\end{equation}
+\item Il tempo medio di servizio
+\begin{equation}
+\bar{s}_c = \frac{1}{n_c} \sum_{i=1}^{n_c} s_{c,i}
+\end{equation}
+\end{itemize}
+\end{itemize}
+dove $t_{end} \geq \tau$ è l'istante di fine simulazione.
+
+Poiché le funzioni sono \textit{stepwise} gli integrali possono essere calcolati incrementando, ad ogni iterazione del ciclo di simulazione, le aree come segue:
+\begin{lstlisting}[caption={Calcolo degli integrali}]
+area->customers[c]+=(t->next-t->current)*customers[c];
+area->queue[c]+=(t->next-t->current)*(customers[c]-in_service[c]);
+area->service[c]+=(t->next-t->current)*in_service[c];
+\end{lstlisting}
+
+Inoltre:
+\begin{itemize}
+\item Nel caso di simulazione ad orizzonte finito, al termine di ogni replica 
+\item Nel caso di simulazione ad orizzonte infinito, al termine di ogni batch
+\end{itemize}
+viene calcolata una delle statistiche sopra presentate e il risultato viene dato in input a \texttt{uvs} per il calcolo di media, deviazione standard, massimo e minimo oppure a \texttt{estimate} per il calcolo di un intervallo di confidenza al $95\%$. In entrambi i casi, i programmi utilizzano l'algoritmo di Welford.

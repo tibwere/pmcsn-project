@@ -143,11 +143,11 @@ N$^o$ di uffici postali & 12 812 \\
 \label{table:modello-specifiche-2}
 \end{table}
 
-Per ricavare il throughput dell'intero sistema si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
+Per stimare il throughput dell'intero sistema si è fatto uso dei dati dati provenienti da \textsl{"Principali dati economici e finanziari di Poste Italiane"}\footnote{\url{https://www.posteitaliane.it/it/performance-finanziaria.html}} nel modo seguente:
 \begin{equation}
 X = \frac{\# \text{clienti al giorno}}{\#\text{uffici postali}} = \frac{1500000}{12812}\ req/wd = \frac{1500000}{12812\cdot 480} \simeq 0.243912\ req/min
 \end{equation} 
-dove la conversione da giornata lavorativa (\textsl{wd}) a minuti effettivi di lavoro è stata realizzata in accordo a quanto specificato negli obiettivi (cap. \ref{chp:obiettivi}).
+dove la conversione da giornata lavorativa (\textsl{wd}) a minuti effettivi di lavoro è stata realizzata dividendo per il solo periodo d'erogazione dei ticket. Il motivo è che quest'ultimo ha un'ampiezza fissa, mentre quella del tempo di smaltimento è funzione delle richieste pendenti (cap. \ref{chp:presentazione}). In definitiva, poiché si divide per un numero più piccolo, si effettua una stima per eccesso.
 
 È opportuno osservare che, sotto l'ipotesi di \textsl{job flow balance}, la frequenza d'arrivo media al centro $\lambda$ coincide con il throughput $X$.
 

@@ -372,11 +372,11 @@ statistics_t *load_statistics(time_integrated_populations_t *area, int *number_o
 #ifdef STATIONARY
         stat->l[i] = area->customers[i] / (t->current - ((batch_index - 1) * B));
         stat->q[i] = area->queue[i] / (t->current - ((batch_index - 1) * B));
-        stat->n[i] = area->service[i] / (t->current - ((batch_index - 1) * B));
+        stat->y[i] = area->service[i] / (t->current - ((batch_index - 1) * B));
 #else
         stat->l[i] = area->customers[i] / t->current;
         stat->q[i] = area->queue[i] / t->current;
-        stat->n[i] = area->service[i] / t->current;
+        stat->y[i] = area->service[i] / t->current;
 #endif
     }
 

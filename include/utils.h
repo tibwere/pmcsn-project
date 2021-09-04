@@ -104,7 +104,7 @@ typedef struct statistics {
     double s[NUMBER_OF_QUEUES];         /* Services */
     double l[NUMBER_OF_QUEUES];         /* Requests in the node */
     double q[NUMBER_OF_QUEUES];         /* Requests in the queues */ 
-    double n[NUMBER_OF_QUEUES];         /* Requests in service */
+    double y[NUMBER_OF_QUEUES];         /* Requests in service */
 } statistics_t;
 
 
