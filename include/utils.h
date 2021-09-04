@@ -9,7 +9,7 @@
 #include <math.h>
 
 /* Uncomment the following line to enable debug prints to verify the system */
-//#define VERIFY
+#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
 //#define STATIONARY
 /* Uncomment the following line to analyze growing stats */
@@ -143,4 +143,5 @@ int                             has_to_continue(int *);
 int                             get_max_prio_queue_not_empty(void);
 void                            toggle_server_status(int);
 void                            next_assignment_ded_server(void);
+void                            dump_statistics(statistics_t *, int *);
 #endif

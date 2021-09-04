@@ -157,13 +157,13 @@ void print_update(int event_type, int event_index, int service_completed)
     printf("Dedicated server:\n\tStatus          = %s \n", tmp);
     printf("\tNext completion = %lf\n\n", events->ded_completion->time);
 
-    printf("===========================================================\n");
+    printf("=============================================================\n");
 }
 
 /*
  * Executes a single run of a simulation
  *
- * @return:
+ * @return:%6.2
  *      Pointer to statistics collected 
  */
 void simulation_run(statistics_t **stat) 
@@ -282,9 +282,13 @@ void simulation_run(statistics_t **stat)
 #endif
     }
 
-    if (stat != NULL)
+    if (stat != NULL) {
         *stat = load_statistics(area, number_of_completions);
-
+#ifdef VERIFY
+        dump_statistics(*stat, number_of_completions);
+#endif
+    }
+    
     /* Free allocated dynamic memory */
     free(t);
     for (int i = 0; i < M-1; ++i)
@@ -309,15 +313,15 @@ int main(void)
     // double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
     // double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP); 
 
-    for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
-        simulation_run(&stat); 
-        //printf("%lf\n", stat->n[4] + stat->n[5]);
-        printf("%lf\n", stat->d[3]);
-        //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
-        //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
-        //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
-        free(stat);
-    }
+    // for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
+         simulation_run(&stat); 
+    //     //printf("%lf\n", stat->n[4] + stat->n[5]);
+    //     printf("%lf\n", stat->d[3]);
+    //     //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
+    //     //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
+    //     //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);
+         free(stat);
+    // }
 #endif
     
     return (0);

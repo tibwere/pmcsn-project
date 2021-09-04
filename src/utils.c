@@ -400,3 +400,24 @@ int has_to_continue(int *flags)
     
     return (result);
 }
+
+void dump_statistics(statistics_t *stat, int *number_of_completions) 
+{
+    char *user_classes[NUMBER_OF_QUEUES] = {
+        "\'Unica Operazione BancoPosta\'", "\'Pagamenti & Prelievi BancoPosta\'", "\'Unica Operazione Standard\'", 
+        "\'Pagamenti & Prelievi Standard\'", "\'Spedizioni & Ritiri BancoPosta\'", "\'Spedizioni & Ritiri Standard\'"
+    };
+
+    for (int i = 0; i < NUMBER_OF_QUEUES; ++i) {
+        printf("Statistics for %s:\n", user_classes[i]);
+        printf("   number of completions ... = %6d\n", number_of_completions[i]);
+        printf("   average wait ............ = %6.2f\n", stat->w[i]);
+        printf("   average delay ........... = %6.2f\n", stat->d[i]);
+        printf("   average service time .... = %6.2f\n", stat->s[i]);
+        printf("   average # in the node ... = %6.2f\n", stat->l[i]);
+        printf("   average # in the queue .. = %6.2f\n", stat->q[i]);
+        printf("   average # in service .... = %6.2f\n\n", stat->y[i]);
+    }
+
+    printf("Last completion time c_n = %6.2f\n\n", t->current);
+}

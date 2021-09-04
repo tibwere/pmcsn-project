@@ -1,7 +1,12 @@
 \chapter{Validazione}\label{chp:validazione}
 Poiché i risultati dei modelli analitici sono validi per periodi d'osservazione tendenzialmente infiniti, è stato scelto in fase di validazione di adottare una simulazione di tipo \textit{steady-state}, al fine di inferire statistiche confrontabili con i valori teorici.
 
-Il metodo adottato è stato quello delle batch means con parametri $(b,k) = (960\footnote{Si è assunta una dimensione del batch pari a due giorni lavorativi.}, 64)$ e periodo d'osservazione $\tau = 61440\ min$.
+Il metodo adottato è stato quello delle batch means con parametri $(b,k) = (256, 64)$ e periodo d'osservazione $\tau = 16384\ min$. La scelta dei parametri è stata effettuata seguendo le linee guida\footnote{Capitolo 8 del libro \textit{"Discrete Event Simulation - A First Course - Lemmis Park"}.}:
+\begin{itemize}
+\item $b = 256$, rappresenta un buon compromesso fra il mantenimento della variabilità naturale del fenomeno osservato e l'indipendenza tra batch successivi.
+\item $k = 64$, al fine di rendere le statistiche campionate indipendenti dalle
+condizioni iniziali ed ottenere intervalli di confidenza significativi.
+\end{itemize}
 
 Inoltre:
 \begin{itemize}
