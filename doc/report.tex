@@ -24,6 +24,15 @@
 \usepackage{multicol}
 \usepackage{mathtools}
 
+\makeatletter
+\AtBeginDocument{%
+  \expandafter\renewcommand\expandafter\subsection\expandafter{%
+    \expandafter\@fb@secFB\subsection
+  }%
+}
+\makeatother
+
+
 % Impostazione delle lunghezze di alcuni elementi del documento
 \setlength{\parskip}{1em}
 \setlength{\parindent}{0em}
