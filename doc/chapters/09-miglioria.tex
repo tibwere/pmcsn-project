@@ -11,8 +11,8 @@ Definiti:
 \end{itemize}
 Di seguito, sono riportate le regole aggiuntive:
 \begin{itemize}
-\item Dopo un certo numero di clienti di tipo $A$ serviti, gli sportelli non dedicati devono necessariamente servire, se presenti, altri di tipo $B$, privilegiando la fila più lunga. 
-\item Dopo un certo numero di clienti di tipo $C$ serviti, lo sportello dedicato deve necessariamente servire, se presenti, altri di tipo $B$, privilegiando la fila più lunga.
+\item Ogni 2 clienti di tipo $A$ serviti, gli sportelli non dedicati servono, se presente, uno di tipo $B$, privilegiando la fila più lunga. 
+\item Ogni 3 clienti di tipo $C$ serviti, lo sportello dedicato serve, se presente, uno di tipo $B$, privilegiando la fila più lunga.
 \item Nel caso in cui non vi siano clienti di tipo $C$ da servire, lo sportello dedicato dà priorità a quelli di tipo $B$, privilegiando la fila più lunga.
 \end{itemize}
 \section{Obiettivi dello studio}\label{sec:miglioria-obiettivi}
@@ -40,20 +40,20 @@ Considerando le regole di schedulazione addizionali espresse nella sezione \ref{
 \begin{algorithm}[ht]
 \SetAlgoLined
 \While{true}{
-\textcolor{purple}{\uIf{reached threshold}{
-		\textit{pick the longest queue between \texttt{UNICA\_OP\_STD} and \texttt{PAGAM\_PREL\_STD}}\;
+\textcolor{purple}{\uIf{2 consecutive `\uo{} \textsl{BancoPosta}' or `\pp{} \textsl{BancoPosta}' served}{
+		\textit{pick the longest queue between `\uo{} \textsl{Standard}' or `\pp{} \textsl{Standard}'}\;
 		\textit{processes the first ticket inside that queue}\;
 	}}
-	\uElseIf{\texttt{UNICA\_OP\_BP} queue not empty}{
+	\uElseIf{`\uo{} \textsl{BancoPosta}' queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
-	\uElseIf{\texttt{PAGAM\_PREL\_BP} queue not empty}{
+	\uElseIf{`\pp{} \textsl{BancoPosta}' queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
-	\uElseIf{\texttt{UNICA\_OP\_STD} queue not empty}{
+	\uElseIf{`\uo{} \textsl{Standard}' queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
-	\uElseIf{\texttt{PAGAM\_PREL\_STD} queue not empty}{
+	\uElseIf{`\pp{} \textsl{Standard}' queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
 	\uElse {
@@ -67,24 +67,24 @@ Considerando le regole di schedulazione addizionali espresse nella sezione \ref{
 \begin{algorithm}
 \SetAlgoLined
 \While{true}{
-	\textcolor{purple}{\uIf{reached threshold and there are tickets \texttt{UNICA\_OP\_STD} or \texttt{PAGAM\_PREL\_STD}}{
-		\textit{pick the longest queue between \texttt{UNICA\_OP\_STD} and \texttt{PAGAM\_PREL\_STD}}\;
+	\textcolor{purple}{\uIf{3 consecutive `\sr{} \textsl{BancoPosta}' or `\sr{} \textsl{Standard}' served}{
+		\textit{pick the longest queue between `\uo{} \textsl{Standard}' or `\pp{} \textsl{Standard}'}\;
 		\textit{processes the first ticket inside that queue}\;
 	}}
-	\uElseIf{\texttt{SPED\_RIT\_BP} queue not empty}{
+	\uElseIf{`\sr{} \textsl{BancoPosta}' queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
-	\uElseIf{\texttt{SPED\_RIT\_STD} queue not empty}{
+	\uElseIf{`\sr{} \textsl{Standard}' queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
-	\textcolor{purple}{\uElseIf{there are tickets \texttt{UNICA\_OP\_STD} or \texttt{PAGAM\_PREL\_STD}}{
+	\textcolor{purple}{\uElseIf{`\uo{} \textsl{Standard}' or `\pp{} \textsl{Standard}' queues are not empty}{
 		\textit{pick the longest queue between them}\;
 		\textit{processes the first ticket inside that queue}\;
 	}}
-	\uElseIf{\texttt{UNICA\_OP\_BP} queue not empty}{
+	\uElseIf{`\uo{} \textsl{BancoPosta}' queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
-	\uElseIf{\texttt{PAGAM\_PREL\_BP} queue not empty}{
+	\uElseIf{`\pp{} \textsl{BancoPosta}' queue not empty}{
 		\textit{processes the first ticket of that type}\;
 	}
 	\uElse {
@@ -103,169 +103,39 @@ Dal modello computazionale descritto nel capitolo \ref{chp:modello-computazional
 \item Il clock di simulazione (sez. \ref{sec:modello-computazionale-clock})
 \item Scheduler (sez. \ref{sec:modello-computazionale-scheduler})
 \item Lista degli eventi (sez. \ref{sec:modello-computazionale-lista-eventi})
+\item Generazione dei nuovi eventi (sez. \ref{sec:modello-computazionale-gen-nuovi-eventi})
+\item Campionamento delle statistiche (sez. \ref{sec:modello-computazionale-campionamento-stat})
 \end{itemize}
 rimangono validi anche a seguito dell'introduzione della miglioria.
 
 \subsection{Algoritmo next-event}
 Per la realizzazione della miglioria, a livello di codice, sono state definite due ulteriori variabili:
 \begin{itemize}
-\item \texttt{{\color{code_purple}int} counter\_served\_gen\_bp}: valore intero modulare rispetto alla soglia, utilizzato per mantenere il numero di richieste di tipo \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} processate dai server generali.
-\item \texttt{{\color{code_purple}int} counter\_served\_sr}: valore intero modulare rispetto alla soglia, utilizzato per mantenere il numero di richieste di tipo \sr{} processate dal server dedicato.
-\end{itemize}
-Al fine di rendere efficace l'implementazione della miglioria, sono stati selezionati, tramite un approccio euristico, i seguenti valori soglia:
-\begin{itemize}
-\item \texttt{MAX\_CONT\_SERVED\_GEN\_BP = 7}, per la variabile \texttt{counter\_served\_gen\_bp}.
-\item \texttt{MAX\_CONT\_SERVED\_SR = 3}, per la variabile \texttt{counter\_served\_sr}.
-\end{itemize}
-Di seguito, è riportato l'algoritmo di simulazione con le opportune modifiche (evidenziate in {\color{purple}viola}):
-\begin{enumerate}[label=Step \arabic*), align=left, leftmargin=*]
-\item \textbf{Inizializzazione}
-\begin{itemize}
-\item L'orologio di simulazione è inizializzato come descritto nella sezione \ref{sec:modello-computazionale-clock}.
-\item La lista degli eventi (\texttt{events}) è inizializzata determinando la prima occorrenza di ogni possibile evento. In particolare, per ogni $\mathtt{i \in \lbrace 0, 1, \dots, 5\rbrace}$:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{events->arrivals[i]} & \texttt{=} & \texttt{GetArrival(i)} \\
-\texttt{events->gen\_completions[i]} & \texttt{=} & \texttt{INFTY}
-\end{tabular}
-\end{center}
-ed inoltre \texttt{events->ded\_completion = INFTY}
-\end{itemize}
-\item \textbf{Processamento evento corrente}
-\begin{enumerate}
-\item La lista degli eventi è scandita per determinare l'evento più imminente possibile, in accordo a quanto descritto nella sezione \ref{sec:modello-computazionale-scheduler}.
-\item L'orologio di sistema viene avanzato al tempo di occorrenza dell'evento schedulato, in relazione a quanto proposto in sezione \ref{sec:modello-computazionale-scheduler}.
-\item L'evento schedulato viene processato, come illustrato in sezione \ref{sec:modello-computazionale-eventi}.
-\end{enumerate}
-\item \textbf{Schedulazione nuovi eventi}
-\begin{itemize}
-\item Nel caso in cui l'evento corrente sia un arrivo di tipo $\mathtt{i \in \lbrace 0, 1, 2, 3 \rbrace}$:
-\begin{itemize}
-\item Se esiste almeno un servente generale \texttt{r} che è \texttt{IDLE}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{gen\_status[r]} & \texttt{=} & \texttt{i} \\
-\texttt{events->gen\_completions[r]} & \texttt{=} & \texttt{t->current + GetService(i)}
-\end{tabular}
-\end{center}
-\item Altrimenti, se il servente dedicato è \texttt{IDLE}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{i} \\
-\texttt{ded\_completion} & \texttt{=} & \texttt{t->current + GetService(i)}
-\end{tabular}
-\end{center}
-\item {\color{purple}Se $\mathtt{i \in \lbrace 0, 1 \rbrace}$, \texttt{counter\_served\_gen\_bp} viene settato a:
-\begin{center}
-\texttt{(counter\_served\_gen\_bp + 1) mod(MAX\_CONT\_SERVED\_GEN\_BP + 1)}\footnote{\label{note:miglioria-modello-computazionale-1}L'incremento modulare consente di resettare il contatore una volta superato il valore soglia. Ciò avviene solo quando le code relative a ticket di tipo \uo{} standard e \pp{} standard sono vuote e quindi non hanno bisogno di essere agevolate dal meccanismo introdotto dalla miglioria.}
-\end{center}}
+\item \texttt{{\color{code_purple}int} counter\_served\_gen\_bp}: valore intero modulo 2, utilizzato per mantenere il numero di clienti afferenti alle classi \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} serviti dagli sportelli generali.
+\item \texttt{{\color{code_purple}int} counter\_served\_sr}: valore intero modulo 3, utilizzato per mantenere il numero di clienti afferenti alle classi \sr{} \textsl{BancoPosta} e \sr{} \textsl{Standard} serviti dallo sportello dedicato.
 \end{itemize}
 
-\item Nel caso in cui l'evento corrente sia un arrivo di tipo $\mathtt{i \in \lbrace 4, 5 \rbrace}$, se il servente dedicato è \texttt{IDLE}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{i} \\
-\texttt{ded\_completion} & \texttt{=} & \texttt{t->current + GetService(i)}
-\end{tabular}
-\end{center}
-{\color{purple}La variabile \texttt{counter\_served\_sr} viene settata a:
-\begin{center}
-\texttt{(counter\_served\_sr + 1) mod(MAX\_CONT\_SERVED\_SR + 1)}\textsuperscript{\ref{note:miglioria-modello-computazionale-1}}
-\end{center}}
-\item Nel caso in cui l'evento corrente sia un completamento di tipo $\mathtt{i \in \lbrace 0, 1, 2, 3 \rbrace}$ da parte di un server generale \texttt{r}:
-\begin{center}
-\texttt{customers[i] = customers[i] - 1}
-\end{center}
+I passi di \textit{inizializzazione}, \textit{processamento dell'evento corrente} e \textit{terminazione} dell'algoritmo di simulazione rimangono inalterati rispetto a quanto descritto nella \ref{sec:modello-computazionale-algoritmo}. Di seguito è riportato lo step della \textit{schedulazione di nuovi eventi} le cui modifiche sono evidenziate in {\color{purple}viola}:
+\begin{enumerate}[label=Step \arabic*), align=left, leftmargin=*]
+\setcounter{enumi}{2}
+\item \textbf{Schedulazione nuovi eventi}
 \begin{itemize}
-\item {\color{purple}Se la variabile \texttt{counter\_served\_gen\_bp} ha raggiunto il suo valore soglia ed esiste una richiesta pendente di tipo \uo{} standard o \pp{} standard:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{q} & \texttt{=} & $\mathtt{\argmax_{j \in \lbrace 2, 3 \rbrace}{\left(queue[j]\right)}}$ \\
-\texttt{gen\_status[r]} & \texttt{=} & \texttt{q} \\
-\texttt{events->gen\_completions[r]} & \texttt{=} & \texttt{t->current + GetService(q)} \\
-\texttt{counter\_served\_gen\_bp} & \texttt{=} & \texttt{0}
-\end{tabular}
-\end{center}}
-\item {\color{purple}Altrimenti,} se esiste almeno una richiesta di tipo $\mathtt{j \in \lbrace 0, 1, 2, 3 \rbrace}$ in attesa di essere servita\footnote{\label{note:miglioria-modello-computazionale-2}Nel caso in cui vi fossero più code non vuote, la priorità verrebbe data a quella con indice \texttt{j} minore.}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{gen\_status[r]} & \texttt{=} & \texttt{j} \\
-\texttt{events->gen\_completions[r]} & \texttt{=} & \texttt{t->current + GetService(j)}
-\end{tabular}
-\end{center}
-{\color{purple}Se $\mathtt{j \in \lbrace 0, 1 \rbrace}$, \texttt{counter\_served\_gen\_bp} viene settato a:
-\begin{center}
-\texttt{(counter\_served\_gen\_bp + 1) mod(MAX\_CONT\_SERVED\_GEN\_BP + 1)}\textsuperscript{\ref{note:miglioria-modello-computazionale-1}}
-\end{center}}
-\item Altrimenti:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{gen\_status[r]} & \texttt{=} & \texttt{IDLE} \\
-\texttt{events->gen\_completions[r]} & \texttt{=} & \texttt{INFTY}
-\end{tabular}
-\end{center}
-\end{itemize}
-\item Nel caso in cui l'evento corrente sia un completamento di tipo $\mathtt{i \in \lbrace 0, \dots, 5 \rbrace}$ da parte del server dedicato:
-\begin{center}
-\texttt{customers[i] = customers[i] - 1}
-\end{center}
+\item Nel caso in cui l'evento corrente sia un arrivo di un cliente afferente ad una classe $c$ ed esiste un servente libero in grado di servirlo:
+\begin{enumerate}
+\item Lo stato del servente viene posto pari ad \texttt{1} (\texttt{BUSY}).
+\item Il numero di clienti in servizio afferenti alla classe $c$ viene incrementato di una unità.
+\item Viene generato l'istante di completamento di tale servizio, come descritto nella sezione \ref{sec:modello-computazionale-gen-nuovi-eventi}.
+\end{enumerate}
+
+\item Nel caso in cui l'evento corrente sia un completamento di un cliente afferente alla classe:
+{\color{purple}
 \begin{itemize}
-\item {\color{purple}Se la variabile \texttt{counter\_served\_sr} ha raggiunto il suo valore soglia ed esiste una richiesta pendente di tipo \uo{} standard o \pp{} standard:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{q} & \texttt{=} & $\mathtt{\argmax_{j \in \lbrace 2, 3 \rbrace}{\left(queue[j]\right)}}$ \\
-\texttt{ded\_status} & \texttt{=} & \texttt{q} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{t->current + GetService(q)} \\
-\texttt{counter\_served\_sr} & \texttt{=} & \texttt{0}
-\end{tabular}
-\end{center}}
-\item {\color{purple}Altrimenti,} se esiste almeno una richiesta di tipo $\mathtt{j \in \lbrace 4, 5 \rbrace}$ in attesa di essere servita\textsuperscript{\ref{note:miglioria-modello-computazionale-2}}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{j} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{t->current + GetService(j)} 
-\end{tabular}
-\end{center}
-{\color{purple}La variabile \texttt{counter\_served\_sr} viene settata a:
-\begin{center}
-\texttt{(counter\_served\_sr + 1) mod(MAX\_CONT\_SERVED\_SR + 1)}\textsuperscript{\ref{note:miglioria-modello-computazionale-1}}
-\end{center}}
-\item {\color{purple}Altrimenti, se esiste almeno una richiesta di tipo $\mathtt{j \in \lbrace 2, 3 \rbrace}$ in attesa di essere servita\textsuperscript{\ref{note:miglioria-modello-computazionale-2}}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{q} & \texttt{=} & $\mathtt{\argmax_{j \in \lbrace 2, 3 \rbrace}{\left(queue[j]\right)}}$ \\
-\texttt{ded\_status} & \texttt{=} & \texttt{q} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{t->current + GetService(q)}
-\end{tabular}
-\end{center}}
-\item {\color{purple}Altrimenti, se esiste almeno una richiesta di tipo $\mathtt{j \in \lbrace 0, 1 \rbrace}$ in attesa di essere servita\textsuperscript{\ref{note:miglioria-modello-computazionale-2}}:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{j} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{t->current + GetService(j)}
-\end{tabular}
-\end{center}
-La variabile \texttt{counter\_served\_gen\_bp} viene settata a:
-\begin{center}
-\texttt{(counter\_served\_gen\_bp + 1) mod(MAX\_CONT\_SERVED\_GEN\_BP + 1)}\textsuperscript{\ref{note:miglioria-modello-computazionale-1}}
-\end{center}}
-\item Altrimenti:
-\begin{center}
-\begin{tabular}{l l l}
-\texttt{ded\_status} & \texttt{=} & \texttt{IDLE} \\
-\texttt{events->ded\_completion} & \texttt{=} & \texttt{INFTY}
-\end{tabular}
-\end{center}
+\item \uo{} \textsl{BancoPosta} o \pp{} \textsl{BancoPosta}, da parte di un servente generale, si incrementa, in modo modulare, il contatore \texttt{counter\_served\_gen\_bp}.
+\item \sr{} \textsl{BancoPosta} o \sr{} \textsl{Standard}, si incrementa, in modo modulare, il contatore \texttt{counter\_served\_sr}.
+\end{itemize} 
+Inoltre,} il servente che si è appena liberato processa, se presente, il primo cliente in coda seguendo l'ordine di priorità\footnote{È opportuno ricordare che tale ordine è diverso da quello del sistema originale, in accordo a quanto descritto nella sezione \ref{sec:miglioria-presentazione} e negli algoritmi \ref{alg:miglioria-modello-specifiche-1} e \ref{alg:miglioria-modello-specifiche-2}.}, replicando i punti (a), (b) e (c) del bullet dedicato all'arrivo di un nuovo cliente.
 \end{itemize}
-\end{itemize}
-\item \textbf{Terminazione}
-\begin{itemize}
-\item L'evento artificiale che causa la terminazione della simulazione è l'intersezione dei seguenti:
-\begin{itemize}
-\item La prossima occorrenza di una qualsiasi tipologia di arrivo è postuma a $\tau$ (\texttt{events->arrivals[i] > STOP} per ogni \texttt{i}).
-\item Non sono presenti richieste da processare (\texttt{customers[i] = 0} per ogni \texttt{i}).
-\end{itemize}
-\end{itemize}
+
 \end{enumerate}
 
 \section{Verifica}\label{sec:miglioria-verifica}

@@ -6,8 +6,8 @@ Per completezza, nella sezione \ref{sec:esperimenti-simulazione-stazionario} è 
 \section{Progetto degli esperimenti}\label{sec:esperimenti-simulazione-1}
 Per realizzare l'analisi transiente del sistema è stata adottata la tecnica \textit{replication}, dove:
 \begin{itemize}
-\item Il numero di repliche adottato nella simulazione (\texttt{ENSEMBLE\_SIZE}) è pari a \texttt{10000}, scelto con l'obiettivo di perdere la dipendenza dal seme iniziale.
-\item Il seme adottato (\texttt{TERM\_INIT\_SEED}) è pari a \texttt{9}, settato unicamente ad inizio simulazione al fine di evitare di generare più volte le stesse sequenze di variate pseudocasuali. Infatti, se si scegliesse manualmente il seed di ciascuna replica, potrebbe verificarsi un overlap nella generazione.
+\item Il numero di repliche adottato nella simulazione è pari a \texttt{10000}, scelto con l'obiettivo di perdere la dipendenza dal seme iniziale.
+\item Il seme iniziale adottato è \texttt{9}, settato unicamente ad inizio simulazione al fine di evitare di generare più volte le stesse sequenze di variate pseudocasuali. Infatti, se si scegliesse manualmente il seed di ciascuna replica, potrebbe verificarsi un overlap nella generazione.
 \item \texttt{START = 0} e \texttt{STOP = 480} come descritto in sezione \ref{sec:modello-computazionale-clock}.
 \end{itemize}
 
@@ -22,7 +22,7 @@ Di seguito sono riportate le descrizioni degli esperimenti di simulazione compiu
 \subsection*{Numero minimo di sportelli}
 Per individuare il numero minimo $M^*$ di sportelli da mantenere operativi in una giornata lavorativa, al fine di soddisfare i QoS (cap. \ref{chp:obiettivi}), un primo esperimento condotto è stato quello di analizzare l'attesa media di ciascuna classe d'utenza al variare di $M$.
 
-A tal proposito, è stato simulato il sistema per un'intera giornata di lavoro, assumendo che i clienti iniziassero ad arrivare all'ufficio postale \textbf{solo} successivamente all'apertura (sistema inizialmente scarico).
+A tal proposito, è stato simulato il sistema per un'intera giornata di lavoro, assumendo che i clienti iniziassero ad arrivare all'ufficio postale solo successivamente all'apertura (sistema inizialmente scarico).
 
 \subsection*{Andamento dell'attesa nell'arco della giornata}
 Una volta individuato il valore $M^*$, è stata studiata l'evoluzione dell'attesa media per ciascuna classe d'utenza all'avanzare del tempo di simulazione.
@@ -43,42 +43,33 @@ I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab
 È immediato osservare che per rispettare i requisiti di qualità stabiliti nel capitolo \ref{chp:obiettivi}, mostrati nei grafici tramite linee rosse tratteggiate, il numero minimo di serventi è $M^* = 4$. Infatti, dalla figura \ref{fig:esperimenti-simulazione-1d} si evince che con $M = 3$ non è possibile rispettare il QoS (in tabella \ref{table:esperimenti-simulazione-1b} è evidenziato in {\color{red}rosso} il valore di  attesa che lo supera).
 
 \subsection*{Andamento dell'attesa nell'arco della giornata}
-I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-2}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-2}).
+I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-2}) che in forma grafica (figg. \ref{fig:esperimenti-simulazione-2} e \ref{fig:esperimenti-simulazione-3}).
 
-Dai risultati ottenuti si evince l'esistenza di una correlazione tra la pendenza delle curve e il tasso d'arrivo della classe d'utenza corrispondente. La spiegazione di questo fenomeno è data dal fatto che flussi caratterizzati da un inferiore frequenza d'arrivo impiegano meno tempo a stabilizzarsi.
-
-Ad esempio, si può osservare che le curve relative all'attesa media delle classi d'utenza \uo{} \textsl{Standard} e \pp{} \textsl{Standard} (figg. \ref{fig:esperimenti-simulazione-2c} e \ref{fig:esperimenti-simulazione-2d}) hanno una pendenza minore rispetto a quelle relative ai flussi \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} (figg. \ref{fig:esperimenti-simulazione-2a} e \ref{fig:esperimenti-simulazione-2b}). Infatti, le probabilità che un utente appartenga alle suddette classi sono:
-\begin{equation*}
-\begin{array}{l l l l l l}
-p_{UO} \cdot p_{BP} & = & 0.125, & p_{PP} \cdot p_{BP} & = & 0.0875, \\
-p_{UO} \cdot (1 - p_{BP}) & = & 0.375, & p_{PP} \cdot (1 - p_{BP}) & = & 0.2625
-\end{array}
-\end{equation*}
-dove $p_{UO}$, $p_{PP}$ e $p_{BP}$ sono le probabilità definite nel modello delle specifiche (cap. \ref{chp:modello-specifiche}).
-
-Inoltre, è possibile osservare che con quattro serventi l'attesa media di ciascuna classe di utenza mostra un incremento che preserva l'ordine di grandezza iniziale.
+In particolare:
+\begin{itemize}
+\item In figura \ref{fig:esperimenti-simulazione-2} è possibile osservare come per tutte le classi d'utenza, dopo circa 5 ore dall'apertura del centro postale, l'attesa media si stabilizza intorno al valore medio calcolato sull'intera giornata lavorativa, di durata non inferiore a 480 minuti (istante in cui si interrompe l'erogazione dei ticket).
+\item In figura \ref{fig:esperimenti-simulazione-3} è possibile osservare come:
+\begin{itemize}
+\item I tempi d'attesa delle classi siano maggiori al diminuire della priorità in ogni fascia oraria, a partire dalla seconda ora di servizio.
+\item I tempi d'attesa per le classi \sr{} \textsl{BancoPosta} e \textsl{Standard} sono di un ordine di grandezza superiore a quelli delle restanti, perché serviti dal singolo servente dedicato piuttosto che da 4 server in parallelo.
+\end{itemize}
+\end{itemize}
 
 \section{Raggiungimento dello stato stazionario}\label{sec:esperimenti-simulazione-stazionario}
-Per mostrare il raggiungimento dello stato stazionario da parte del sistema è stata adottata la tecnica \textit{batch means}, utilizzando i seguenti parametri:
+Per mostrare il raggiungimento dello stato stazionario da parte del sistema è stata adottata la tecnica \textit{batch means}, con:
 \begin{itemize}
-\item \texttt{STAT\_INIT\_SEED = 12345}.
-\item \texttt{B = 960}, è stato notato essere il giusto compromesso fra il mantenimento della variabilità naturale del fenomeno osservato e l'indipendenza tra batch successivi.
+\item \texttt{B = 256}, come da linee guida al fine di mantenere la variabilità naturale del fenomeno osservato e l'indipendenza tra batch successivi.
 \item \texttt{K = 64}, come da linee guida, al fine di rendere le statistiche campionate indipendenti dalle condizioni iniziali ed ottenere intervalli di confidenza significativi.
-\item \texttt{START = 0} e $\mathtt{STOP = B \cdot K = 61440}$.
+\item \texttt{START = 0} e $\mathtt{STOP = B \cdot K = 16384}$.
 \end{itemize}
 
-Inoltre, è stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza.
+Inoltre, sono stati utilizzati i programmi \texttt{uvs} e \texttt{estimate} rispettivamente per il calcolo della media, della deviazione standard e delle realizzazioni degli intervalli di confidenza al 95\%.
 
-I risultati riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-4}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-4}) mostrano l'andamento dell'attesa media:
+I risultati riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-4}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-4}) mostrano l'andamento dell'attesa media. In particolare:
 \begin{itemize}
-\item Per ticket di tipo \uo{} e \pp{} (tab. \ref{table:esperimenti-simulazione-4a} e fig. \ref{fig:esperimenti-simulazione-4a})
-\item Per ticket di tipo \sr{} (tab. \ref{table:esperimenti-simulazione-4a} e fig. \ref{fig:esperimenti-simulazione-4b})
+\item 
 \end{itemize}
-al variare del numero di batch considerati fino a raggiungere il valore di \texttt{K} sopra definito.
 
-I dati raccolti confermano quanto detto ad inizio capitolo, ovvero è possibile raggiungere lo stato stazionario soltanto prendendo in considerazione finestre temporali più ampie dei $480\ min$ giornalieri.
-
-\newpage
 \section{Grafici e tabelle}
 \subsection*{Numero minimo di sportelli}
 \captionsetup[table]{justification=centering}
@@ -418,78 +409,47 @@ $t$ & $\bar{d}_5$ & $s_5$ & $w$\\
 \label{fig:esperimenti-simulazione-2}
 \end{figure}
 
-\subsection*{Raggiungimento dello stato stazionario}
-\begin{table}[ht]
-\centering
-\begin{subtable}{0.475\textwidth}
-\centering
-{\tablecolors
-\begin{tabular}{|c|c|c|}
-\hline
-$K$ & Media & Dev. std. \\
-\hline
-1 & 20.258 & - \\
-\hline
-2 & 16.041 & 4.217 \\
-\hline
-4 & 17.105 & 3.303 \\
-\hline
-8 & 40.237 & 37.398 \\
-\hline
-16 & 37.644 & 28.445 \\
-\hline
-32 & 35.328 & 34.331 \\
-\hline
-64 & 29.543 & 27.305 \\	
-\hline
-\end{tabular}}
-\caption{\uo{} e \pp{}}
-\label{table:esperimenti-simulazione-4a}
-\end{subtable}%
-\begin{subtable}{0.475\textwidth}
-\centering
-{\tablecolors
-\begin{tabular}{|c|c|c|}
-\hline
-$K$ & Media & Dev. std. \\
-\hline
-1 & 29.430 & - \\
-\hline
-2 & 25.126 & 4.304 \\
-\hline
-4 & 27.608 & 4.663 \\
-\hline
-8 & 27.065 & 9.396 \\
-\hline
-16 & 30.917 & 14.156 \\
-\hline
-32 & 30.592 & 24.059 \\
-\hline
-64 & 30.642 & 18.991 \\
-\hline
-\end{tabular}}
-\caption{\sr{}}
-\label{table:esperimenti-simulazione-4b}
-\end{subtable}
-\caption{Raggiungimento dello stato stazionario del sistema}
-\label{table:esperimenti-simulazione-4}
-\end{table}
-
+\captionsetup[figure]{justification=centering}
 \begin{figure}[ht]
 \centering
-\begin{subfigure}[b]{0.8\textwidth}
+\includegraphics[width=\textwidth]{plots/day-from-empty-all}
+\caption{Intervalli di confidenza al 95\% per l'attesa media (espressa in minuti) di tutte le classi d'utenza, al variare dell'istante di campionamento}
+\label{fig:esperimenti-simulazione-3}
+\end{figure}
+
+\subsection*{Mancato raggiungimento dello stato stazionario}
+\captionsetup[table]{justification=centering}
+\begin{table}[ht]
 \centering
-\includegraphics[width=\textwidth]{plots/d-staz-G-ic}
-\caption{\uo{} e \pp{}}
-\label{fig:esperimenti-simulazione-4a}
-\end{subfigure}
-\vskip\baselineskip    
-\begin{subfigure}[b]{0.8\textwidth}  
-\centering 
-\includegraphics[width=\textwidth]{plots/d-staz-D-ic}
-\caption{\sr{}}
-\label{fig:esperimenti-simulazione-4b}
-\end{subfigure}
-\caption{Raggiungimento dello stato stazionario del sistema}
+{\tablecolors
+\begin{tabular}{|c|c|c|c||c|c|c|c|}
+\hline
+$t$ & $\bar{d}_2$ & $s_2$ & $w$ & $t$ & $\bar{d}_2$ & $s_2$ & $w$ \\
+\hline
+60 & 0.846 & 2.827 & 0.06 & 540 & 1.374 & 1.263 & 0.02 \\
+\hline
+120 & 1.045 & 2.002 & 0.04 & 600 & 1.385 & 1.204 & 0.02 \\
+\hline
+180 & 1.167 & 1.791 & 0.04 & 660 & 1.392 & 1.147 & 0.02 \\
+\hline
+240 & 1.242 & 1.628 & 0.03 & 720 & 1.397 & 1.098 & 0.02 \\
+\hline
+300 & 1.289 & 1.528 & 0.03 & 780 & 1.405 & 1.059 & 0.02 \\
+\hline
+360 & 1.324 & 1.518 & 0.03 & 840 & 1.413 & 1.027 & 0.02 \\
+\hline
+420 & 1.348 & 1.407 & 0.03 & 900 & 1.418 & 0.996 & 0.02 \\
+\hline
+480 & 1.362 & 1.322 & 0.03 & 960 & 1.423 & 0.971 & 0.02 \\
+\hline
+\end{tabular}}
+\caption{Istante di campionamento ($t$), media ($\bar{d}_c$), deviazione standard ($s_c$) e ampiezza dell'intervallo di confidenza al 95\% ($w$) per l'attesa (espressa in minuti) della classe d'utenza \uo{} \textsl{Standard}}
+\end{table}
+
+\captionsetup[figure]{justification=centering}
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=0.8\textwidth]{plots/d2-no-stat}
+\caption{Intervalli di confidenza al 95\% per l'attesa media (espressa in minuti) della classe d'utenza \uo{} \textsl{Standard}}
 \label{fig:esperimenti-simulazione-4}
 \end{figure}
