@@ -248,11 +248,6 @@ void init_status(void)
         gen_status[i] = IDLE;
     
     ded_status = IDLE;
-
-    /* Uncomment these lines to start with not empty center */
-    // int initial_customers[NUMBER_OF_QUEUES] = {1, 1, 2, 3, 1, 2};
-    // for (i = 0; i < NUMBER_OF_QUEUES; ++i)
-    //     customers[i] = initial_customers[i];
 }
 
 /*
@@ -267,18 +262,15 @@ void init_event_list(void)
         abort();
     memset(events, 0x0, sizeof(event_list_t));
 
-    /* Uncomment these lines if you want to start with an empty center 
-     * (Standard behaviuour - should be uncommented)
-     */
     for (i = 0; i < NUMBER_OF_QUEUES; ++i) 
         GetArrival(i);
 
     /* Uncomment these lines in validation phase (sec. 7.2) */
-    //for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
+    // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
     //   events->arrivals[i] = INFTY;
 
     /* Uncomment these lines in validation phase (sec. 7.3) */
-    //for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
+    // for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
     //   events->arrivals[i] = INFTY;
 
     for (i = 0; i < M - 1; ++i) {
@@ -420,4 +412,17 @@ void dump_statistics(statistics_t *stat, int *number_of_completions)
     }
 
     printf("Last completion time c_n = %6.2f\n\n", t->current);
+}
+
+void compute_stationary_stats(time_integrated_populations_t *area, int * number_of_completions)
+{
+    double p0 = (P_BP * P_UO)/(P_UO + P_PP);
+    double p1 = (P_BP * P_PP)/(P_UO + P_PP);
+    double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
+    double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP);
+
+    statistics_t *s = load_statistics(area, number_of_completions);
+    // printf("%lf\n", p0*s->w[0] + p1*s->w[1] + p2*s->w[2] + p3*s->w[3]);  
+    printf("%lf\n", P_BP*s->w[4] + (1-P_BP)*s->w[5]);
+    free(s);
 }

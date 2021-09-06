@@ -1,8 +1,11 @@
-def setup(destpath):
-    times=[45, 47, 49, 53, 61, 77, 109, 173, 301, 480]
+import os
 
-    fr = open("../doc/figs/plots/data/raw.csv", "r")
-    fw = open(f"../doc/figs/plots/data/{destpath}", "w")
+def setup(destpath):
+    times=[i*60 for i in range(1, 9)]
+
+    curdir = os.path.dirname(os.path.abspath(__file__))
+    fr = open(curdir + "/../doc/figs/plots/data/raw.csv", "r")
+    fw = open(f"{curdir}/../doc/figs/plots/data/{destpath}", "w")
 
     fw.write("ticket,t,stat,width\n")
 
@@ -14,4 +17,4 @@ def setup(destpath):
     fw.close()
 
 if __name__ == "__main__":
-    setup("day-from-mean-values.csv")
+    setup("d-staz.csv")

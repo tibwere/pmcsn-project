@@ -175,9 +175,6 @@ void simulation_run(statistics_t **stat)
     int next_event_type;
     int next_event_index;
     int current_state;
-#ifdef STATIONARY
-    statistics_t *stationary_stat;
-#endif
         
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_times();
@@ -186,11 +183,11 @@ void simulation_run(statistics_t **stat)
     area = init_tip();
 
     /* Uncomment these lines in validation phase (sec. 7.2) */
-    //for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
+    // for (int i = NUMBER_OF_GP_QUEUES; i < NUMBER_OF_QUEUES; ++i)
     //   continue_simul[i] = 0;
 
     /* Uncomment these lines in validation phase (sec. 7.3) */
-    //for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
+    // for (int i = 0; i < NUMBER_OF_GP_QUEUES; ++i)
     //   continue_simul[i] = 0;
 
 #ifdef STATIONARY   
@@ -198,45 +195,19 @@ void simulation_run(statistics_t **stat)
 
     while (has_to_continue(continue_simul)) { 
 
-        double p0 = (P_BP * P_UO)/(P_UO + P_PP);
-        double p1 = (P_BP * P_PP)/(P_UO + P_PP);
-        double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
-        double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP);
-
         if (t->current > B * (batch_index + 1)) {
             batch_index++;
-            stationary_stat = load_statistics(area, number_of_completions);
-            //printf("%d,%lf\n", batch_index, stationary_stat->d[3]);
-            //printf("%lf\n", (p0*stationary_stat->d[0] + p1*stationary_stat->d[1] + p2*stationary_stat->d[2] + p3*stationary_stat->d[3]));
-            //printf("%lf\n", (p0*stationary_stat->w[0] + p1*stationary_stat->w[1] + p2*stationary_stat->w[2] + p3*stationary_stat->w[3]));
-            //printf("%lf\n", (stationary_stat->y[0] + stationary_stat->y[1] + stationary_stat->y[2] + stationary_stat->y[3]) / M);
-            //printf("%lf\n", P_BP*stationary_stat->d[4] + (1-P_BP)*stationary_stat->d[5]);
-            printf("%lf\n", P_BP*stationary_stat->w[4] + (1-P_BP)*stationary_stat->w[5]);
-
-            /* Uncomment these lines to plot stationary delay */
-            // if (STOP_BATCH == 1) 
-            //     printf("%lf\n", (p0*stationary_stat->d[0] + p1*stationary_stat->d[1] + p2*stationary_stat->d[2] + p3*stationary_stat->d[3]));
-            //     //printf("%lf\n", P_BP*stationary_stat->d[4] + (1-P_BP)*stationary_stat->d[5]);
-
-            free(stationary_stat);
+            compute_stationary_stats(area, number_of_completions);
             memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
             free(area);
             area = init_tip();
             update_tip(area);
-
-            /* Uncomment these lines to analyze growing stats */
-            // if (batch_index == STOP_BATCH)
-            //     break;            
         }
 #else
 	while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
 #endif
         t->next = next_event(&next_event_type, &next_event_index);
-        
-#ifndef FLUSH
-        if (t->next > STOP)
-            break;
-#endif
+
         update_tip(area);
         t->current = t->next;
 
@@ -282,6 +253,10 @@ void simulation_run(statistics_t **stat)
         print_update(next_event_type, next_event_index, current_state);
 #endif
     }
+
+#ifdef STATIONARY
+    compute_stationary_stats(area, number_of_completions);
+#endif
 
     if (stat != NULL) {
         *stat = load_statistics(area, number_of_completions);

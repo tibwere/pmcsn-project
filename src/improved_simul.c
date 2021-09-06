@@ -273,11 +273,7 @@ void simulation_run(statistics_t **stat)
 	while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
 #endif
         t->next = next_event(&next_event_type, &next_event_index);
-        
-#ifndef FLUSH
-        if (t->next > STOP)
-            break;
-#endif
+
         update_tip(area);
         t->current = t->next;
 

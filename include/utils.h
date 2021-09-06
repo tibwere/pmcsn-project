@@ -12,8 +12,6 @@
 //#define VERIFY
 /* Uncomment the following line to enable stationary simulation */
 //#define STATIONARY
-/* Uncomment the following line to analyze growing stats */
-//#define STOP_BATCH (64)
 
 #define START 0.0                       /* Initial time */
 #ifdef STATIONARY
@@ -22,14 +20,11 @@
     #define STOP (B * K)                /* Conceptual infinity time for the end of the simulation */
 #else
     #define STOP (480.0)                /* Terminal ("close the door") time */
-    #define ENSEMBLE_SIZE 1000           /* Number of simulation replies */                       
+    #define ENSEMBLE_SIZE 10000           /* Number of simulation replies */                       
 #endif
 
 #define TERM_INIT_SEED 9				/* Initial seed for terminating simulation */
-#define STAT_INIT_SEED 12345			/* Initial seed for steady-state simulation */
-
-#define FLUSH                           /* Flush the system after close the door */
-
+#define STAT_INIT_SEED 12345	        /* Initial seed for steady-state simulation */
 #define INFTY (100.0 * STOP)            /* Impossible occurrence of an event (must be much larger than STOP) */
 
 #define UNICA_OP_BP_ARR_STREAM 0        /* Stream for "Unica Operazione Banco Posta" [ARRIVALS] */
@@ -43,7 +38,7 @@
 #define PAGAM_PREL_SERV_STREAM 7        /* Stream for "Pagamenti & Prelievi" [SERVICES] */
 #define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
-#define M 3
+#define M 4
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
 #define NUMBER_OF_GP_QUEUES 4           /* Number of queues (without SPED_RIT) */
 
@@ -144,4 +139,5 @@ int                             get_max_prio_queue_not_empty(void);
 void                            toggle_server_status(int);
 void                            next_assignment_ded_server(void);
 void                            dump_statistics(statistics_t *, int *);
+void                            compute_stationary_stats(time_integrated_populations_t *, int *);
 #endif

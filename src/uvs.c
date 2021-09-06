@@ -36,7 +36,9 @@
  */
 
 #include <stdio.h>                             
-#include <math.h>                                
+#include <math.h>  
+
+#include "utils.h"
 
 
   int main(void)
@@ -74,11 +76,13 @@
 
   if (index > 0) {
     stdev = sqrt(sum / index);
-    printf("\nfor a sample of size %ld\n", index);
-    printf("mean ................. = %7.3f\n", mean);
-    printf("standard deviation ... = %7.3f\n", stdev);
-    printf("minimum .............. = %7.3f\n", min);
-    printf("maximum .............. = %7.3f\n", max);
+    // printf("\nfor a sample of size %ld\n", index);
+    // printf("mean ................. = %7.3f\n", mean);
+    // printf("standard deviation ... = %7.3f\n", stdev);
+    // printf("minimum .............. = %7.3f\n", min);
+    // printf("maximum .............. = %7.3f\n", max);
+
+    printf("\\hline\n%d & %.3f & %.3f \\\\\n", (int) BREAK_TIME, mean, stdev);
   }
 
   return (0);
