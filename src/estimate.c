@@ -47,7 +47,7 @@
     // printf("\nbased upon %ld data points", n);
     // printf(" and with %d%% confidence\n", (int) (100.0 * LOC + 0.5));
     // printf("the expected value is in the interval");
-    printf("%d,%d,%.2f,%.2f\n", TICKET, (int)BREAK_TIME, mean, w);
+    printf("%.2f,%.2f\n", mean, w);
   }
   else
     printf("ERROR - insufficient data\n");

@@ -82,7 +82,7 @@
     // printf("minimum .............. = %7.3f\n", min);
     // printf("maximum .............. = %7.3f\n", max);
 
-    printf("\\hline\n%d & %.3f & %.3f \\\\\n", (int) BREAK_TIME, mean, stdev);
+    // printf("\\hline\n%d & %.3f & %.3f \\\\\n", (int) BREAK_TIME, mean, stdev);
   }
 
   return (0);

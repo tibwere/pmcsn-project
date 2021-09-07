@@ -13,8 +13,8 @@
 #include "rvgs.h"                       /* Random variate generators */
 #include "utils.h"                      /* Simulator utilities */
 
-#define MAX_CONT_SERVED_GEN_BP 2        /* Maximum number of continuous UO_BP and PP_BP tickets served */
-#define MAX_CONT_SERVED_SR 3            /* Maximum number of continuous SR tickets served */
+#define MAX_CONT_SERVED_GEN_BP 1        /* Maximum number of continuous UO_BP and PP_BP tickets served */
+#define MAX_CONT_SERVED_SR 4            /* Maximum number of continuous SR tickets served */
 
 /* Counter of continuous served tickets */
 int counter_served_gen_bp;
@@ -215,9 +215,6 @@ void simulation_run(statistics_t **stat)
     int next_event_type;
     int next_event_index;
     int current_state;
-#ifdef STATIONARY
-    statistics_t *stationary_stat;
-#endif
         
     memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
     init_times();
@@ -247,27 +244,11 @@ void simulation_run(statistics_t **stat)
 
         if (t->current > B * (batch_index + 1)) {
             batch_index++;
-            stationary_stat = load_statistics(area, number_of_completions);
-            //printf("%d,%lf\n", batch_index, stationary_stat->d[3]);
-            printf("%lf\n", (p0*stationary_stat->d[0] + p1*stationary_stat->d[1] + p2*stationary_stat->d[2] + p3*stationary_stat->d[3]));
-            //printf("%lf\n", (p0*stationary_stat->w[0] + p1*stationary_stat->w[1] + p2*stationary_stat->w[2] + p3*stationary_stat->w[3]));
-            //printf("%lf\n", (stationary_stat->n[0] + stationary_stat->n[1] + stationary_stat->n[2] + stationary_stat->n[3]) / M);
-            //printf("%lf\n", P_BP*stationary_stat->d[4] + (1-P_BP)*stationary_stat->d[5]);
-
-            /* Uncomment these lines to plot stationary delay */
-            // if (STOP_BATCH == 1) 
-            //     printf("%lf\n", (p0*stationary_stat->d[0] + p1*stationary_stat->d[1] + p2*stationary_stat->d[2] + p3*stationary_stat->d[3]));
-            //     //printf("%lf\n", P_BP*stationary_stat->d[4] + (1-P_BP)*stationary_stat->d[5]);
-
-            free(stat);
+            compute_stationary_stats(area, number_of_completions);
             memset(number_of_completions, 0x0, NUMBER_OF_QUEUES * sizeof(int));
             free(area);
             area = init_tip();
-            update_tip(area);
-
-            /* Uncomment these lines to analyze growing stats */
-            // if (batch_index == STOP_BATCH)
-            //     break;             
+            update_tip(area);             
         }
 #else
 	while (has_to_continue(continue_simul) || (integers_sum(customers, NUMBER_OF_QUEUES) > 0)) {
@@ -319,8 +300,16 @@ void simulation_run(statistics_t **stat)
 #endif
     }
 
-    if (stat != NULL)
+#ifdef STATIONARY
+    compute_stationary_stats(area, number_of_completions);
+#endif
+
+    if (stat != NULL) {
         *stat = load_statistics(area, number_of_completions);
+#ifdef VERIFY
+        dump_statistics(*stat, number_of_completions);
+#endif
+    }
 
     /* Free allocated dynamic memory */
     free(t);
@@ -349,7 +338,7 @@ int main(void)
     for (int j = 0; j < ENSEMBLE_SIZE; ++j) {
         simulation_run(&stat); 
         //printf("%lf\n", stat->n[4] + stat->n[5]);
-        printf("%lf\n", stat->d[3]);
+        printf("%lf\n", stat->d[5]);
         //printf("%lf\n", (stat->n[0] + stat->n[1] + stat->n[2] + stat->n[3]) / M);
         //printf("%lf\n", (p0*stat->d[0] + p1*stat->d[1] + p2*stat->d[2] + p3*stat->d[3]));
         //printf("%lf\n", P_BP*stat->w[4] + (1-P_BP)*stat->w[5]);

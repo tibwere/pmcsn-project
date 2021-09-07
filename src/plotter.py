@@ -16,7 +16,7 @@ tickets_str = [
 
 
 def plot_delay_M(ticket):
-    qos = [5,5,5,10,12.5,15]
+    qos = [5,7.5,10,12.5,10,15]
 
     curdir = os.path.dirname(os.path.abspath(__file__))
     df = pd.read_csv(curdir + "/../doc/figs/plots/data/d-trans.csv")
@@ -151,8 +151,8 @@ def plot_delay_t_no_stationary():
 
 if __name__ == "__main__":
 
-    # for i in range(6):
-    #     plot_delay_M(i)
+    for i in range(6):
+        plot_delay_M(i)
 
     # for i in range(6):
     #     plot_delay_t_terminating(i, need_mean=False)
@@ -163,4 +163,4 @@ if __name__ == "__main__":
     # plot_delay_t_stationary('D')
 
 
-    plot_delay_t_no_stationary()
+    # plot_delay_t_no_stationary()

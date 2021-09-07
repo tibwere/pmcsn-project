@@ -20,7 +20,7 @@
     #define STOP (B * K)                /* Conceptual infinity time for the end of the simulation */
 #else
     #define STOP (480.0)                /* Terminal ("close the door") time */
-    #define ENSEMBLE_SIZE 10000           /* Number of simulation replies */                       
+    #define ENSEMBLE_SIZE 10000         /* Number of simulation replies */                       
 #endif
 
 #define TERM_INIT_SEED 9				/* Initial seed for terminating simulation */
@@ -38,7 +38,7 @@
 #define PAGAM_PREL_SERV_STREAM 7        /* Stream for "Pagamenti & Prelievi" [SERVICES] */
 #define SPED_RIT_SERV_STREAM 8          /* Stream for "Spedizioni & Ritiri" [SERVICES] */
 
-#define M 4
+#define M 3
 #define NUMBER_OF_QUEUES 6              /* Number of queues (UNICA_OP + PAGAM_PREL + SPED_RIT) */
 #define NUMBER_OF_GP_QUEUES 4           /* Number of queues (without SPED_RIT) */
 

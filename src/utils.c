@@ -416,10 +416,10 @@ void dump_statistics(statistics_t *stat, int *number_of_completions)
 
 void compute_stationary_stats(time_integrated_populations_t *area, int * number_of_completions)
 {
-    double p0 = (P_BP * P_UO)/(P_UO + P_PP);
-    double p1 = (P_BP * P_PP)/(P_UO + P_PP);
-    double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
-    double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP);
+    // double p0 = (P_BP * P_UO)/(P_UO + P_PP);
+    // double p1 = (P_BP * P_PP)/(P_UO + P_PP);
+    // double p2 = ((1-P_BP) * P_UO)/(P_UO + P_PP);
+    // double p3 = ((1-P_BP) * P_PP)/(P_UO + P_PP);
 
     statistics_t *s = load_statistics(area, number_of_completions);
     // printf("%lf\n", p0*s->w[0] + p1*s->w[1] + p2*s->w[2] + p3*s->w[3]);  
