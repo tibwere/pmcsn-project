@@ -11,8 +11,8 @@ Definiti:
 \end{itemize}
 Di seguito, sono riportate le regole aggiuntive:
 \begin{itemize}
-\item Ogni 2 clienti di tipo $A$ serviti, gli sportelli non dedicati servono, se presente, uno di tipo $B$, privilegiando la fila più lunga. 
-\item Ogni 3 clienti di tipo $C$ serviti, lo sportello dedicato serve, se presente, uno di tipo $B$, privilegiando la fila più lunga.
+\item Dopo ogni cliente di tipo $A$ servito, gli sportelli non dedicati servono, se presente, uno di tipo $B$, privilegiando la fila più lunga. 
+\item Dopo ogni 4 clienti di tipo $C$ serviti, lo sportello dedicato serve, se presente, uno di tipo $B$, privilegiando la fila più lunga.
 \item Nel caso in cui non vi siano clienti di tipo $C$ da servire, lo sportello dedicato dà priorità a quelli di tipo $B$, privilegiando la fila più lunga.
 \end{itemize}
 \section{Obiettivi dello studio}\label{sec:miglioria-obiettivi}
@@ -40,7 +40,7 @@ Considerando le regole di schedulazione addizionali espresse nella sezione \ref{
 \begin{algorithm}[ht]
 \SetAlgoLined
 \While{true}{
-\textcolor{purple}{\uIf{2 consecutive `\uo{} \textsl{BancoPosta}' or `\pp{} \textsl{BancoPosta}' served}{
+\textcolor{purple}{\uIf{1 of `\uo{} \textsl{BancoPosta}' or `\pp{} \textsl{BancoPosta}' served}{
 		\textit{pick the longest queue between `\uo{} \textsl{Standard}' or `\pp{} \textsl{Standard}'}\;
 		\textit{processes the first ticket inside that queue}\;
 	}}
@@ -67,7 +67,7 @@ Considerando le regole di schedulazione addizionali espresse nella sezione \ref{
 \begin{algorithm}
 \SetAlgoLined
 \While{true}{
-	\textcolor{purple}{\uIf{3 consecutive `\sr{} \textsl{BancoPosta}' or `\sr{} \textsl{Standard}' served}{
+	\textcolor{purple}{\uIf{4 of `\sr{} \textsl{BancoPosta}' or `\sr{} \textsl{Standard}' served}{
 		\textit{pick the longest queue between `\uo{} \textsl{Standard}' or `\pp{} \textsl{Standard}'}\;
 		\textit{processes the first ticket inside that queue}\;
 	}}
@@ -112,7 +112,7 @@ rimangono validi anche a seguito dell'introduzione della miglioria.
 Per la realizzazione della miglioria, a livello di codice, sono state definite due ulteriori variabili:
 \begin{itemize}
 \item \texttt{{\color{code_purple}int} counter\_served\_gen\_bp}: valore intero modulo 2, utilizzato per mantenere il numero di clienti afferenti alle classi \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} serviti dagli sportelli generali.
-\item \texttt{{\color{code_purple}int} counter\_served\_sr}: valore intero modulo 3, utilizzato per mantenere il numero di clienti afferenti alle classi \sr{} \textsl{BancoPosta} e \sr{} \textsl{Standard} serviti dallo sportello dedicato.
+\item \texttt{{\color{code_purple}int} counter\_served\_sr}: valore intero modulo 5, utilizzato per mantenere il numero di clienti afferenti alle classi \sr{} \textsl{BancoPosta} e \sr{} \textsl{Standard} serviti dallo sportello dedicato.
 \end{itemize}
 
 I passi di \textit{inizializzazione}, \textit{processamento dell'evento corrente} e \textit{terminazione} dell'algoritmo di simulazione rimangono inalterati rispetto a quanto descritto nella \ref{sec:modello-computazionale-algoritmo}. Di seguito è riportato lo step della \textit{schedulazione di nuovi eventi} le cui modifiche sono evidenziate in {\color{purple}viola}:
@@ -141,23 +141,20 @@ Inoltre,} il servente che si è appena liberato processa, se presente, il primo 
 \section{Verifica}\label{sec:miglioria-verifica}
 Per poter controllare che tutte le modifiche introdotte con la miglioria operassero come atteso, seguendo lo stesso approccio adottato nel capitolo \ref{chp:verifica}, è stata utilizzata la funzione \texttt{print\_update()}, modificata al fine di mostrare:
 \begin{itemize}
-\item Il numero intero modulo \texttt{(MAX\_CONT\_SERVED\_GEN\_BP + 1)} di ticket \uo{}	\textsl{BancoPosta} e \pp{} \textsl{BancoPosta} serviti.
-\item Il numero intero modulo \texttt{(MAX\_CONT\_SERVED\_SR + 1)} di ticket \sr{} serviti.
+\item Il numero intero modulo $2$ di ticket \uo{}	\textsl{BancoPosta} e \pp{} \textsl{BancoPosta} serviti.
+\item Il numero intero modulo $5$ di ticket \sr{} serviti.
 \end{itemize}
 
-I controlli di consistenza effettuati, che fanno riferimento alle porzioni in {\color{purple} viola} dei modelli delle specifiche (sez. \ref{sec:miglioria-modello-specifiche}) e computazionale (sez. \ref{sec:miglioria-modello-computazionale}), sono di seguito analizzati:
+\subsection{Controlli di consistenza sullo scheduler}
+I controlli di consistenza effettuati sullo scheduler, che fanno riferimento alle porzioni in {\color{purple} viola} dei modelli delle specifiche (sez. \ref{sec:miglioria-modello-specifiche}) e computazionale (sez. \ref{sec:miglioria-modello-computazionale}), sono di seguito analizzati:
 \begin{itemize}
-\item Il contatore di ticket \uo{} \textsl{BancoPosta} e \pp{} \textsl{BancoPosta} viene incrementato ad ogni servizio corrispondente (fig. \ref{fig:miglioria-verifica-1a}).
-\item Il contatore di ticket \sr{} viene incrementato ad ogni servizio corrispondente (fig. \ref{fig:miglioria-verifica-1b}).
-\item Quando \texttt{counter\_served\_gen\_bp} raggiunge la soglia \texttt{MAX\_CONT\_SERVED\_GEN\_BP}, il primo sportello \texttt{IDLE} serve un cliente \textbf{non} titolare di conto \textsl{BancoPosta} dando priorità alla coda più lunga (fig. \ref{fig:miglioria-verifica-2a}). Inoltre, è possibile osservare come il contatore venga correttamente azzerato.
-\item Quando \texttt{counter\_served\_sr} raggiunge la soglia \texttt{MAX\_CONT\_SERVED\_SR}, non appena \texttt{IDLE}, lo sportello dedicato serve un cliente \textbf{non} titolare di conto \textsl{BancoPosta} e non in possesso di un ticket \sr{}, dando priorità alla coda più lunga (fig. \ref{fig:miglioria-verifica-2b}). Inoltre, è possibile osservare come il contatore venga correttamente azzerato.
-\item In assenza di ticket \sr{} da servire, lo sportello dedicato ne processa uno di tipo \uo{} o \pp{} appartenente ad un cliente \textbf{non} titolare di conto \textsl{BancoPosta}, dando priorità alla coda più lunga (fig. \ref{fig:miglioria-verifica-3a}).
-\item In assenza di ticket:
-\begin{itemize}
-\item \sr{}
-\item \uo{} o \pp{} appartenenti a clienti \textbf{non} titolari di conto \textsl{BancoPosta}
-\end{itemize}
-da servire, lo sportello dedicato, così come accadeva prima dell'introduzione della miglioria, processa un ticket appartenente a clienti titolari di conto \textsl{BancoPosta} (fig. \ref{fig:miglioria-verifica-3b}). 
+\item In figura \ref{fig:miglioria-verifica-1a} è mostrata una verifica di come, dopo che un servente generale completa il servizio di un cliente afferente alla classe d'utenza \uo{} \textsl{BancoPosta}, ne serve uno non titolare di conto \textsl{BancoPosta} appartente alla coda più lunga (evidenziato in {\color{verify_blue}blu}), ovvero \uo{} \textsl{Standard} (evidenziato in {\color{verify_red}rosso}). 
+
+Inoltre, è possibile osservare come il contatore venga correttamente azzerato (evidenziato in {\color{verify_yellow}giallo}).
+\item In figura \ref{fig:miglioria-verifica-1b} è mostrata una verifica di come, dopo che il servente dedicato ha servito $4$ clienti in possesso di ticket \sr{}, ne serve uno non titolare di conto \textsl{BancoPosta} appartente alla coda più lunga (evidenziato in {\color{verify_blue}blu}), ovvero \pp{} \textsl{Standard} (evidenziato in {\color{verify_red}rosso}). 
+
+Inoltre, è possibile osservare come il contatore venga correttamente azzerato (evidenziato in {\color{verify_yellow}giallo}).
+\item In figura \ref{fig:miglioria-verifica-2} è mostrata una verifica di come, in assenza di ticket \sr{} da servire (evidenziato in {\color{verify_yellow}giallo}), lo sportello dedicato serve un cliente non titolare di conto \textsl{BancoPosta} appartente alla coda più lunga (evidenziato in {\color{verify_blue}blu}), ovvero \uo{} \textsl{Standard} (evidenziato in {\color{verify_red}rosso}).
 \end{itemize}
 
 In particolare, gli screenshot riportati nelle figure \ref{fig:miglioria-verifica-1}, \ref{fig:miglioria-verifica-2} e \ref{fig:miglioria-verifica-3}, e sopra più volte referenziati, sono stati tutti quanti realizzati fissando come seed iniziale \texttt{10}.
@@ -166,59 +163,56 @@ In particolare, gli screenshot riportati nelle figure \ref{fig:miglioria-verific
 \centering
 \captionsetup[subfigure]{justification=centering}
 \begin{subfigure}[b]{0.475\textwidth}
-\centering
-\includegraphics[width=\textwidth]{screenshots/improved/inc_counter_gen_BP}
-\caption{Incremento del contatore di ticket \textsl{BancoPosta} serviti}    
-\label{fig:miglioria-verifica-1a}
-\end{subfigure}
-\hfill    
-\begin{subfigure}[b]{0.475\textwidth} 
-\centering 
-\includegraphics[width=\textwidth]{screenshots/improved/inc_counter_ded_SR}
-\caption{Incremento del contatore di ticket \sr{} serviti}    
-\label{fig:miglioria-verifica-1b}
-\end{subfigure}
-\caption{Verifica del corretto incremento dei contatori}
-\label{fig:miglioria-verifica-1}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\captionsetup[subfigure]{justification=centering}
-\begin{subfigure}[b]{0.475\textwidth}
 \centering 
 \includegraphics[width=\textwidth]{screenshots/improved/exception_gen}
 \caption{Il servente generale processa un ticket non \textsl{BancoPosta}}   
-\label{fig:miglioria-verifica-2a}
+\label{fig:miglioria-verifica-1a}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.475\textwidth}   
 \centering 
 \includegraphics[width=\textwidth]{screenshots/improved/exception_ded}
 \caption{Il servente dedicato processa un ticket \uo{} o \pp{} \textbf{non} \textsl{BancoPosta}}    
-\label{fig:miglioria-verifica-2b}
+\label{fig:miglioria-verifica-1b}
 \end{subfigure}
-\caption{Verifica del corretto cambiamento della priorità a seguito del superamento della soglia}
+\caption{Verifica del corretto cambiamento della priorità a seguito del raggiungimento della soglia}
+\label{fig:miglioria-verifica-1}
+\end{figure}
+
+\captionsetup[figure]{justification=centering}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{screenshots/improved/longest_queue_ded_no_SR}
+\caption{In assenza di \sr{}, lo sportello dedicato serve un cliente non titolare di conto \textsl{BancoPosta} appartenente alla coda più lunga}   
 \label{fig:miglioria-verifica-2}
 \end{figure}
 
-\begin{figure}[ht]
-\centering
-\captionsetup[subfigure]{justification=centering}
-\begin{subfigure}[b]{0.475\textwidth}  
+\section{Controlli di consistenza sulle statistiche di output}
+Di seguito vengono effettuati i controlli di consistenza sulle statistiche di output:
+\begin{itemize}
+\item Per le statistiche job-averaged, per definizione, si ha:
+\begin{equation}
+\bar{d} = \bar{w} - \bar{s}
+\end{equation}
+Dalla figura \ref{fig:verifica-2} è facile osservare che questa relazione sia rispettata. Ad esempio, per la classe d'utenza \uo{} \textsl{BancoPosta} vale che $\mathtt{10.47 - 6.51 = 3.96}$.
+\item Per le statistiche time-averaged, per definizione, si ha:
+\begin{equation}
+\bar{q} = \bar{l} - \bar{y}
+\end{equation}
+Dalla figura \ref{fig:verifica-2} è facile osservare che questa relazione sia rispettata. Ad esempio, per la classe d'utenza \uo{} \textsl{BancoPosta} vale che $\mathtt{0.33 - 0.21 = 0.12}$.
+\item Dalla teoria è noto che:
+\begin{equation}
+\begin{array}{c c c}
+\bar{l} = \frac{n}{c_n} \cdot \bar{w}, & \bar{q} = \frac{n}{c_n} \cdot \bar{d}, & \bar{y} = \frac{n}{c_n} \cdot \bar{s} 
+\end{array}
+\end{equation}
+Dalla figura \ref{fig:verifica-2} è facile osservare che questa relazione sia rispettata. Ad esempio, per la classe d'utenza \pp{} \textsl{Standard} vale che $\mathtt{\frac{32}{538.25} \cdot 16.49 = 0.980362 \simeq 0.98}$.
+\end{itemize}
+
+\begin{figure}[ht]  
 \centering 
-\includegraphics[width=\textwidth]{screenshots/improved/longest_queue_ded_no_SR}
-\caption{In assenza di \sr{}, il servente dedicato processa ticket della coda più lunga}   
-\label{fig:miglioria-verifica-3a}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.475\textwidth}  
-\centering 
-\includegraphics[width=\textwidth]{screenshots/improved/ded_sched_BP_if_no_STD}
-\caption{Il servente dedicato processa un ticket \uo{} o \pp{} \textbf{non} \textsl{BancoPosta}}    
-\label{fig:miglioria-verifica-3b}
-\end{subfigure}
-\caption{Verifica del corretto scheduling in assenza di ticket \sr{}}
+\includegraphics[width=\textwidth]{screenshots/improved/statistics}
+\caption{Statistiche per ciascuna classe di utenza computate su un singolo run}   
 \label{fig:miglioria-verifica-3}
 \end{figure}
 

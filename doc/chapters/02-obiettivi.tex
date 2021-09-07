@@ -1,9 +1,18 @@
 \chapter{Obiettivi dello studio}\label{chp:obiettivi}
 L'obiettivo dello studio è quello di minimizzare il numero degli sportelli operativi in un'intera giornata lavorativa, al fine di garantire il soddisfacimento di differenti requisiti di qualità per ciascuna tipologia di servizio illustrata nella presentazione del caso di studio (cap. \ref{chp:presentazione}):
 
+\begin{itemize}
+\item I clienti titolari di un conto \textsl{BancoPosta}:
 \begin{enumerate}[label=QoS-\arabic*), align=left, leftmargin=*]
-\item I clienti titolari di un conto \textsl{BancoPosta} devono sperimentare un tempo d'attesa medio non superiore a $5\ min$.
-\item I clienti \textbf{non} titolari di un conto \textsl{BancoPosta}, possessori di ticket di tipo \uo{}, devono sperimentare un tempo d'attesa medio non superiore a $10\ min$.
-\item I clienti \textbf{non} titolari di un conto \textsl{BancoPosta}, possessori di ticket di tipo \pp{}, devono sperimentare un tempo d'attesa medio non superiore a $12.5\ min$.
-\item I clienti \textbf{non} titolari di un conto \textsl{BancoPosta}, possessori di ticket di tipo \sr{}, devono sperimentare un tempo d'attesa medio non superiore a $15\ min$.
+\item Possessori di ticket di tipo \uo{}, devono sperimentare un tempo d'attesa non superiore a $5\ min$.
+\item Possessori di ticket di tipo \pp{}, devono sperimentare un tempo d'attesa non superiore a $7.5\ min$.
+\item Possessori di ticket di tipo \sr{}, devono sperimentare un tempo d'attesa non superiore a $10\ min$.
 \end{enumerate}
+\item I clienti \textbf{non} titolari di un conto \textsl{BancoPosta}:
+\begin{enumerate}[label=QoS-\arabic*), align=left, leftmargin=*]
+\setcounter{enumi}{3}
+\item Possessori di ticket di tipo \uo{}, devono sperimentare un tempo d'attesa non superiore a $10\ min$.
+\item Possessori di ticket di tipo \pp{}, devono sperimentare un tempo d'attesa non superiore a $12.5\ min$.
+\item Possessori di ticket di tipo \sr{}, devono sperimentare un tempo d'attesa non superiore a $15\ min$.
+\end{enumerate}
+\end{itemize}

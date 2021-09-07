@@ -1,7 +1,7 @@
 \chapter{Esperimenti di simulazione}\label{chp:esperimenti-simulazione}
 In accordo agli obiettivi dello studio, per la progettazione degli esperimenti di simulazione, è stata considerata unicamente l'analisi dello stato transiente del sistema. Infatti, perderebbe di significato considerare lo stato stazionario per determinare il numero minimo di serventi necessari affinché vengano soddisfatti i QoS descritti nel capitolo \ref{chp:obiettivi}. Questo perché in una giornata lavorativa il sistema non riesce a raggiungere lo stato stazionario prima che si verifichi la condizione di scarico (\textit{"close the door"}) ed inoltre rimane forte l'influenza delle condizioni iniziali. 
 
-Per completezza, nella sezione \ref{sec:esperimenti-simulazione-stazionario} è mostrato il raggiungimento della stazionarietà da parte del sistema. 
+Per completezza, nella sezione \ref{sec:esperimenti-simulazione-stazionario}, è mostrato il mancato raggiungimento della stazionarietà, nell'arco di una giornata lavorativa, da parte del sistema. 
 
 \section{Progetto degli esperimenti}\label{sec:esperimenti-simulazione-1}
 Per realizzare l'analisi transiente del sistema è stata adottata la tecnica \textit{replication}, dove:
@@ -55,21 +55,20 @@ In particolare:
 \end{itemize}
 \end{itemize}
 
-\section{Raggiungimento dello stato stazionario}\label{sec:esperimenti-simulazione-stazionario}
-Per mostrare il raggiungimento dello stato stazionario da parte del sistema è stata adottata la tecnica \textit{batch means}, con:
+\section{Mancato raggiungimento dello stato stazionario}\label{sec:esperimenti-simulazione-stazionario}
+Per mostrare il mancato raggiungimento dello stato stazionario è stato simulato il sistema per un periodo superiore ad una giornata lavorativa ($960$ minuti di erogazione dei ticket). 
+
+In figura \ref{fig:esperimenti-simulazione-4} e in tabella \ref{table:esperimenti-simulazione-3} è mostrato come il tempo medio d'attesa per la classe \uo{} \textsl{Standard} continua a crescere dopo i primi $480$ minuti (tempo di erogazione dei ticket in una normale giornata lavorativa). 
+
+Il mancato raggiungimento della stazionarietà da parte di una classe d'utenza implica il mancato raggiungimento della stazionarietà di tutto il sistema.
+
+Inoltre:
 \begin{itemize}
-\item \texttt{B = 256}, come da linee guida al fine di mantenere la variabilità naturale del fenomeno osservato e l'indipendenza tra batch successivi.
-\item \texttt{K = 64}, come da linee guida, al fine di rendere le statistiche campionate indipendenti dalle condizioni iniziali ed ottenere intervalli di confidenza significativi.
-\item \texttt{START = 0} e $\mathtt{STOP = B \cdot K = 16384}$.
+\item È stata adottata la tecnica replication con lo stesso numero di repliche ($10000$) e seed iniziale ($9$) descritti in precedenza nella sezione \ref{sec:esperimenti-simulazione-1}. L'unica variazione è stata quella di impostare il parametro \texttt{STOP} pari a $960$.
+\item Sono stati utilizzati i programmi \texttt{uvs} e \texttt{estimate} rispettivamente per il calcolo della media, della deviazione standard e delle realizzazioni degli intervalli di confidenza al 95\%.
 \end{itemize}
 
-Inoltre, sono stati utilizzati i programmi \texttt{uvs} e \texttt{estimate} rispettivamente per il calcolo della media, della deviazione standard e delle realizzazioni degli intervalli di confidenza al 95\%.
-
-I risultati riportati sia in forma tabellare (tab. \ref{table:esperimenti-simulazione-4}) che in forma grafica (fig. \ref{fig:esperimenti-simulazione-4}) mostrano l'andamento dell'attesa media. In particolare:
-\begin{itemize}
-\item 
-\end{itemize}
-
+\newpage
 \section{Grafici e tabelle}
 \subsection*{Numero minimo di sportelli}
 \captionsetup[table]{justification=centering}
@@ -444,6 +443,7 @@ $t$ & $\bar{d}_2$ & $s_2$ & $w$ & $t$ & $\bar{d}_2$ & $s_2$ & $w$ \\
 \hline
 \end{tabular}}
 \caption{Istante di campionamento ($t$), media ($\bar{d}_c$), deviazione standard ($s_c$) e ampiezza dell'intervallo di confidenza al 95\% ($w$) per l'attesa (espressa in minuti) della classe d'utenza \uo{} \textsl{Standard}}
+\label{table:esperimenti-simulazione-3}
 \end{table}
 
 \captionsetup[figure]{justification=centering}
