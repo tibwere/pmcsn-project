@@ -121,7 +121,7 @@ I passi di \textit{inizializzazione}, \textit{processamento dell'evento corrente
 \item \textbf{Schedulazione nuovi eventi}
 \begin{itemize}
 \item Nel caso in cui l'evento corrente sia un arrivo di un cliente afferente ad una classe $c$ ed esiste un servente libero in grado di servirlo:
-\begin{enumerate}
+\begin{enumerate}[label=\Roman*.]
 \item Lo stato del servente viene posto pari ad \texttt{1} (\texttt{BUSY}).
 \item Il numero di clienti in servizio afferenti alla classe $c$ viene incrementato di una unità.
 \item Viene generato l'istante di completamento di tale servizio, come descritto nella sezione \ref{sec:modello-computazionale-gen-nuovi-eventi}.
@@ -133,7 +133,7 @@ I passi di \textit{inizializzazione}, \textit{processamento dell'evento corrente
 \item \uo{} \textsl{BancoPosta} o \pp{} \textsl{BancoPosta}, da parte di un servente generale, si incrementa, in modo modulare, il contatore \texttt{counter\_served\_gen\_bp}.
 \item \sr{} \textsl{BancoPosta} o \sr{} \textsl{Standard}, si incrementa, in modo modulare, il contatore \texttt{counter\_served\_sr}.
 \end{itemize} 
-Inoltre,} il servente che si è appena liberato processa, se presente, il primo cliente in coda seguendo l'ordine di priorità\footnote{È opportuno ricordare che tale ordine è diverso da quello del sistema originale, in accordo a quanto descritto nella sezione \ref{sec:miglioria-presentazione} e negli algoritmi \ref{alg:miglioria-modello-specifiche-1} e \ref{alg:miglioria-modello-specifiche-2}.}, replicando i punti (a), (b) e (c) del bullet dedicato all'arrivo di un nuovo cliente.
+Inoltre,} il servente che si è appena liberato processa, se presente, il primo cliente in coda seguendo l'ordine di priorità\footnote{È opportuno ricordare che tale ordine è diverso da quello del sistema originale, in accordo a quanto descritto nella sezione \ref{sec:miglioria-presentazione} e negli algoritmi \ref{alg:miglioria-modello-specifiche-1} e \ref{alg:miglioria-modello-specifiche-2}.}, replicando i punti I, II e III del bullet dedicato all'arrivo di un nuovo cliente.
 \end{itemize}
 
 \end{enumerate}
@@ -144,6 +144,8 @@ Per poter controllare che tutte le modifiche introdotte con la miglioria operass
 \item Il numero intero modulo $2$ di ticket \uo{}	\textsl{BancoPosta} e \pp{} \textsl{BancoPosta} serviti.
 \item Il numero intero modulo $5$ di ticket \sr{} serviti.
 \end{itemize}
+
+Gli screenshot riportati nelle figure che seguiranno in questa sezione (figg. \ref{fig:miglioria-verifica-1}, \ref{fig:miglioria-verifica-2} e \ref{fig:miglioria-verifica-3}) sono stati tutti quanti realizzati fissando come seed iniziale \texttt{9}.
 
 \subsection{Controlli di consistenza sullo scheduler}
 I controlli di consistenza effettuati sullo scheduler, che fanno riferimento alle porzioni in {\color{purple} viola} dei modelli delle specifiche (sez. \ref{sec:miglioria-modello-specifiche}) e computazionale (sez. \ref{sec:miglioria-modello-computazionale}), sono di seguito analizzati:
@@ -156,8 +158,6 @@ Inoltre, è possibile osservare come il contatore venga correttamente azzerato (
 Inoltre, è possibile osservare come il contatore venga correttamente azzerato (evidenziato in {\color{verify_yellow}giallo}).
 \item In figura \ref{fig:miglioria-verifica-2} è mostrata una verifica di come, in assenza di ticket \sr{} da servire (evidenziato in {\color{verify_yellow}giallo}), lo sportello dedicato serve un cliente non titolare di conto \textsl{BancoPosta} appartente alla coda più lunga (evidenziato in {\color{verify_blue}blu}), ovvero \uo{} \textsl{Standard} (evidenziato in {\color{verify_red}rosso}).
 \end{itemize}
-
-In particolare, gli screenshot riportati nelle figure \ref{fig:miglioria-verifica-1}, \ref{fig:miglioria-verifica-2} e \ref{fig:miglioria-verifica-3}, e sopra più volte referenziati, sono stati tutti quanti realizzati fissando come seed iniziale \texttt{10}.
 
 \begin{figure}[ht]
 \centering

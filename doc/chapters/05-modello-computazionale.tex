@@ -22,7 +22,7 @@ $Customers_c(t)$ & \texttt{{\color{code_purple}int} customers[c]} \\
 \hline
 $InService_c(t)$ & \texttt{{\color{code_purple}int} in\_service[c]} \\
 \hline
-$Server_r(t)$ & \texttt{{\color{code_purple}int} gen\_status[r]} \\
+$Server_r(t)$ {\small(con $r \neq \ded{}$)} & \texttt{{\color{code_purple}int} gen\_status[r]} \\
 \hline
 $Server_\ded(t)$ & \texttt{{\color{code_purple}int} ded\_status} \\
 \hline
@@ -155,7 +155,7 @@ Di seguito è riportata un'analisi della metodologia adottata nella generazione 
 
 In particolare:
 \begin{itemize}
-\item Una sola volta, all'avvio del simulatore, viene invocata la funzione \texttt{PlantSeeds()} per la generazione dei flussi. Dei 256 generati ne vengono utilizzati 9:
+\item Una sola volta, all'avvio del simulatore, viene invocata la funzione \texttt{PlantSeeds()} per l'inizializzazione dei 9 stream utilizzati:
 \begin{itemize}
 \item 6 per generare gli istanti d'arrivo per ciascuna classe d'utenza.
 \item 3 per generare gli istanti di completamento per ciascuna tipologia di ticket.
@@ -172,7 +172,7 @@ In particolare:
 \textsl{Unica Op. Standard} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_UO*(1-P\_BP)))} \\
 \textsl{Pagam. \& Prel. Standard} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_PP*(1-P\_BP)))} \\
 \textsl{Sped. \& Rit. BancoPosta} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_SR*P\_BP))} \\
-\textsl{Sped. \& Rit. BancoPosta} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_SR*(1-P\_BP)))} \\
+\textsl{Sped. \& Rit. Standard} & $\to$ \texttt{Exponential(1.0/(LAMBDA*P\_SR*(1-P\_BP)))} \\
 \end{tabular}
 \end{center}
 \item Viene aggiornato l'istante del successivo arrivo di un cliente afferente a tale classe.
@@ -218,7 +218,7 @@ vengono utilizzate nel codice facendo riferimento ai valori fissati nel modello 
 \end{itemize}
 
 \section{Algoritmo next-event}\label{sec:modello-computazionale-algoritmo}
-Di seguito sono analizzati alcuni statement di codice per l'implementazione dell'algoritmo di simulazione:
+Di seguito è analizzata l'implementazione dell'algoritmo di simulazione:
 \begin{enumerate}[label=Step \arabic*), align=left, leftmargin=*]
 \item \textbf{Inizializzazione}
 \begin{itemize}
@@ -239,13 +239,13 @@ Di seguito sono analizzati alcuni statement di codice per l'implementazione dell
 \item \textbf{Schedulazione nuovi eventi}
 \begin{itemize}
 \item Nel caso in cui l'evento corrente sia un arrivo di un cliente afferente ad una classe $c$ ed esiste un servente libero in grado di servirlo:
-\begin{enumerate}
+\begin{enumerate}[label=\Roman*.]
 \item Lo stato del servente viene posto pari ad \texttt{1} (\texttt{BUSY}).
 \item Il numero di clienti in servizio afferenti alla classe $c$ viene incrementato di una unità.
 \item Viene generato l'istante di completamento di tale servizio, come descritto nella sezione \ref{sec:modello-computazionale-gen-nuovi-eventi}.
 \end{enumerate}
 
-\item Nel caso in cui l'evento corrente sia un completamento di un cliente afferente ad una classe $c$, il servente che si è appena liberato processa, se presente, il primo cliente in coda seguendo l'ordine di priorità, replicando i punti (a), (b) e (c) del bullet dedicato all'arrivo di un nuovo cliente.
+\item Nel caso in cui l'evento corrente sia un completamento di un cliente afferente ad una classe $c$, il servente che si è appena liberato processa, se presente, il primo cliente in coda seguendo l'ordine di priorità, replicando i punti I, II e III del bullet dedicato all'arrivo di un nuovo cliente.
 \end{itemize}
 
 \item \textbf{Terminazione}
@@ -282,7 +282,7 @@ Per ogni classe d'utenza $c$, le statistiche calcolate durante la simulazione so
 \begin{itemize}
 \item Il tempo medio di interarrivo
 \begin{equation}
-\bar{r}_c = \frac{1}{n_c} \sum_{i=1}^{n_c} r_{c,i} = \frac{a_{n_c}}{n}
+\bar{r}_c = \frac{1}{n_c} \sum_{i=1}^{n_c} r_{c,i} = \frac{a_{n_c}}{n_c}
 \end{equation}
 \item Il tempo medio di risposta
 \begin{equation}
@@ -312,4 +312,4 @@ Inoltre:
 \item Nel caso di simulazione ad orizzonte finito, al termine di ogni replica 
 \item Nel caso di simulazione ad orizzonte infinito, al termine di ogni batch
 \end{itemize}
-viene calcolata una delle statistiche sopra presentate e il risultato viene dato in input a \texttt{uvs} per il calcolo di media, deviazione standard, massimo e minimo oppure a \texttt{estimate} per il calcolo di un intervallo di confidenza al $95\%$. In entrambi i casi, i programmi utilizzano l'algoritmo di Welford.
+viene calcolata una delle statistiche sopra presentate e il risultato viene dato in input a \texttt{uvs} per il calcolo di media e deviazione standard oppure a \texttt{estimate} per il calcolo di un intervallo di confidenza al $95\%$. In entrambi i casi, i programmi utilizzano l'algoritmo di Welford.

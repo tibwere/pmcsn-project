@@ -34,7 +34,7 @@ Per realizzare quest'esperimento è stata eseguita una campionatura oraria delle
 \item $\dots$
 \item 10000 repliche in cui il campionamento avviene al $480$-esimo minuto di simulazione
 \end{itemize}
-dove la procedura utilizzata per inferire le statistiche è quella illustrata nel capitolo \ref{sec:modello-computazionale-campionamento-stat}.
+dove la procedura utilizzata per inferire le statistiche è quella illustrata nella sezione \ref{sec:modello-computazionale-campionamento-stat}.
 	
 \section{Esecuzione degli esperimenti ed analisi degli output}
 \subsection*{Numero minimo di sportelli}
@@ -47,7 +47,7 @@ I risultati dell'esperimento condotto sono riportati sia in forma tabellare (tab
 
 In particolare:
 \begin{itemize}
-\item In figura \ref{fig:esperimenti-simulazione-2} è possibile osservare come per tutte le classi d'utenza, dopo circa 5 ore dall'apertura del centro postale, l'attesa media si stabilizza intorno al valore medio calcolato sull'intera giornata lavorativa, di durata non inferiore a 480 minuti (istante in cui si interrompe l'erogazione dei ticket).
+\item In figura \ref{fig:esperimenti-simulazione-2} è possibile osservare come per tutte le classi d'utenza, dopo circa 5 ore dall'apertura del centro postale, l'attesa media si avvicina al valore medio calcolato sull'intera giornata lavorativa, di durata non inferiore a 480 minuti (istante in cui si interrompe l'erogazione dei ticket).
 \item In figura \ref{fig:esperimenti-simulazione-3} è possibile osservare come:
 \begin{itemize}
 \item I tempi d'attesa delle classi siano maggiori al diminuire della priorità in ogni fascia oraria, a partire dalla seconda ora di servizio.
@@ -56,7 +56,7 @@ In particolare:
 \end{itemize}
 
 \section{Mancato raggiungimento dello stato stazionario}\label{sec:esperimenti-simulazione-stazionario}
-Per mostrare il mancato raggiungimento dello stato stazionario è stato simulato il sistema per un periodo superiore ad una giornata lavorativa ($960$ minuti di erogazione dei ticket). 
+Una volta individuato il valore $M^*$, per mostrare il mancato raggiungimento dello stato stazionario è stato simulato il sistema per un periodo superiore ad una giornata lavorativa ($960$ minuti di erogazione dei ticket). 
 
 In figura \ref{fig:esperimenti-simulazione-4} e in tabella \ref{table:esperimenti-simulazione-3} è mostrato come il tempo medio d'attesa per la classe \uo{} \textsl{Standard} continua a crescere dopo i primi $480$ minuti (tempo di erogazione dei ticket in una normale giornata lavorativa). 
 

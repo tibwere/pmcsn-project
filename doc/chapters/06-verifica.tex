@@ -8,9 +8,8 @@ I controlli di consistenza effettuati sullo scheduler sono di seguito analizzati
 \begin{itemize}
 \item In figura \ref{fig:verifica-1a} è mostrata una verifica di come, in assenza di ticket di tipo \sr{} da processare (evidenziato in {\color{verify_blue}blu}), il server dedicato si comporta come se fosse generale, infatti elabora una richiesta \pp{} \textsl{BancoPosta} (evidenziato in {\color{verify_red}rosso}).
 \item In figura \ref{fig:verifica-1b} è mostrata una verifica di come, in presenza di ticket di tipo \sr{} da processare (evidenziato in {\color{verify_blue}blu}), il server dedicato ignora la coda \pp{} \textsl{Standard} ed elabora una richiesta \sr{} \textsl{BancoPosta} (evidenziato in {\color{verify_red}rosso}).
-\item In figura \ref{fig:verifica-1c} è mostrata una verifica di come, pur essendo \texttt{IDLE} (evidenziato in {\color{verify_red}rosso}), i server generali non possono processare richieste di tipo \sr{} (evidenziato in {\color{verify_blue}blu}).
 \item In figura \ref{fig:verifica-1c} è mostrata una verifica di come un server possa essere \texttt{IDLE} (evidenziato in {\color{verify_red}rosso}) se e soltanto se non sono presenti richieste pendenti che è in grado di processare (evidenziato in {\color{verify_blue}blu}).
-\item In figura \ref{fig:verifica-1d} è mostra una verifica di come, in presenza di più code non vuote (evidenziato in {\color{verify_blue}blu}), il server dà priorità al cliente appartenente alla classe \uo{} \textsl{Standard} piuttosto che all'altro \pp{} \textsl{Standard} (evidenziato in {\color{verify_red}rosso}).
+\item In figura \ref{fig:verifica-1d} è mostrata una verifica di come, in presenza di più code non vuote (evidenziato in {\color{verify_blue}blu}), il server dà priorità al cliente appartenente alla classe \uo{} \textsl{Standard} piuttosto che all'altro \pp{} \textsl{Standard} (evidenziato in {\color{verify_red}rosso}).
 \end{itemize}
 
 \begin{figure}[ht]
