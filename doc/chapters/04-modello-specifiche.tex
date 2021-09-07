@@ -4,24 +4,20 @@ Le seguenti variabili matematiche, definite per ogni istante di tempo $t$, ident
 \begin{itemize}
 \item Lo stato dello sportello $r$-esimo è dato da:
 \begin{equation}
-\label{eqn:modello-specifiche-3}
 Server_r(t) \in \lbrace 0, 1 \rbrace
 \end{equation}
 \item Per ciascuna classe $c$ il numero totale di clienti è definito come:
 \begin{equation}
-\label{eqn:modello-specifiche-2}
 Customers_c(t) \in \mathbb{N}
 \end{equation}
 \item Per ciascuna classe $c$ il numero di clienti in servizio è definito come segue:
 \begin{itemize}
 \item Per $c$ diversa da \sr{} \textsl{BancoPosta} e \sr{} \textsl{Standard}:
 \begin{equation}
-\label{eqn:modello-specifiche-2}
 InService_c(t) \in \lbrace 0, 1, \dots, M \rbrace
 \end{equation}
 \item Altrimenti:
 \begin{equation}
-\label{eqn:modello-specifiche-2}
 InService_c(t) \in \lbrace 0, 1 \rbrace
 \end{equation}
 \end{itemize}
