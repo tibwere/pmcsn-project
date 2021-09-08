@@ -27,7 +27,7 @@ Pertanto:
 \end{itemize}
 sono le medesime introdotte in tale capitolo.
 \section{Modello delle specifiche}\label{sec:miglioria-modello-specifiche}
-Dal modello delle speficiche descritto nel capitolo \ref{chp:modello-specifiche}:
+Dal modello delle specifiche descritto nel capitolo \ref{chp:modello-specifiche}:
 \begin{itemize}
 \item Le variabili matematiche e le equazioni che le legano
 \item Le assunzioni di base
@@ -106,7 +106,7 @@ Dal modello computazionale descritto nel capitolo \ref{chp:modello-computazional
 \item Generazione dei nuovi eventi (sez. \ref{sec:modello-computazionale-gen-nuovi-eventi})
 \item Campionamento delle statistiche (sez. \ref{sec:modello-computazionale-campionamento-stat})
 \end{itemize}
-rimangono validi anche a seguito dell'introduzione della miglioria.
+rimangono validi anche a seguito dell'introduzione della miglioria. L'unica sezione modificata è quella relativa all'algoritmo next-event, di seguito analizzata.
 
 \subsection{Algoritmo next-event}
 Per la realizzazione della miglioria, a livello di codice, sono state definite due ulteriori variabili:
@@ -141,8 +141,8 @@ Inoltre,} il servente che si è appena liberato processa, se presente, il primo 
 \section{Verifica}\label{sec:miglioria-verifica}
 Per poter controllare che tutte le modifiche introdotte con la miglioria operassero come atteso, seguendo lo stesso approccio adottato nel capitolo \ref{chp:verifica}, è stata utilizzata la funzione \texttt{print\_update()}, modificata al fine di mostrare:
 \begin{itemize}
-\item Il numero intero modulo $2$ di ticket \uo{}	\textsl{BancoPosta} e \pp{} \textsl{BancoPosta} serviti.
-\item Il numero intero modulo $5$ di ticket \sr{} serviti.
+\item Il numero intero modulo $2$ di clienti serviti afferenti alle classi \uo{}	\textsl{BancoPosta} e \pp{} \textsl{BancoPosta}.
+\item Il numero intero modulo $5$ di clienti serviti afferenti alle classi \sr{} \textsl{BancoPosta} e \sr{} \textsl{Standard}.
 \end{itemize}
 
 Gli screenshot riportati nelle figure che seguiranno in questa sezione (figg. \ref{fig:miglioria-verifica-1}, \ref{fig:miglioria-verifica-2} e \ref{fig:miglioria-verifica-3}) sono stati tutti quanti realizzati fissando come seed iniziale \texttt{9}.
@@ -217,12 +217,13 @@ Dalla figura \ref{fig:verifica-2} è facile osservare che questa relazione sia r
 \end{figure}
 
 \section{Validazione}\label{sec:miglioria-validazione}
-Per la fase di validazione, è stato seguito lo stesso approccio mostrato nel capitolo \ref{chp:validazione}. Per semplicità, di seguito è riportata la configurazione dei parametri utilizzati per la simulazione:
+Per la fase di validazione, è stato seguito lo stesso approccio mostrato nel capitolo \ref{chp:validazione}, utilizzando gli
+i medesimi parametri ivi descritti e motivati che, per semplicità, sono di seguito riportati:
 \begin{itemize}
-\item \texttt{B = 256}
-\item \texttt{K = 64}
-\item \texttt{STOP = 16384}
-\item \texttt{STAT\_INIT\_SEED = 12345}
+\item $b = 256$
+\item $k = 64$
+\item \texttt{START = 0} e \texttt{STOP = 16384}.
+\item Il seme iniziale adottato è \texttt{12345}, settato unicamente ad inizio simulazione.
 \end{itemize}
 Inoltre, è stato utilizzato il programma \texttt{estimate} per il calcolo delle realizzazioni degli intervalli di confidenza al 95\%.
 
@@ -270,7 +271,7 @@ Poiché, anche in questo caso, un intervallo di confidenza al 95\% per l'occupaz
 si ritengono ragionevoli i risultati ottenuti per i motivi descritti nella sezione \ref{sec:validazione-blocco-sr}.
 
 \subsection{Blocco del flusso degli arrivi di tipo \uo{} e \pp{}}
-Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come mostrato in figura \ref{fig:validazione-semplificazione-2} e fissando $M = 4$, si ottengono i seguenti risultati:
+Privando il sistema della generazione di arrivi di tipo \uo{} e \pp{}, come mostrato in figura \ref{fig:validazione-semplificazione-2} e fissando $M = 3$, si ottengono i seguenti risultati:
 \begin{itemize}
 \item Mediante la simulazione:
 \begin{itemize}
